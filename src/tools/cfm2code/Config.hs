@@ -132,7 +132,7 @@ parseArguments = do
       exitFailure
 
     fstLower = \case
-      []   -> []u
+      []   -> []
       x:xr -> toLower x : xr
 
     fstUpper = \case
