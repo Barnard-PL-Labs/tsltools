@@ -30,6 +30,7 @@ cfmsym
 cstratsim
 tslcoregen
 tslminrealizable
+parsedot
 .commit
 .stack-work
 local_testing

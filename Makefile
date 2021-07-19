@@ -12,6 +12,7 @@ CFMSYM=cfmsym
 CFM2CODE=cfm2code
 TSLCOREGEN=tslcoregen
 TSLMINREAL=tslminrealizable
+PARSEDOT=parsedot
 
 TOOLS=\
   ${TSLCHECK}\
@@ -27,7 +28,8 @@ TOOLS=\
   ${CFMSYM}\
   ${CFM2CODE}\
   ${TSLCOREGEN}\
-  ${TSLMINREAL}
+  ${TSLMINREAL}\
+  ${PARSEDOT}
 
 STACKPATH=$(shell if [ -d "dist" ]; then echo ""; else stack path | grep local-install-root | sed 's/local-install-root: //'; fi)
 BLDTOOL=$(shell if [ -d "dist" ]; then echo "cabal"; else echo "stack"; fi)
@@ -89,6 +91,10 @@ ${TSLCOREGEN}:
 	@if [ -d "dist" ]; then cp ./dist/build/$@/$@ $@; else cp ${STACKPATH}/bin/$@ $@; fi
 
 ${TSLMINREAL}:
+	${BLDTOOL} build :$@
+	@if [ -d "dist" ]; then cp ./dist/build/$@/$@ $@; else cp ${STACKPATH}/bin/$@ $@; fi
+
+${PARSEDOT}:
 	${BLDTOOL} build :$@
 	@if [ -d "dist" ]; then cp ./dist/build/$@/$@ $@; else cp ${STACKPATH}/bin/$@ $@; fi
 
