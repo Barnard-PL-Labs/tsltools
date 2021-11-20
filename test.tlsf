@@ -1,0 +1,24 @@
+INFO {
+  TITLE:       "Converted TSL Specification: test"
+  DESCRIPTION: "TSL specification, which has been converted to TLSF."
+  SEMANTICS:   Mealy
+  TARGET:      Mealy
+}
+MAIN {
+  INPUTS {
+    p0p0play0note67;
+    p0p0play0note64;
+  }
+
+  OUTPUTS {
+    u0fm2synthesis0fm2synthesis;
+    u0fm2synthesis0f1dtoggle0fm2synthesis1b;
+    u0lfo0lfo;
+    u0lfo0f1dtoggle0lfo1b;
+  }
+
+  GUARANTEE {
+    (G ((! (((u0fm2synthesis0fm2synthesis) && (! (u0fm2synthesis0f1dtoggle0fm2synthesis1b))) <-> ((u0fm2synthesis0f1dtoggle0fm2synthesis1b) && (! (u0fm2synthesis0fm2synthesis))))) && (! (((u0lfo0lfo) && (! (u0lfo0f1dtoggle0lfo1b))) <-> ((u0lfo0f1dtoggle0lfo1b) && (! (u0lfo0lfo))))))) && ((G ((p0p0play0note67) <-> (u0fm2synthesis0f1dtoggle0fm2synthesis1b))) && (G ((p0p0play0note64) <-> (u0lfo0f1dtoggle0lfo1b))));
+  }
+}
+
