@@ -1,4 +1,3 @@
-REALIZABLE
 digraph "" {
 graph [rankdir=LR,ranksep=0.8,nodesep=0.2];
 node [shape=circle];
