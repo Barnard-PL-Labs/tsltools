@@ -7,6 +7,8 @@
 -----------------------------------------------------------------------------
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
+
 module Main
   ( main
   ) where
@@ -19,6 +21,7 @@ import TSL (Formula(..))
 import Data.Either 
 import Data.Char 
 import Data.List 
+import Data.Tuple
 
 import System.Environment
 
@@ -27,9 +30,18 @@ import qualified Data.Text as T
 import Data.Monoid
 import qualified Data.Text.IO as T
 
+import Data.String
+
+import qualified Data.Map as M
+import Debug.Trace
+
 andToken = "&#8743;"
 notToken = "&#172;"
 endToken = "&#10;"
+topToken = "&#8868;"
+
+type Transition = ([Text], [Text])
+type Edge = [Transition] 
 
 main :: IO ()
 main = do
@@ -41,6 +53,7 @@ main = do
 
        T.writeFile ("parsed_" ++ filename) newContent
 
+-- | translate a single edge's label into TSL
 translateLabeltooltip :: Text -> Text
 translateLabeltooltip lineOfDotFile =
   let
@@ -55,28 +68,47 @@ translateLabeltooltip lineOfDotFile =
     then transitionInfo <> "[label=\"" <> (combinepsus translatedTerms) <> "\\l\"];"
     else lineOfDotFile
 
-combinepsus :: [([Text], [Text])] -> Text
-combinepsus = T.intercalate "\\l\\l" . map (\(ps,us) -> (T.intercalate " /\\ " ps) <> "\\l===\n" <> (T.intercalate "\\l" us)) 
+squashTransitions :: [(Text, Text)] -> [(Text, Text)]
+squashTransitions ts = let
+  updatePreds = map swap ts
+ in
+  map swap $ M.toList $ M.fromListWithKey (\k p1 p2 -> p1 <> " || \\l" <> p2) updatePreds
 
-getTerms :: Text -> [([Text], [Text])]
+combinepsus :: Edge -> Text
+combinepsus labels = let
+  c = map (\(ps,us) -> ((T.intercalate " && " ps), (T.intercalate "\\l" us))) labels 
+  c1 = squashTransitions c :: [(Text, Text)]
+ in
+  T.intercalate "\\l --- \n" $ map 
+      (\(ps,us) -> ps <> "\\l=>\n" <> us) 
+      c1
+
+getTerms :: Text -> Edge 
 getTerms t = let
-  lines = init $ T.splitOn endToken t
-  predsUpdates = map ((\[x1,x2] -> (x1,x2)). T.splitOn "/") lines 
+  transitionLabels = init $ T.splitOn endToken t
+  predsUpdates = map ((\[x1,x2] -> (x1,T.takeWhile (/= '+') x2)). T.splitOn "/") $ transitionLabels --TODO figure out why we have "+" in the dot file output. for now, if we see +, just drop the rest of the line. maybe + means or? in which case it is fine to drop the stuff that comes after
   splitAnds = (\f (x,y) -> (f x, f y)) (T.splitOn andToken)
  in
   map splitAnds predsUpdates
 
 
-decodeWrapper :: ([Text], [Text]) -> ([Text],[Text])
-decodeWrapper (ps, us) = let
-  unpackClean = 
-    T.unpack. 
-    T.replace "+" "" --TODO figure out why we have "+" in the dot file output
-  preprocess decode = map (decode. unpackClean) . filter (not. T.isPrefixOf notToken) 
-  tryInput  = preprocess decodeInputAP ps
-  tryOutput = preprocess decodeOutputAP us
-  generatePredString   = either (const "ERR") (T.pack. tslFormula id. Check)
-  generateUpdateString = either (const "ERR") (T.pack. tslFormula id. (uncurry Update))
+removeNegation :: Text -> Text
+removeNegation t = case T.stripPrefix notToken t of
+  Just t' -> t'
+  Nothing -> t
+
+generateTSLString :: forall a b. _ -> (String -> Either a b) -> Text -> Text
+generateTSLString tslType decoder x = let
+  negationPrefix :: Text -> Text
+  negationPrefix z = if T.isPrefixOf notToken z then "!" else ""
+  preprocess decode =  
+    (decode. T.unpack) .  removeNegation 
  in
-  (map generatePredString tryInput, map generateUpdateString tryOutput)
+  either (\t -> if x == topToken then "T" else "ERR") (\t -> (negationPrefix x) <> (T.pack $ tslFormula id $ tslType t)) $
+    preprocess decoder x
+
+decodeWrapper :: Transition -> Transition
+decodeWrapper (ps, us) = 
+  (map (generateTSLString Check decodeInputAP) ps, 
+   map (generateTSLString (uncurry Update) decodeOutputAP) (filter (not. T.isPrefixOf notToken) us))
 

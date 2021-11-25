@@ -546,6 +546,7 @@ executable parsedot
     , process
     , optparse-applicative
     , text
+    , containers
 
   main-is:
     Main.hs
