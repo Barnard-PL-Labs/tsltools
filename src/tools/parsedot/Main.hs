@@ -1,13 +1,14 @@
 ----------------------------------------------------------------------------
 -- |
 -- Module      :  Main
--- Maintainer  :  Morgan Zee, Wonhyuk Choi
+-- Maintainer  :  Mark Santolucito, Morgan Zee, Wonhyuk Choi
 -- 
 -- Description : Parse a dot file with labels and transitions from TSL and re-render the lables in a human readable form
 -----------------------------------------------------------------------------
-{-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE PartialTypeSignatures #-}
+{-# LANGUAGE MultiWayIf #-}
 
 module Main
   ( main
@@ -35,80 +36,79 @@ import Data.String
 import qualified Data.Map as M
 import Debug.Trace
 
-andToken = "&#8743;"
-notToken = "&#172;"
-endToken = "&#10;"
-topToken = "&#8868;"
-
-type Transition = ([Text], [Text])
-type Edge = [Transition] 
-
+data APType = Pred | Upd
+  deriving (Show, Eq)
 main :: IO ()
 main = do
-       args <- getArgs
-       let filename = head args
-       contents <- T.readFile filename
+   args <- getArgs
+   let filename = head args
+   contents <- T.readFile filename
 
-       let newContent = T.unlines $ map translateLabeltooltip $ T.lines contents
+   let translatedContent = T.unlines $ map translateLabels $ T.lines contents
+   let apMap = genAPMap contents
+   let updateIds = map (\(i, _, _) -> i) $ filter (\(i, ty, tx) -> ty == Upd) apMap
+   let cleanedContent = T.unlines $ map (cleanLabels apMap) $ T.lines translatedContent
+   T.writeFile ("parsed_" ++ filename) cleanedContent
 
-       T.writeFile ("parsed_" ++ filename) newContent
+-- this crap function should be replace by a proper HAO parser
+genAPMap :: Text -> [(Int, APType, Text)]
+genAPMap t = let
+  aps = head $ filter (T.isPrefixOf "AP:") $ T.lines t
+  
+  typedAPs = map (\l -> if T.isPrefixOf "\"p0" l then (Pred, l) else (Upd, l)) $ drop 2 $ T.words aps
+  labelledAPs = zipWith (\(ty, ap) i -> (i, ty, ap)) typedAPs [0..]
+ in
+  if T.length ((T.words aps) !! 1) >= 2
+  then error "too many APs. give me a real parser!"
+  else labelledAPs 
+
+-- remove negated updates
+-- to remove negations, just change and number that is negated to an f
+-- then it becomes !f, and we can rely on simplification of autfilt to remove 
+-- TODO to remove only the negated updates, we need to actually parse the formulas
+-- right now, this breaks if we have more than 10 APs, since we only look at on char at a time
+-- let's try out https://github.com/reactive-systems/hanoi
+-- parsing will give us lots of flexiblity
+cleanLabels :: [(Int, APType, Text)] -> Text -> Text
+cleanLabels apMap t = let
+  updateIds = map (\(i, _, _) -> i) $ filter (\(i, ty, tx) -> ty == Upd) apMap
+  replaceNegated s c = s ++ if
+    | isNumber c && last s == 'f' -> "" --if we just made a replacement but still have more digits, delete them (e.g. !14)
+    | isNumber c && last s == '!' && (digitToInt c) `elem` updateIds -> "f"
+    | otherwise -> [c]
+  removedNegationUpdates = T.foldl (replaceNegated :: String -> Char -> String) " " t
+ in
+  if T.isPrefixOf "[" t
+  then T.pack removedNegationUpdates 
+  else t
+  
+  
+
 
 -- | translate a single edge's label into TSL
-translateLabeltooltip :: Text -> Text
-translateLabeltooltip lineOfDotFile =
-  let
-    transitionInfo = fst $ T.breakOn "[label=" lineOfDotFile
-    dropStart = T.drop (T.length "labeltooltip=\"") 
-    dropEnding = T.dropEnd 3 --drop last three chars ( "]; ) of tooltip line
-    tooltip = dropStart $ dropEnding $ snd $ T.breakOn "labeltooltip=\"" lineOfDotFile
-    terms = getTerms $ T.strip $ tooltip
-    translatedTerms = map decodeWrapper terms
-  in 
-    if T.isInfixOf "labeltooltip" lineOfDotFile
-    then transitionInfo <> "[label=\"" <> (combinepsus translatedTerms) <> "\\l\"];"
-    else lineOfDotFile
+translateLabels :: Text -> Text
+translateLabels lineOfHAOFile =
+  if T.isInfixOf "AP: " lineOfHAOFile
+  then applyTranslations lineOfHAOFile
+  else lineOfHAOFile
 
-squashTransitions :: [(Text, Text)] -> [(Text, Text)]
-squashTransitions ts = let
-  updatePreds = map swap ts
+applyTranslations :: Text -> Text
+applyTranslations t = let
+  tokens = T.words t
+  terms = drop 2 tokens
+  stripQuotes = T.tail. T.init
+  addQuotes x = "\"" <> x <> "\""
+  translated = map (addQuotes. translateToTSL. stripQuotes) terms
  in
-  map swap $ M.toList $ M.fromListWithKey (\k p1 p2 -> p1 <> " || \\l" <> p2) updatePreds
+  T.unwords $ (take 2 tokens) ++ translated
 
-combinepsus :: Edge -> Text
-combinepsus labels = let
-  c = map (\(ps,us) -> ((T.intercalate " && " ps), (T.intercalate "\\l" us))) labels 
-  c1 = squashTransitions c :: [(Text, Text)]
- in
-  T.intercalate "\\l --- \n" $ map 
-      (\(ps,us) -> ps <> "\\l=>\n" <> us) 
-      c1
-
-getTerms :: Text -> Edge 
-getTerms t = let
-  transitionLabels = init $ T.splitOn endToken t
-  predsUpdates = map ((\[x1,x2] -> (x1,T.takeWhile (/= '+') x2)). T.splitOn "/") $ transitionLabels --TODO figure out why we have "+" in the dot file output. for now, if we see +, just drop the rest of the line. maybe + means or? in which case it is fine to drop the stuff that comes after
-  splitAnds = (\f (x,y) -> (f x, f y)) (T.splitOn andToken)
- in
-  map splitAnds predsUpdates
-
-
-removeNegation :: Text -> Text
-removeNegation t = case T.stripPrefix notToken t of
-  Just t' -> t'
-  Nothing -> t
+translateToTSL :: Text -> Text
+translateToTSL t = 
+  if T.isPrefixOf "p0" t
+  then generateTSLString Check decodeInputAP t
+  else generateTSLString (uncurry Update) decodeOutputAP t
 
 generateTSLString :: forall a b. _ -> (String -> Either a b) -> Text -> Text
-generateTSLString tslType decoder x = let
-  negationPrefix :: Text -> Text
-  negationPrefix z = if T.isPrefixOf notToken z then "!" else ""
-  preprocess decode =  
-    (decode. T.unpack) .  removeNegation 
- in
-  either (\t -> if x == topToken then "T" else "ERR") (\t -> (negationPrefix x) <> (T.pack $ tslFormula id $ tslType t)) $
-    preprocess decoder x
-
-decodeWrapper :: Transition -> Transition
-decodeWrapper (ps, us) = 
-  (map (generateTSLString Check decodeInputAP) ps, 
-   map (generateTSLString (uncurry Update) decodeOutputAP) (filter (not. T.isPrefixOf notToken) us))
-
+generateTSLString tslType decoder x =
+  either (const "ERR") (\t -> (T.pack $ tslFormula id $ tslType t)) $
+    (decoder. T.unpack) x

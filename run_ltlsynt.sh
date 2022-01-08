@@ -4,6 +4,9 @@ filename="${filename%.*}"
 LTL=$(syfco $1 -f ltlxba -m fully)
 IN=$(syfco $1 --print-input-signals)
 OUT=$(syfco $1 --print-output-signals)
-ltlsynt --dot --formula="$LTL" --ins="$IN" --outs="$OUT" > $filename.dot
-sed -i 1d $filename.dot
+ltlsynt --formula="$LTL" --ins="$IN" --outs="$OUT" > $filename.hao
+./parsedot $filename.hao
+sed -i 1d parsed_$filename.hao
+autfilt parsed_$filename.hao --deterministic --dot > $filename.dot
+sed -i 's/|/|\\n/g' $filename.dot
 dot -Tpng $filename.dot -o $filename.png
