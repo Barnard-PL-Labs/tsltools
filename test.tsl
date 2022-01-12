@@ -1,4 +1,0 @@
-always guarantee{
-     	play note67 <-> [fmSynthesis <- toggle fmSynthesis];
-     	play note64 <-> [lfo <- toggle lfo];
-}
