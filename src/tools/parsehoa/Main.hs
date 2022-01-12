@@ -3,7 +3,7 @@
 -- Module      :  Main
 -- Maintainer  :  Mark Santolucito, Morgan Zee, Wonhyuk Choi
 -- 
--- Description : Parse a dot file with labels and transitions from TSL and re-render the lables in a human readable form
+-- Description : Parse a hao file with labels and transitions from TSL and re-render the lables in a human readable form
 -----------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}

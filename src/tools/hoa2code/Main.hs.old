@@ -1,0 +1,69 @@
+----------------------------------------------------------------------------
+-- |
+-- Module      :  Main
+-- Maintainer  :  Mark Santolucito
+--
+-- Generates code from a HOA file generated from a TSL spec
+--
+-----------------------------------------------------------------------------
+
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE ImplicitParams        #-}
+
+-----------------------------------------------------------------------------
+
+module Main
+  ( main
+  ) where
+
+-----------------------------------------------------------------------------
+
+import Config (Configuration(..), parseArguments)
+
+import EncodingUtils (initEncoding)
+
+import FileUtils (loadCFM, writeContent)
+
+import TSL (implement)
+
+import Hanoi 
+  ( HOA(..)
+  , printHOA
+  , parse
+  )
+import System.Environment
+import Data.Maybe
+import Data.List as List (intercalate, sortOn)
+
+import Finite (Finite, FiniteBounds, index, offset, v2t, values)
+
+-----------------------------------------------------------------------------
+
+main
+  :: IO ()
+
+main = do
+  initEncoding
+
+  Configuration{input, output, codeTarget, moduleName, functionName} <- parseArguments
+  c <- readFile $ fromJust input
+  let hoa = parse c
+  print $ either id printHOA hoa
+  print $ either id (processHOA) hoa
+  --cfm <- loadCFM input
+
+--  writeContent output $
+--    implement codeTarget moduleName functionName cfm
+--processHOA :: (Finite H.HOA H.HOA, FiniteBounds H.HOA) => H.HOA -> String
+processHOA :: (Finite HOA a, FiniteBounds HOA) => HOA -> String
+processHOA  hoa@HOA {..} = 
+  let ?bounds = hoa in
+  let
+    apNamesSorted = map (atomicPropositionName) $ sortOn index values
+  in
+    show values
+
+----------------------------------------------------------------------------
