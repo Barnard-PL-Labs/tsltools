@@ -582,6 +582,8 @@ executable parsehoa
     , optparse-applicative
     , text
     , containers
+    , hanoi
+    , finite
 
   main-is:
     Main.hs

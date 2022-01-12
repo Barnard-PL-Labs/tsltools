@@ -12,7 +12,7 @@ CFMSYM=cfmsym
 CFM2CODE=cfm2code
 TSLCOREGEN=tslcoregen
 TSLMINREAL=tslminrealizable
-PARSEDOT=parsedot
+PARSEHOA=parsehoa
 HOA2CODE=hoa2code
 
 TOOLS=\
@@ -30,7 +30,7 @@ TOOLS=\
   ${CFM2CODE}\
   ${TSLCOREGEN}\
   ${TSLMINREAL}\
-  ${PARSEDOT}\
+  ${PARSEHOA}\
   ${HOA2CODE}
 
 STACKPATH=$(shell if [ -d "dist" ]; then echo ""; else stack path | grep local-install-root | sed 's/local-install-root: //'; fi)
@@ -96,7 +96,7 @@ ${TSLMINREAL}:
 	${BLDTOOL} build :$@
 	@if [ -d "dist" ]; then cp ./dist/build/$@/$@ $@; else cp ${STACKPATH}/bin/$@ $@; fi
 
-${PARSEDOT}:
+${PARSEHOA}:
 	${BLDTOOL} build :$@
 	@if [ -d "dist" ]; then cp ./dist/build/$@/$@ $@; else cp ${STACKPATH}/bin/$@ $@; fi
 
