@@ -102,7 +102,7 @@ multOp = do
 divOp :: Parser Op
 divOp = do
   _ <- Parsec.string "/"
-  return Mult
+  return Div
 
 comparator :: Parser Op
 comparator = ltOp <|> gtOp <|> lteOp <|> gteOp <|> eqOp
