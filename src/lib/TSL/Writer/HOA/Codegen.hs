@@ -122,7 +122,11 @@ genTrans targetState formulas = do
   updateFormulas    <- filterM isUpdateFormula formulas
   predicates        <- mapM genPredicate predicateFormulas
   updates           <- catMaybes <$> mapM genUpdate updateFormulas
-  return $ Trans predicates updates targetState
+
+  -- if no predicates, it means always true
+  let predicates' = if null predicates then [PTrue] else predicates
+
+  return $ Trans predicates' updates targetState
 
 genPredicate :: H.Formula H.AP -> Gen Predicate
 genPredicate f = case f of
