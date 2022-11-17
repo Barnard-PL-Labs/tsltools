@@ -85,6 +85,7 @@ library
     TSL.Writer.HOA.JavaScript
     TSL.Writer.HOA.Utils
     TSL.Writer.HOA.Codegen
+    TSL.Writer.HOA.Imp
     TSL.Aiger
     TSL.Logic
     TSL.Eval
