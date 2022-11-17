@@ -19,6 +19,7 @@ data ImpConfig = ImpConfig
   , impNot        :: String -> String
   , impIf         :: String
   , impElif       :: String
+  , impCondition  :: String -> String
   , impFuncApp    :: String -> [String] -> String
   , impAssign     :: String -> String -> String
   , impIndent     :: Int -> String
@@ -53,7 +54,11 @@ writeStateTrans useElif (CG.StateTrans state transList) = do
   innerLines <- concat <$> zipWithM writeTrans (False : repeat True) transList
 
   return
-    $  [opIf ++ " " ++ impEqual "currentState" state ++ impBlockStart]
+    $  [ opIf
+         ++ " "
+         ++ impCondition (impEqual "currentState" state)
+         ++ impBlockStart
+       ]
     ++ map (impIndent 1 ++) innerLines
     ++ [impBlockEnd]
 
@@ -69,7 +74,7 @@ writeTrans useElif (CG.Trans ps us target) = do
       assignments = map (impIndent 1 ++) us'
 
   return
-    $  [opIf ++ " " ++ condition ++ impBlockStart]
+    $  [opIf ++ " " ++ impCondition condition ++ impBlockStart]
     ++ assignments
     ++ [impIndent 1 ++ impAssign "currentState" target]
     ++ [impBlockEnd]

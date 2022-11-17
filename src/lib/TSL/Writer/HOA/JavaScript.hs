@@ -18,6 +18,7 @@ config = ImpConfig { impAnd        = "&&"
                    , impNot        = \s -> "!(" ++ s ++ ")"
                    , impIf         = "if"
                    , impElif       = "else if"
+                   , impCondition  = \c -> "(" ++ c ++ ")"
                    , impFuncApp    = funcApp
                    , impAssign     = \x y -> x ++ " = " ++ y
                    , impIndent     = \n -> replicate (2 * n) ' '
