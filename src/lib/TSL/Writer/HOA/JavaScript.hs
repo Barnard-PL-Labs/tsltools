@@ -20,6 +20,7 @@ config = ImpConfig
   , impDiv        = "/"
     -- binary comparators
   , impEq         = "==="
+  , impNeq        = "!=="
   , impLt         = "<"
   , impGt         = ">"
   , impLte        = "<="
@@ -28,7 +29,7 @@ config = ImpConfig
   , impAnd        = "&&"
   , impTrue       = "true"
   , impFalse      = "false"
-  , impNot        = \s -> "!(" ++ s ++ ")"
+  , impNot        = "!"
     -- language constructs
   , impIf         = "if"
   , impElif       = "else if"
