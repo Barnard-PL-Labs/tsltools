@@ -13,10 +13,23 @@ import qualified Hanoi                         as H
 import qualified TSL.Writer.HOA.Codegen        as CG
 
 data ImpConfig = ImpConfig
-  { impAnd        :: String
+  { -- binary functions
+    impAdd        :: String
+  , impSub        :: String
+  , impMult       :: String
+  , impDiv        :: String
+    -- binary comparators
+  , impEq         :: String
+  , impLt         :: String
+  , impGt         :: String
+  , impLte        :: String
+  , impGte        :: String
+    -- logic
+  , impAnd        :: String
   , impTrue       :: String
   , impFalse      :: String
   , impNot        :: String -> String
+    -- language constructs
   , impIf         :: String
   , impElif       :: String
   , impCondition  :: String -> String
@@ -25,7 +38,6 @@ data ImpConfig = ImpConfig
   , impIndent     :: Int -> String
   , impBlockStart :: String
   , impBlockEnd   :: String
-  , impEqual      :: String -> String -> String
   }
 
 withConfig :: ImpConfig -> H.HOA -> String
@@ -56,7 +68,7 @@ writeStateTrans useElif (CG.StateTrans state transList) = do
   return
     $  [ opIf
          ++ " "
-         ++ impCondition (impEqual "currentState" state)
+         ++ impCondition ("currentState " ++ impEq ++ " " ++ state)
          ++ impBlockStart
        ]
     ++ map (impIndent 1 ++) innerLines
@@ -98,9 +110,18 @@ writeTerm term = do
   ImpConfig {..} <- Reader.ask
   case term of
     CG.Var x      -> return x
-    CG.App f args -> if isTSLMT f && null args
-      then return $ replaceTSLMT f
-      else impFuncApp f <$> mapM writeTerm args
+    CG.App f args -> writeTermApp f args
+
+writeTermApp :: String -> [CG.Term] -> Imp String
+writeTermApp f args
+  | isTSLMTLiteral f && null args = return $ replaceTSLMTLiteral f
+  | isTSLMTBinOp f && length args == 2 = do
+    args' <- mapM writeTerm args
+    let [x1, x2] = args'
+    replaceTSLMTBinOp f x1 x2
+  | otherwise = do
+    ImpConfig {..} <- Reader.ask
+    impFuncApp f <$> mapM writeTerm args
 
 
 -- | HELPERS
@@ -109,16 +130,46 @@ pickIfOrElif :: Bool -> Imp String
 pickIfOrElif useElif = do
   if useElif then Reader.asks impElif else Reader.asks impIf
 
-isTSLMT :: String -> Bool
-isTSLMT s = isReal s || isInt s
+isTSLMTLiteral :: String -> Bool
+isTSLMTLiteral s = isReal s || isInt s
 
-replaceTSLMT :: String -> String
-replaceTSLMT s | isReal s  = drop 4 s
-               | isInt s   = drop 3 s
-               | otherwise = s
+replaceTSLMTLiteral :: String -> String
+replaceTSLMTLiteral s | isReal s  = drop 4 s
+                      | isInt s   = drop 3 s
+                      | otherwise = s
 
 isReal :: String -> Bool
 isReal s = "real" `isPrefixOf` s
 
 isInt :: String -> Bool
 isInt s = "int" `isPrefixOf` s
+
+isTSLMTBinOp :: String -> Bool
+isTSLMTBinOp f = case f of
+  "add"  -> True
+  "sub"  -> True
+  "mult" -> True
+  "div"  -> True
+  "eq"   -> True
+  "lt"   -> True
+  "gt"   -> True
+  "lte"  -> True
+  "gte"  -> True
+  _      -> False
+
+replaceTSLMTBinOp :: String -> String -> String -> Imp String
+replaceTSLMTBinOp f x1 x2 = do
+  ImpConfig {..} <- Reader.ask
+  return $ case f of
+    "add"  -> useBinOp impAdd
+    "sub"  -> useBinOp impSub
+    "mult" -> useBinOp impMult
+    "div"  -> useBinOp impDiv
+    "eq"   -> useBinOp impEq
+    "lt"   -> useBinOp impLt
+    "gt"   -> useBinOp impGt
+    "lte"  -> useBinOp impLte
+    "gte"  -> useBinOp impGte
+    x ->
+      error ("Implementation bug: " ++ x ++ " is not a TSLMT binary operation.")
+  where useBinOp op = "(" ++ x1 ++ " " ++ op ++ " " ++ x2 ++ ")"
