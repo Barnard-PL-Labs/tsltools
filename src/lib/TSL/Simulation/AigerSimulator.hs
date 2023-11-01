@@ -114,7 +114,7 @@ normalize renameInput renameOutput aig =
         )
         xs
     --
-    lookup :: Eq a => [(a, b)] -> a -> b
+    lookup :: (Eq a) => [(a, b)] -> a -> b
     lookup [] _ = assert False undefined
     lookup ((k, v) : xr) a =
       if k == a
@@ -170,7 +170,7 @@ simStep NormCircuit {..} state inpt =
       outputMap = functionToMap outputs $ \o -> eval (outputCir o) state inpt
    in ((!) latchMap, (!) outputMap)
   where
-    functionToMap :: Ord a => [a] -> (a -> b) -> Map a b
+    functionToMap :: (Ord a) => [a] -> (a -> b) -> Map a b
     functionToMap keys f = Map.fromList $ fmap (\k -> (k, f k)) keys
 
 -------------------------------------------------------------------------------

@@ -142,7 +142,7 @@ options sim@SystemSimulation {counterStrategy = ct} =
         cells
 
     removeDoubles ::
-      Ord a => [a] -> [a]
+      (Ord a) => [a] -> [a]
 
     removeDoubles =
       Set.toList . Set.fromList

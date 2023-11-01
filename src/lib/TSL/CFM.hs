@@ -331,26 +331,26 @@ symbolTable cfm@CFM {..} =
         Right t
           | termName t == "true" || termName t == "false" -> transitive is ws xr
           | otherwise ->
-            let ti = fromList $ termInputWires t
-             in transitive
-                  (insert (sourceId (Right t)) is)
-                  (insert x ws)
-                  (toList $ difference (ti `union` fromList xr) ws)
+              let ti = fromList $ termInputWires t
+               in transitive
+                    (insert (sourceId (Right t)) is)
+                    (insert x ws)
+                    (toList $ difference (ti `union` fromList xr) ws)
 
     -- \| Updates the term ids to redirect the removed, redundant
     -- entries.
 
     upd =
-      (\x y -> fromMaybe y $ IM.lookup y x) $
-        IM.fromList $
-          concatMap
-            ((\xs -> map (,head xs) xs) . map (sourceId . Right))
-            $ groupBy ((==) `on` termName) $
-              sortBy (compare `on` termName) $
-                filter ((/= "false") . termName) $
-                  filter
-                    ((/= "true") . termName)
-                    terms
+      (\x y -> fromMaybe y $ IM.lookup y x)
+        $ IM.fromList
+        $ concatMap
+          ((\xs -> map (,head xs) xs) . map (sourceId . Right))
+        $ groupBy ((==) `on` termName)
+        $ sortBy (compare `on` termName)
+        $ filter ((/= "false") . termName)
+        $ filter
+          ((/= "true") . termName)
+          terms
 
     -- \| Updates ids to appear in sorted order
 
@@ -812,10 +812,10 @@ inferTypes cfm@CFM {..} = do
     infer a s
       | size s == 0 = return ()
       | otherwise =
-        -- update every component with the given wire as input
-        foldM (inferWire a) (deleteAt 0 s) (wireTargets $ elemAt 0 s)
-          -- do so until the types for every wire stabilized
-          >>= infer a
+          -- update every component with the given wire as input
+          foldM (inferWire a) (deleteAt 0 s) (wireTargets $ elemAt 0 s)
+            -- do so until the types for every wire stabilized
+            >>= infer a
 
     -- \| Infers equal types with respect to the given component.
 

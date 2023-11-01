@@ -59,7 +59,7 @@ data Obligation c = Obligation
 
 -- | 'append' extends a 'FiniteTrace' by some predicate and update evaluation.
 append ::
-  Ord c =>
+  (Ord c) =>
   FiniteTrace c ->
   (c -> SignalTerm c) ->
   (PredicateTerm c -> Bool) ->
@@ -80,7 +80,7 @@ append ft@FiniteTrace {..} updates predicates =
 -------------------------------------------------------------------------------
 
 -- | 'rewind' undoes the last extensions by 'append'.
-rewind :: Ord c => FiniteTrace c -> FiniteTrace c
+rewind :: (Ord c) => FiniteTrace c -> FiniteTrace c
 rewind ft@FiniteTrace {..} =
   case (trace, obligations) of
     ([], _) -> ft
@@ -94,7 +94,7 @@ rewind ft@FiniteTrace {..} =
 -- | 'emptyTrace' initializes a 'FiniteTrace'. To compute the initial
 -- obligation the initial specification has to be passed in form of a list
 -- of assumptions and guarantees.
-emptyTrace :: Ord c => ([Formula c], [Formula c]) -> FiniteTrace c
+emptyTrace :: (Ord c) => ([Formula c], [Formula c]) -> FiniteTrace c
 emptyTrace (assumptions, guarantees) =
   FiniteTrace
     { trace = [],
@@ -114,7 +114,7 @@ emptyTrace (assumptions, guarantees) =
 -------------------------------------------------------------------------------
 
 -- | 'violated' returns the 'Formula' that some finite trace violates.
-violated :: Eq c => FiniteTrace c -> [Formula c]
+violated :: (Eq c) => FiniteTrace c -> [Formula c]
 violated ft =
   guarantee <$> filter ((== FFalse) . expTotalFormula) (nextObligations ft)
 
@@ -136,7 +136,7 @@ nextObligations FiniteTrace {..} =
 -- "F [x <- t]" and the last evaluation contained "[x <- t]" the formula should
 -- be simplified to "true".
 checkNext ::
-  Ord c =>
+  (Ord c) =>
   [(c -> SignalTerm c, PredicateTerm c -> Bool)] ->
   Formula c ->
   Formula c
@@ -145,7 +145,7 @@ checkNext trace form = fst $ checkNextC trace empty form
 -- To improve performance, the computation is enhanced with caching for
 -- intermediate results.
 checkNextC ::
-  Ord c =>
+  (Ord c) =>
   [(c -> SignalTerm c, PredicateTerm c -> Bool)] ->
   Map (Formula c) (Formula c) ->
   Formula c ->
@@ -239,7 +239,7 @@ checkNextC ts@(t : tr) cache form =
 
 -- | 'simplify' simplifies a TSL 'formula' by applying some easy syntactic
 -- conversion on the boolean level.
-simplify :: Eq c => Formula c -> Formula c
+simplify :: (Eq c) => Formula c -> Formula c
 simplify =
   \case
     Not f ->
@@ -303,7 +303,7 @@ simplify =
     isTrue TTrue = True
     isTrue _ = False
     --
-    removeDoubles :: Eq a => [a] -> [a]
+    removeDoubles :: (Eq a) => [a] -> [a]
     removeDoubles [] = []
     removeDoubles (x : xr) =
       if x `elem` xr

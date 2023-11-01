@@ -66,7 +66,7 @@ instance Foldable SignalTerm where
     FunctionTerm t -> foldr f a t
     PredicateTerm t -> foldr f a t
 
-instance Arbitrary a => Arbitrary (SignalTerm a) where
+instance (Arbitrary a) => Arbitrary (SignalTerm a) where
   arbitrary =
     choose (0 :: Int, 2 :: Int) >>= \case
       0 -> Signal <$> arbitrary
@@ -98,7 +98,7 @@ instance Foldable FunctionTerm where
 --     FunctionSymbol s -> show s
 --     FApplied t t' -> show t ++ " " ++ show t'
 
-instance Arbitrary a => Arbitrary (FunctionTerm a) where
+instance (Arbitrary a) => Arbitrary (FunctionTerm a) where
   arbitrary = do
     b <- arbitrary
     if b
@@ -134,7 +134,7 @@ instance Foldable PredicateTerm where
     PredicateSymbol s -> f s a
     PApplied t t' -> foldr f (foldr f a t) t'
 
-instance Show a => Show (PredicateTerm a) where
+instance (Show a) => Show (PredicateTerm a) where
   show = \case
     BooleanTrue -> "True"
     BooleanFalse -> "False"
@@ -142,7 +142,7 @@ instance Show a => Show (PredicateTerm a) where
     PredicateSymbol s -> show s
     PApplied t t' -> show t ++ " " ++ show t' ++ " "
 
-instance Arbitrary a => Arbitrary (PredicateTerm a) where
+instance (Arbitrary a) => Arbitrary (PredicateTerm a) where
   arbitrary =
     choose (0 :: Int, 4 :: Int) >>= \case
       0 -> return BooleanTrue
@@ -279,7 +279,7 @@ size = size' 0
 
 -- | Returns all predicate terms that are checked as part of the formula.
 checks ::
-  Ord a => Formula a -> Set (PredicateTerm a)
+  (Ord a) => Formula a -> Set (PredicateTerm a)
 checks = preds empty
   where
     preds s = \case
@@ -308,7 +308,7 @@ checks = preds empty
 
 -- | Returns all updates that appear in the formula
 updates ::
-  Ord a => Formula a -> Set (a, SignalTerm a)
+  (Ord a) => Formula a -> Set (a, SignalTerm a)
 updates = upds empty
   where
     upds s = \case
@@ -336,13 +336,13 @@ updates = upds empty
 -----------------------------------------------------------------------------
 
 outputs ::
-  Ord a => Formula a -> Set a
+  (Ord a) => Formula a -> Set a
 outputs = S.map fst . updates
 
 -----------------------------------------------------------------------------
 
 inputs ::
-  Ord a => Formula a -> Set a
+  (Ord a) => Formula a -> Set a
 inputs fml =
   let ps = checks fml
       os = outputs fml
@@ -366,7 +366,7 @@ inputs fml =
 -----------------------------------------------------------------------------
 
 functions ::
-  Ord a => Formula a -> Set a
+  (Ord a) => Formula a -> Set a
 functions fml =
   let ps = checks fml
       fs = S.map snd $ updates fml
@@ -389,7 +389,7 @@ functions fml =
 -----------------------------------------------------------------------------
 
 predicates ::
-  Ord a => Formula a -> Set a
+  (Ord a) => Formula a -> Set a
 predicates fml =
   let ps = checks fml
       fs = S.map snd $ updates fml
@@ -412,13 +412,13 @@ predicates fml =
 -----------------------------------------------------------------------------
 
 symbols ::
-  Ord a => Formula a -> Set a
+  (Ord a) => Formula a -> Set a
 symbols = unions . ((<*>) [inputs, outputs, functions, predicates]) . pure
 
 -----------------------------------------------------------------------------
 
 exactlyOne ::
-  Eq a => [Formula a] -> Formula a
+  (Eq a) => [Formula a] -> Formula a
 exactlyOne xs =
   Or $ map (\x -> And ([x] ++ map Not (filter (/= x) xs))) xs
 

@@ -58,7 +58,7 @@ data Invertible a
 
 -----------------------------------------------------------------------------
 
-instance Show a => Show (Invertible a) where
+instance (Show a) => Show (Invertible a) where
   show = \case
     Positive x -> show x ++ "+"
     Negative x -> show x ++ "-"

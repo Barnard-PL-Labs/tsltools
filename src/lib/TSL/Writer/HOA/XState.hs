@@ -47,14 +47,14 @@ printHOALines hoa@HOA {..} =
    in let apNamesSorted = map (Data.Bifunctor.first atomicPropositionName) $ sortOn (atomicPropositionName . fst) $ zip values [0 ..]
           apNamesMap = M.fromList $ map swap apNamesSorted
 
-          printState :: FiniteBounds HOA => State -> [String]
+          printState :: (FiniteBounds HOA) => State -> [String]
           printState s =
             unwords
               ( [strInd s]
                   ++ [": {"]
                   ++ ["\n on: {"]
-              ) :
-            zipWith (curry printEdge) (filterDupes' (toList $ edges s)) [1 ..]
+              )
+              : zipWith (curry printEdge) (filterDupes' (toList $ edges s)) [1 ..]
               ++ ["}"]
               ++ ["},"]
 
@@ -71,7 +71,7 @@ printHOALines hoa@HOA {..} =
                   else filterDupesHelper xs (x : ys)
 
           printEdge ::
-            FiniteBounds HOA =>
+            (FiniteBounds HOA) =>
             (([State], Maybe Label, Maybe (Set AcceptanceSet)), Integer) ->
             String
           printEdge edge =
@@ -79,7 +79,7 @@ printHOALines hoa@HOA {..} =
                 stateUpdate = "target: \'" ++ printStateConj target ++ "\',\n},"
              in printLabel (fromJust label) stateUpdate nlab
 
-          printLabel :: FiniteBounds HOA => Label -> String -> Integer -> String
+          printLabel :: (FiniteBounds HOA) => Label -> String -> Integer -> String
           printLabel label stateUpdate n =
             let splitFormulas = formulaToList label
                 termStringList = map (map (printTSLFormula strInd2)) splitFormulas :: [[String]]
@@ -92,7 +92,7 @@ printHOALines hoa@HOA {..} =
              in -- add zip below
                 concatMap (\x -> indent 2 ++ predUpdToCode x) (zip predUpds [1 ..])
 
-          printStateConj :: FiniteBounds HOA => [State] -> String
+          printStateConj :: (FiniteBounds HOA) => [State] -> String
           printStateConj = intercalate " & " . map strInd
 
           strInd2 = strIndWithMap apNamesMap
@@ -136,7 +136,7 @@ translateToTSL t =
 
 -- TODO need to specialize this to Python syntax, rather than just using TSL syntax
 -- for pred terms just add parens, for update terms, a little bit more parsing needed
-generateTSLString :: forall a b. Show a => (b -> T.Formula String) -> (String -> Either a b) -> String -> String
+generateTSLString :: forall a b. (Show a) => (b -> T.Formula String) -> (String -> Either a b) -> String -> String
 generateTSLString tslType decoder x =
   either show (T.tslFormula id . tslType) $
     decoder x

@@ -128,51 +128,51 @@ cPutMessageInput c message input =
 -----------------------------------------------------------------------------
 
 -- | outputs a value of any printable type to stdout
-printOut :: Show a => a -> IO ()
+printOut :: (Show a) => a -> IO ()
 printOut = putOut . show
 
 -----------------------------------------------------------------------------
 
 -- | outputs a value of any printable type to stdout and
 -- adds a newline at the end
-printOutLn :: Show a => a -> IO ()
+printOutLn :: (Show a) => a -> IO ()
 printOutLn = putOutLn . show
 
 -----------------------------------------------------------------------------
 
 -- | outputs a value of any printable type to stderr
-printErr :: Show a => a -> IO ()
+printErr :: (Show a) => a -> IO ()
 printErr = putErr . show
 
 -----------------------------------------------------------------------------
 
 -- | outputs a value of any printable type to stderr and
 -- adds a newline at the end
-printErrLn :: Show a => a -> IO ()
+printErrLn :: (Show a) => a -> IO ()
 printErrLn = putErrLn . show
 
 -----------------------------------------------------------------------------
 
 -- | same as 'printOut', but with colors
-cPrintOut :: Show a => ColorIntensity -> Color -> a -> IO ()
+cPrintOut :: (Show a) => ColorIntensity -> Color -> a -> IO ()
 cPrintOut i c = cPutOut i c . show
 
 -----------------------------------------------------------------------------
 
 -- | same as 'printOutLn', but with colors
-cPrintOutLn :: Show a => ColorIntensity -> Color -> a -> IO ()
+cPrintOutLn :: (Show a) => ColorIntensity -> Color -> a -> IO ()
 cPrintOutLn i c = cPutOutLn i c . show
 
 -----------------------------------------------------------------------------
 
 -- | same as 'printErr', but with colors
-cPrintErr :: Show a => ColorIntensity -> Color -> a -> IO ()
+cPrintErr :: (Show a) => ColorIntensity -> Color -> a -> IO ()
 cPrintErr i c = cPutErr i c . show
 
 -----------------------------------------------------------------------------
 
 -- | same as 'printErrLn', but with colors
-cPrintErrLn :: Show a => ColorIntensity -> Color -> a -> IO ()
+cPrintErrLn :: (Show a) => ColorIntensity -> Color -> a -> IO ()
 cPrintErrLn i c = cPutErrLn i c . show
 
 -----------------------------------------------------------------------------

@@ -46,7 +46,7 @@ data ImpConfig = ImpConfig
 
 withConfig :: ImpConfig -> Bool -> H.HOA -> String
 withConfig config isCounterStrat hoa =
-  let prog = CG.codegen hoa in Reader.runReader (writeProgram isCounterStrat prog) config --TODO: make the False a flag for indicating counterstrategy
+  let prog = CG.codegen hoa in Reader.runReader (writeProgram isCounterStrat prog) config -- TODO: make the False a flag for indicating counterstrategy
 
 -- | WRITE PROGRAM TO STRING
 type Imp a = Reader ImpConfig a
@@ -139,12 +139,12 @@ writeTermApp :: String -> [CG.Term] -> Imp String
 writeTermApp f args
   | isTSLMTLiteral f args = return $ replaceTSLMTLiteral f
   | isTSLMTBinOp f args = do
-    args' <- mapM writeTerm args
-    let [x1, x2] = args'
-    replaceTSLMTBinOp f x1 x2
+      args' <- mapM writeTerm args
+      let [x1, x2] = args'
+      replaceTSLMTBinOp f x1 x2
   | otherwise = do
-    ImpConfig {..} <- Reader.ask
-    impFuncApp f <$> mapM writeTermNoParens args
+      ImpConfig {..} <- Reader.ask
+      impFuncApp f <$> mapM writeTermNoParens args
 
 -- | HELPERS
 pickIfOrElif :: Bool -> Imp String

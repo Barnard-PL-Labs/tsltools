@@ -119,7 +119,7 @@ data BinaryFunction
 -------------------------------------------------------------------------------
 -- Fmt instances
 
-class Show a => Fmt a where
+class (Show a) => Fmt a where
   fmt :: a -> String
 
 instance (Fmt a) => Fmt [a] where

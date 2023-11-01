@@ -73,7 +73,7 @@ updatesMap (Specification a g s) = Map.map (map toAst) updMap
     updMap = foldr add Map.empty updatesList
     toAst = fromSignalTerm (arity . (stType s))
 
-mapConsInsert :: Ord k => k -> v -> Map k [v] -> Map k [v]
+mapConsInsert :: (Ord k) => k -> v -> Map k [v] -> Map k [v]
 mapConsInsert k v mp = Map.insert k (v : vs) mp
   where
     vs = Map.findWithDefault [] k mp

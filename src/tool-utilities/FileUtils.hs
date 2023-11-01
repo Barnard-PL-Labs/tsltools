@@ -41,10 +41,10 @@ import TSL
     Error,
     Specification,
     Theory (..),
-    tUninterpretedFunctions,
     fromCFM,
     fromTSL,
     readTheory,
+    tUninterpretedFunctions,
     unwrap,
   )
 
@@ -125,15 +125,15 @@ loadTSLMT input = do
   content <- tryReadContent input
   let linesList = lines content
       hasTheoryAnnotation = '#' == (head $ head linesList)
-      theory =  readTheory $ head linesList
-      specStr = unlines $ tail linesList  -- FIXME: unlines.lines is computationally wasteful
-  if hasTheoryAnnotation 
-  then do
-    tslmt <- fromTSL input specStr
-    unwrap $ (,,specStr) <$> theory <*> tslmt 
-  else do
-    rawTSL <- fromTSL input content
-    unwrap $ (,,content) <$> Right tUninterpretedFunctions <*> rawTSL
+      theory = readTheory $ head linesList
+      specStr = unlines $ tail linesList -- FIXME: unlines.lines is computationally wasteful
+  if hasTheoryAnnotation
+    then do
+      tslmt <- fromTSL input specStr
+      unwrap $ (,,specStr) <$> theory <*> tslmt
+    else do
+      rawTSL <- fromTSL input content
+      unwrap $ (,,content) <$> Right tUninterpretedFunctions <*> rawTSL
 
 -----------------------------------------------------------------------------
 
