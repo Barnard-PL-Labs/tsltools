@@ -132,7 +132,7 @@ doc:
 	${BLDTOOL} haddock --open
 
 format:
-	stylish-haskell  -c .stylish-haskell.yaml  -i  -r src/
+	ormolu --mode inplace $$(find ./src -name '*.hs')
 
 clean:
 	${BLDTOOL} clean
