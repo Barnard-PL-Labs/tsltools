@@ -36,16 +36,16 @@ import TSL (implementHoa, preprocess, toTLSF)
 main ::
   IO ()
 main = do
+  initEncoding
+
+  Configuration {input, codeTarget, writeHoa} <- parseArguments
+  let fileBasename = takeBaseName $ fromJust input
+
   -- check if ltlsynt is available on path
   ltlsyntAvailable <- isLtlsyntAvailable
   unless ltlsyntAvailable $ do
     hPutStrLn stderr "'ltlsynt' is not found."
     exitFailure
-
-  initEncoding
-
-  Configuration {input, codeTarget, writeHoa} <- parseArguments
-  let fileBasename = takeBaseName $ fromJust input
 
   -- tslmt2tsl
   content <- tryReadContent input
