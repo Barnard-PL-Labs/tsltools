@@ -22,8 +22,12 @@ extra-source-files:
 
 ghc-options:
   - -Wall
-  - -Wno-name-shadowing
   # - -fno-ignore-asserts
+  - -Wno-name-shadowing
+  # Workaround for https://github.com/haskell/cabal/issues/4739.
+  # -Wnon-noportable-include-path is a Clang diagnostic flag. See
+  # https://clang.llvm.org/docs/DiagnosticsReference.html#wnonportable-include-path
+  - -optP-Wno-nonportable-include-path
 
 dependencies:
   - base >= 4.13 && <4.19
@@ -42,7 +46,7 @@ library:
     - mtl >=2.2 && <2.3
     - containers >=0.5 && <0.7
     - QuickCheck
-    - process >= 1.6.3.0
+    # - process >= 1.6.3.0
     - ansi-terminal >= 0.6
     - transformers >= 0.5.6.2
     - process
@@ -57,9 +61,17 @@ executables:
     main: Main.hs
     source-dirs:
       - src/tools/tsl
+      - src/tool-utilities
     dependencies:
       - tsl
       - optparse-applicative
+      - directory
+      - ansi-terminal
+      - process
+    # Workaround for https://github.com/commercialhaskell/stack/issues/5439
+    when:
+    - condition: false
+      other-modules: Paths_tsl
 
 tests:
   default:
