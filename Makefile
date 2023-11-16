@@ -8,7 +8,7 @@ doc:
 	stack haddock --open
 
 format:
-	ormolu --mode inplace $$(find ./src -name '*.hs')
+	ormolu --mode inplace $$(find . -name '*.hs')
 
 clean:
 	stack clean
