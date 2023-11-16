@@ -10,15 +10,18 @@
 -- Maintainer  :  Wonhyuk Choi
 module TSL.Preprocessor
   ( preprocess,
+    parse,
   )
 where
 
 -----------------------------------------------------------------------------
 -- Imports
 
+import Control.Arrow (left)
 import Control.Monad (liftM)
 import Data.Functor.Identity (Identity)
 import Numeric (showFFloat)
+import TSL.Error (Error, parseError, syntaxError, unwrap)
 import TSL.ModuloTheories.Theories (Theory (..))
 import Text.Parsec
   ( alphaNum,
@@ -455,10 +458,19 @@ functionLiteralParser = do
     argParser =
       try literalParser <|> liftM Symbol (try identifier) <|> try signalParser
 
-preprocess :: String -> Either Parsec.ParseError Specification
-preprocess input = Parsec.parse (specParser <* Parsec.eof) errMsg input
+parse :: String -> Either Error Specification
+parse input =
+  let result = Parsec.parse (specParser <* Parsec.eof) errMsg input
+   in case result of
+        Left err -> parseError err
+        Right spec -> Right spec
   where
     errMsg =
       "\n\nParser Failed! Input was:\n\n"
-        ++ (unlines (map ('\t' :) (lines input)))
+        ++ unlines (map ('\t' :) (lines input))
         ++ "\n\n"
+
+preprocess :: String -> IO String
+preprocess input = do
+  spec <- unwrap $ parse input
+  return $ fmt spec

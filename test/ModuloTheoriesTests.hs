@@ -34,7 +34,7 @@ import Distribution.TestSuite
     TestInstance (..),
   )
 import System.Directory (doesFileExist)
-import TSL
+import TSL.ModuloTheories
   ( Cfg (..),
     buildDtoList,
     cfgFromSpec,
@@ -42,7 +42,7 @@ import TSL
     generateSygusAssumptions,
     predsFromSpec,
   )
-import TSL.ModuloTheories (parseTSLMT)
+import qualified TSL.ModuloTheories as MT
 import Test.HUnit ((@=?))
 import qualified Test.HUnit as H
 
@@ -89,7 +89,7 @@ predicatesTests = [convert2Cabal (makeTestName "Predicates") hUnitTest]
     expectedNumPreds = 2
 
     hUnitTest = do
-      (theory, spec, _) <- readFile path >>= parseTSLMT (Just path)
+      (theory, spec, _) <- readFile path >>= MT.parse (Just path)
       return $
         H.TestCase $ case predsFromSpec theory spec of
           Right preds -> expectedNumPreds @=? length preds
@@ -103,7 +103,7 @@ cfgTests = [convert2Cabal (makeTestName "CFG") hUnitTest]
     expectedProductionRuleSize = 1
 
     hUnitTest = do
-      (theory, spec, _) <- readFile path >>= parseTSLMT (Just path)
+      (theory, spec, _) <- readFile path >>= MT.parse (Just path)
       return $ case cfgFromSpec theory spec of
         Right cfg ->
           let assocs = Map.assocs $ grammar cfg
@@ -128,7 +128,7 @@ consistencyTests = [convert2Cabal (makeTestName "Consistency") hUnitTest]
     expectedNumQueries = 15
 
     hUnitTest = do
-      (theory, spec, _) <- readFile path >>= parseTSLMT (Just path)
+      (theory, spec, _) <- readFile path >>= MT.parse (Just path)
       let preds = case predsFromSpec theory spec of
             Left err -> error $ show err
             Right ps -> ps
@@ -172,7 +172,7 @@ sygusTests =
           zip paths numExpectedAssumptions
 
     makeTestCase (path, numExpected) = do
-      (theory, spec, _) <- readFile path >>= parseTSLMT (Just path)
+      (theory, spec, _) <- readFile path >>= MT.parse (Just path)
       let preds = case predsFromSpec theory spec of
             Left err -> error $ "PREDICATES ERROR: " ++ show err
             Right ps -> ps

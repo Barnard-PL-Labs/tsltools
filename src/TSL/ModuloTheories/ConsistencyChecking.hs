@@ -20,7 +20,7 @@ where
 -------------------------------------------------------------------------------
 
 import Control.Monad.Trans.Except
-import TSL.Ast
+import TSL.Core.Ast
   ( AstInfo (..),
     SymbolInfo (..),
     deduplicate,

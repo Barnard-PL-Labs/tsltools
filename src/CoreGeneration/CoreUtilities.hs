@@ -27,7 +27,7 @@ where
 
 import Control.Monad (when)
 import Data.Set as Set (Set, empty, fromList, insert, notMember, size, toList)
-import TSL (Formula (..), Specification (..))
+import TSL.Core (Formula (..), Specification (..))
 
 -------------------------------------------------------------------------------
 

@@ -35,9 +35,9 @@ import System.Exit
 import System.FilePath (joinPath)
 import System.IO (readFile)
 import System.Process
-import TSL
+import TSL.HOA
   ( CodeTarget (..),
-    implementHoa,
+    implement,
   )
 
 -----------------------------------------------------------------------------
@@ -55,7 +55,7 @@ tests =
       jsCode dirPath hoaFilepath = do
         c <- readFile $ joinPath [dirPath, hoaFilepath]
         let hoa = parse c
-        let code = either id (implementHoa False JS) hoa
+        let code = either id (implement False JS) hoa
         (exitCode, stdout, stderr) <-
           readProcessWithExitCode
             "jshint"

@@ -40,7 +40,7 @@ import Data.Set as Set
     union,
     unions,
   )
-import TSL
+import TSL.Core
   ( Formula (..),
     SignalTerm (..),
     Specification (..),

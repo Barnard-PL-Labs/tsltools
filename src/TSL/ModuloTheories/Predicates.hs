@@ -25,9 +25,12 @@ where
 
 import Control.Exception (assert)
 import Control.Monad (filterM)
-import TSL.Ast (AstInfo, fromPredicateTerm, (+++))
+import TSL.Core.Ast (AstInfo, fromPredicateTerm, (+++))
+import TSL.Core.Logic (Formula (..), PredicateTerm, foldFormula)
+import TSL.Core.Specification (Specification (..))
+import TSL.Core.SymbolTable (SymbolTable (..))
+import TSL.Core.Types (arity)
 import TSL.Error (Error)
-import TSL.Logic (Formula (..), PredicateTerm, foldFormula)
 import TSL.ModuloTheories.Theories
   ( TAst,
     Theory,
@@ -40,9 +43,6 @@ import TSL.ModuloTheories.Theories
     tastSignals,
     tastTheory,
   )
-import TSL.Specification (Specification (..))
-import TSL.SymbolTable (SymbolTable (..))
-import TSL.Types (arity)
 
 -------------------------------------------------------------------------------
 

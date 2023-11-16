@@ -26,7 +26,7 @@ import Distribution.TestSuite
 import System.Directory (listDirectory)
 import System.FilePath (joinPath)
 import System.IO (readFile)
-import TSL (fromTSL, specifications2dependencies)
+import TSL.Core (fromTSL, specifications2dependencies)
 import TSL.Error (unwrap)
 
 -----------------------------------------------------------------------------

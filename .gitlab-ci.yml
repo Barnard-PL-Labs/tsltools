@@ -1,6 +1,0 @@
-image: "registry.intelligent-conception.de/container_registry/container_registry/haskell-dev:lts-14.17"
-
-testing:
-  script:
-    - stack build --test
-    - make && /tslsynth test/res/specs/Heating.tsl --python

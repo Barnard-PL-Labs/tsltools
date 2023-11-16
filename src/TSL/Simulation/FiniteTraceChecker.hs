@@ -27,7 +27,7 @@ where
 
 import Control.Exception (assert)
 import Data.Map as Map (Map, empty, insert, lookup, union)
-import TSL.Logic as Logic (Formula (..), PredicateTerm, SignalTerm)
+import TSL.Core.Logic as Logic (Formula (..), PredicateTerm, SignalTerm)
 
 -------------------------------------------------------------------------------
 

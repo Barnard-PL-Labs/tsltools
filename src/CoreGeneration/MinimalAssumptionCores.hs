@@ -28,7 +28,7 @@ import CoreGeneration.CoreUtilities
   )
 import CoreGeneration.FindFirstConcurrent (incParallelFirst)
 import Data.Set as Set (Set, difference, empty, fromList, member, toList, union)
-import TSL (Formula (..), Specification (..), SymbolTable, split, toTSL)
+import TSL.Core (Formula (..), Specification (..), SymbolTable, split, toTSL)
 
 -------------------------------------------------------------------------------
 

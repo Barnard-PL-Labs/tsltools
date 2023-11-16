@@ -1,28 +1,29 @@
-module TSL.ModuloTheories (tslmt2tsl, parseTSLMT) where
+module TSL.ModuloTheories
+  ( theorize,
+    parse,
+    module TSL.ModuloTheories,
+    module TSL.ModuloTheories.Cfg,
+    module TSL.ModuloTheories.ConsistencyChecking,
+    module TSL.ModuloTheories.Predicates,
+    module TSL.ModuloTheories.Sygus,
+    module TSL.ModuloTheories.Theories,
+  )
+where
 
 import Control.Monad.Trans.Except
 import Data.Maybe (catMaybes)
+import TSL.Core.Reader (fromTSL)
+import TSL.Core.Specification (Specification)
 import TSL.Error (unwrap)
-import TSL.ModuloTheories.Cfg (cfgFromSpec)
+import TSL.ModuloTheories.Cfg
 import TSL.ModuloTheories.ConsistencyChecking
-  ( generateConsistencyAssumptions,
-  )
-import TSL.ModuloTheories.Predicates (predsFromSpec)
+import TSL.ModuloTheories.Predicates
 import TSL.ModuloTheories.Sygus
-  ( buildDtoList,
-    generateSygusAssumptions,
-  )
 import TSL.ModuloTheories.Theories
-  ( Theory,
-    readTheory,
-    tUninterpretedFunctions,
-  )
-import TSL.Reader (fromTSL)
-import TSL.Specification (Specification)
 
-tslmt2tsl :: FilePath -> Maybe FilePath -> String -> IO String
-tslmt2tsl solverPath inputPath spec = do
-  (theory, tslSpec, specStr) <- parseTSLMT inputPath spec
+theorize :: FilePath -> Maybe FilePath -> String -> IO String
+theorize solverPath inputPath spec = do
+  (theory, tslSpec, specStr) <- parse inputPath spec
   let cfg = unError $ cfgFromSpec theory tslSpec
       preds = unError $ predsFromSpec theory tslSpec
 
@@ -74,8 +75,8 @@ tslmt2tsl solverPath inputPath spec = do
       Left err -> error $ show err
       Right val -> val
 
-parseTSLMT :: Maybe FilePath -> String -> IO (Theory, Specification, String)
-parseTSLMT inputPath spec = do
+parse :: Maybe FilePath -> String -> IO (Theory, Specification, String)
+parse inputPath spec = do
   let linesList = lines spec
       hasTheoryAnnotation = '#' == head (head linesList)
       theory = readTheory $ head linesList

@@ -46,7 +46,7 @@ where
 
 -------------------------------------------------------------------------------
 
-import TSL.Ast
+import TSL.Core.Ast
   ( Ast,
     AstInfo,
     getAstInfo,

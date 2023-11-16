@@ -24,7 +24,7 @@ import Distribution.TestSuite
     Test (..),
     TestInstance (..),
   )
-import TSL (Specification, fromTSL, split, toTSL)
+import TSL.Core (Specification, fromTSL, split, toTSL)
 
 -----------------------------------------------------------------------------
 

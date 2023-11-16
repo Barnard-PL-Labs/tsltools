@@ -6,12 +6,12 @@ import qualified Syfco as S
 import System.Exit (ExitCode (ExitSuccess), die)
 import System.FilePath (takeBaseName)
 import System.Process (readProcessWithExitCode)
-import TSL (CodeTarget (..), implementHoa)
 import TSL.Command.Synth.Options (Options (..))
+import TSL.Core.Reader (fromTSL)
 import TSL.Error (Error)
-import TSL.ModuloTheories (tslmt2tsl)
+import TSL.HOA (CodeTarget (..), implement)
+import TSL.ModuloTheories (theorize)
 import TSL.Preprocessor (preprocess)
-import TSL.Reader (fromTSL)
 import TSL.TLSF (toTLSF)
 
 optionsParserInfo :: ParserInfo Options
@@ -60,12 +60,10 @@ synth (Options {inputPath, outputPath, target, solverPath}) = do
   input <- readInput inputPath
 
   -- user-provided TSLMT spec (String) -> desugared TSLMT spec (String)
-  preprocessedSpec <- case preprocess input of
-    Left err -> die $ show err
-    Right s -> return $ show s
+  preprocessedSpec <- preprocess input
 
   -- desugared TSLMT spec (String) -> theory-encoded TSL spec (String)
-  theorizedSpec <- tslmt2tsl solverPath inputPath preprocessedSpec
+  theorizedSpec <- theorize solverPath inputPath preprocessedSpec
 
   -- theory-encoded TSL spec (String) -> TLSF (String)
   tlsfSpec <- toTLSF fileBaseName <$> (fromTSL inputPath theorizedSpec >>= rightOrInvalidInput inputPath)
@@ -74,7 +72,7 @@ synth (Options {inputPath, outputPath, target, solverPath}) = do
   hoaController <- callLtlsynt tlsfSpec
 
   -- HOA controller (String) -> controller in target language (String)
-  let targetController = either id (implementHoa False target) $ Hanoi.parse hoaController
+  let targetController = either id (implement False target) $ Hanoi.parse hoaController
 
   -- Write to output
   writeOutput outputPath targetController

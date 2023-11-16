@@ -26,7 +26,7 @@ import Data.List
   )
 import Data.Set (elems, toList, union)
 import qualified Data.Set as S (map)
-import TSL.Logic
+import TSL.Core.Logic
   ( Formula (..),
     SignalTerm (..),
     checks,
@@ -38,8 +38,8 @@ import TSL.Logic
     tslFormula,
     updates,
   )
-import TSL.Specification (Specification (..), toFormula)
-import TSL.SymbolTable (stName)
+import TSL.Core.Specification (Specification (..), toFormula)
+import TSL.Core.SymbolTable (stName)
 
 -----------------------------------------------------------------------------
 

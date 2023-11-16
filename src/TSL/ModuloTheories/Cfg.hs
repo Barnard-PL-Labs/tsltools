@@ -30,9 +30,12 @@ import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
-import TSL.Ast (Ast, fromSignalTerm)
+import TSL.Core.Ast (Ast, fromSignalTerm)
+import TSL.Core.Logic (updates)
+import TSL.Core.Specification (Specification (..))
+import TSL.Core.SymbolTable (Id, SymbolTable (..))
+import TSL.Core.Types (arity)
 import TSL.Error (Error)
-import TSL.Logic (updates)
 import TSL.ModuloTheories.Theories
   ( TAst,
     Theory,
@@ -40,9 +43,6 @@ import TSL.ModuloTheories.Theories
     applySemantics,
     read2Symbol,
   )
-import TSL.Specification (Specification (..))
-import TSL.SymbolTable (Id, SymbolTable (..))
-import TSL.Types (arity)
 
 -------------------------------------------------------------------------------
 

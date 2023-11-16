@@ -51,8 +51,8 @@ import qualified Data.IntMap as IM (lookup)
 import Data.Maybe (fromMaybe)
 import System.Exit (die, exitFailure)
 import System.IO (hPrint, stderr)
-import TSL.Expression (ExprPos (..), SrcPos (..))
-import TSL.Types (ExprType (..), prType, reducer)
+import TSL.Core.Expression (ExprPos (..), SrcPos (..))
+import TSL.Core.Types (ExprType (..), prType, reducer)
 import Text.Parsec.Error (ParseError)
 
 -----------------------------------------------------------------------------

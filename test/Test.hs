@@ -29,7 +29,7 @@ import qualified JSWriterTests (tests)
 import qualified ModuloTheoriesTests (tests)
 import qualified PreprocessorTests (tests)
 import qualified SplitTests (tests)
-import TSL
+import TSL.Core
   ( PredicateTerm,
     SignalTerm,
     decodeInputAP,

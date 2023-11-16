@@ -25,7 +25,7 @@ import Distribution.TestSuite
 import System.Directory (listDirectory)
 import System.Exit (die)
 import System.FilePath (combine)
-import TSL (preprocess)
+import TSL.Preprocessor (parse, preprocess)
 import Test.HUnit ((@=?))
 import qualified Test.HUnit as H
 
@@ -84,11 +84,9 @@ unitTests = map runTest testNums
        in convert2Cabal testName $ do
             inputTSL <- readFile inputPath
             expectedTSL <- readFile expectedPath
-            case preprocess inputTSL of
-              Left err -> die $ show err
-              Right actual -> case preprocess expectedTSL of
-                Left err -> die $ show err
-                Right expected -> return $ H.TestCase $ expected @=? actual
+            actual <- preprocess inputTSL
+            expected <- preprocess expectedTSL
+            return $ H.TestCase $ expected @=? actual
 
 specTests :: IO [Test]
 specTests = liftM (map runTest) filePaths
@@ -112,7 +110,7 @@ specTests = liftM (map runTest) filePaths
     runTest :: FilePath -> Test
     runTest path = convert2Cabal ("Preprocess Spec Test: " ++ path) $ do
       tsl <- readFile path
-      let parseSuccess = isRight $ preprocess tsl
+      let parseSuccess = isRight $ parse tsl
       return $ H.TestCase $ H.assertBool "Preprocess failed!" parseSuccess
 
 tests :: IO [Test]

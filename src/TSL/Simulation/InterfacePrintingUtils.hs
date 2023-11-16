@@ -42,7 +42,7 @@ import System.Console.ANSI
     clearScreen,
     setSGR,
   )
-import TSL.Logic (Formula (..), PredicateTerm, SignalTerm, tslFormula)
+import TSL.Core.Logic (Formula (..), PredicateTerm, SignalTerm, tslFormula)
 
 -------------------------------------------------------------------------------
 
