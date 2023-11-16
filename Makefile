@@ -1,3 +1,6 @@
+build:
+	stack build
+
 install:
 	stack install
 
@@ -13,5 +16,5 @@ format:
 clean:
 	stack clean
 
-.PHONY: install test doc format clean
+.PHONY: build install test doc format clean
 .SILENT:

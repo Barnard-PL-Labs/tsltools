@@ -3,7 +3,7 @@ module TSL.Command.Synth where
 import qualified Hanoi
 import Options.Applicative (Parser, ParserInfo, action, flag', fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, strOption, (<|>))
 import qualified Syfco as S
-import System.Exit (ExitCode (ExitSuccess), die, exitFailure)
+import System.Exit (ExitCode (ExitSuccess), die)
 import System.FilePath (takeBaseName)
 import System.Process (readProcessWithExitCode)
 import TSL (CodeTarget (..), implementHoa)
