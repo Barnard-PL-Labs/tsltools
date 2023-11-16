@@ -55,7 +55,7 @@ tests =
       jsCode dirPath hoaFilepath = do
         c <- readFile $ joinPath [dirPath, hoaFilepath]
         let hoa = parse c
-        let code = either id (implementHoa JS) hoa
+        let code = either id (implementHoa False JS) hoa
         (exitCode, stdout, stderr) <-
           readProcessWithExitCode
             "jshint"
@@ -67,7 +67,7 @@ tests =
             putStrLn $ "\nSynthesized JS code:\n" ++ code ++ "\n"
             return $ Finished $ Fail (stdout ++ stderr)
    in do
-        let dirPath = "src/test/res/hoa"
+        let dirPath = "test/res/hoa"
         paths <- listDirectory dirPath
         jsHintPath <- findExecutable "jshint"
         if isJust jsHintPath

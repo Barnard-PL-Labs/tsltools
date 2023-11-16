@@ -56,6 +56,7 @@ synth :: Options -> IO ()
 synth (Options {inputPath, outputPath, target, solverPath}) = do
   let fileBaseName = maybe "input" takeBaseName inputPath
 
+  -- Read input
   input <- readInput inputPath
 
   -- user-provided TSLMT spec (String) -> desugared TSLMT spec (String)
@@ -75,6 +76,7 @@ synth (Options {inputPath, outputPath, target, solverPath}) = do
   -- HOA controller (String) -> controller in target language (String)
   let targetController = either id (implementHoa False target) $ Hanoi.parse hoaController
 
+  -- Write to output
   writeOutput outputPath targetController
 
 command :: ParserInfo (IO ())

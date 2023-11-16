@@ -47,12 +47,8 @@ module TSL
 
     -- * CFM Utilities
     CodeTarget (..),
-    CFM,
     ModuleName,
     FunctionName,
-    fromCFM,
-    statistics,
-    symbolTable,
     implementHoa,
 
     -- * Symbol Table
@@ -96,7 +92,6 @@ where
 -----------------------------------------------------------------------------
 
 import qualified Hanoi as H (HOA (..))
-import TSL.CFM (CFM, fromCFM, statistics, symbolTable)
 import TSL.Dependency
   ( DependencyRepresentation (..),
     specifications2dependencies,

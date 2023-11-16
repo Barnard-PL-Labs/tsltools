@@ -46,7 +46,7 @@ Folder structure:
 * `src/lib/` contains the source code of the library part of the project, i.e., the main program logic of `tsltools`. The export modules for the different sub-libraries are placed at the top-level of `src/lib`. Each sub-library has its own sub-folder.
 * `src/tools/` contains the code of the individual tools. Each tools has a separate folder which usually contains one or two source files.
 * `src/tool-utilities/` contains common routines used by the individual tools. Note that these allow that the different tools are accessed in a similar manner. Hence, when writing a new tool please take them into account.
-* `src/tests/` contains some unit tests.
+* `tests/` contains some unit tests.
 
 ### Code Style and Documentation
 

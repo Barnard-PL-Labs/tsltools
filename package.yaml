@@ -73,7 +73,22 @@ executables:
 
 tests:
   default:
-    main: Test.hs
+    # main: Test.hs
     source-dirs: test
+    verbatim:
+      type: detailed-0.9
+      test-module: Test
+    when:
+      - condition: false
+        other-modules: Test
     dependencies:
       - tsl
+      - containers
+      - HUnit
+      - filepath
+      - directory
+      - Cabal
+      - transformers
+      - process
+      - hanoi
+      - QuickCheck

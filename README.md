@@ -23,7 +23,7 @@ To run full pipeline synthesis, use the `tslsynth` tool.
 This takes a TSL spec and generates a .code file in the specified target language.
 For a quick test, you can run:
 
-```./tslsynth src/test/res/specs/Heating.tsl --python```
+```./tslsynth test/res/specs/Heating.tsl --python```
 
 The precise usage and arguments for each tool are describe by 
 `<toolname> --help`. Note that most tools will try to read some file 

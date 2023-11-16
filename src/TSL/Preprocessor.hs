@@ -58,7 +58,7 @@ bracketify = surround '[' ']'
 
 -------------------------------------------------------------------------------
 
-data Specification = Specification Theory [Section]
+data Specification = Specification (Maybe Theory) [Section]
   deriving (Eq)
 
 data Section = Section (Maybe TemporalWrapper) SectionType [Expr]
@@ -131,7 +131,8 @@ instance Fmt Char where
   fmt c = [c]
 
 instance Fmt Specification where
-  fmt (Specification theory sections) = unlines $ ('#' : show theory) : map fmt sections
+  fmt (Specification (Just theory) sections) = unlines $ ('#' : show theory) : map fmt sections
+  fmt (Specification Nothing sections) = unlines $ map fmt sections
 
 instance Show Specification where
   show = fmt
@@ -347,16 +348,16 @@ binaryFunctions =
 specParser :: Parser Specification
 specParser = do
   whiteSpace
-  theory <- option Uf theoryParser
+  theory <- option Nothing theoryParser
   sections <- sectionParser `sepBy` spaces
   return $ Specification theory sections
 
-theoryParser :: Parser Theory
+theoryParser :: Parser (Maybe Theory)
 theoryParser = do
   reserved "#"
-  (reserved "UF" >> return Uf)
-    <|> (reserved "EUF" >> return EUf)
-    <|> (reserved "LIA" >> return Lia)
+  (reserved "UF" >> return (Just Uf))
+    <|> (reserved "EUF" >> return (Just EUf))
+    <|> (reserved "LIA" >> return (Just Lia))
 
 sectionParser :: Parser Section
 sectionParser = do

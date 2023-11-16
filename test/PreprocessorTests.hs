@@ -65,7 +65,7 @@ unitTests :: [Test]
 unitTests = map runTest testNums
   where
     dir :: FilePath
-    dir = "src/test/regression/Preprocess/"
+    dir = "test/regression/Preprocess/"
 
     testNums :: [Int]
     testNums = [0 .. 9]
@@ -94,7 +94,7 @@ specTests :: IO [Test]
 specTests = liftM (map runTest) filePaths
   where
     dir :: FilePath
-    dir = "src/test/res/specs/"
+    dir = "test/res/specs/"
 
     fileNames :: IO [FilePath]
     fileNames = listDirectory dir

@@ -23,11 +23,11 @@ import Distribution.TestSuite
     Test (..),
     TestInstance (..),
   )
-import FileUtils (loadTSL)
 import System.Directory (listDirectory)
 import System.FilePath (joinPath)
 import System.IO (readFile)
-import TSL (specifications2dependencies)
+import TSL (fromTSL, specifications2dependencies)
+import TSL.Error (unwrap)
 
 -----------------------------------------------------------------------------
 
@@ -36,11 +36,19 @@ tests =
   let test =
         TestInstance
           { run = do
-              let dirPath = "src/test/res/specs"
+              let dirPath = "test/res/specs"
               paths <- listDirectory dirPath
-              specs <- forM paths (\path -> loadTSL $ Just $ joinPath [dirPath, path])
+              specs <-
+                forM
+                  paths
+                  ( \path -> do
+                      let inputPath = joinPath [dirPath, path]
+                      specStr <- readFile inputPath
+                      res <- fromTSL (Just inputPath) specStr
+                      unwrap res
+                  )
               let out = show $ specifications2dependencies specs
-              let refPath = "src/test/res/DepTestReference.txt"
+              let refPath = "test/res/DepTestReference.txt"
               ref <- readFile refPath
               if out == ref
                 then return $ Finished Pass

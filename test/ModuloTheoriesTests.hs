@@ -33,7 +33,6 @@ import Distribution.TestSuite
     Test (..),
     TestInstance (..),
   )
-import FileUtils (loadTSLMT)
 import System.Directory (doesFileExist)
 import TSL
   ( Cfg (..),
@@ -43,6 +42,7 @@ import TSL
     generateSygusAssumptions,
     predsFromSpec,
   )
+import TSL.ModuloTheories (parseTSLMT)
 import Test.HUnit ((@=?))
 import qualified Test.HUnit as H
 
@@ -85,11 +85,11 @@ cvc5Path = "deps/cvc5"
 predicatesTests :: [Test]
 predicatesTests = [convert2Cabal (makeTestName "Predicates") hUnitTest]
   where
-    path = "src/test/regression/ModuloTheories/functions_and_preds.tslmt"
+    path = "test/regression/ModuloTheories/functions_and_preds.tslmt"
     expectedNumPreds = 2
 
     hUnitTest = do
-      (theory, spec, _) <- loadTSLMT $ Just path
+      (theory, spec, _) <- readFile path >>= parseTSLMT (Just path)
       return $
         H.TestCase $ case predsFromSpec theory spec of
           Right preds -> expectedNumPreds @=? length preds
@@ -98,12 +98,12 @@ predicatesTests = [convert2Cabal (makeTestName "Predicates") hUnitTest]
 cfgTests :: [Test]
 cfgTests = [convert2Cabal (makeTestName "CFG") hUnitTest]
   where
-    path = "src/test/regression/ModuloTheories/functions_and_preds.tslmt"
+    path = "test/regression/ModuloTheories/functions_and_preds.tslmt"
     expectedCfgSize = 1
     expectedProductionRuleSize = 1
 
     hUnitTest = do
-      (theory, spec, _) <- loadTSLMT $ Just path
+      (theory, spec, _) <- readFile path >>= parseTSLMT (Just path)
       return $ case cfgFromSpec theory spec of
         Right cfg ->
           let assocs = Map.assocs $ grammar cfg
@@ -123,12 +123,12 @@ countSuccess = fmap (length . filter id) . sequence . (map isSuccess)
 consistencyTests :: [Test]
 consistencyTests = [convert2Cabal (makeTestName "Consistency") hUnitTest]
   where
-    path = "src/test/regression/ModuloTheories/euf.tslmt"
+    path = "test/regression/ModuloTheories/euf.tslmt"
     expectedNumAssumptions = 9
     expectedNumQueries = 15
 
     hUnitTest = do
-      (theory, spec, _) <- loadTSLMT $ Just path
+      (theory, spec, _) <- readFile path >>= parseTSLMT (Just path)
       let preds = case predsFromSpec theory spec of
             Left err -> error $ show err
             Right ps -> ps
@@ -151,7 +151,7 @@ sygusTests =
     [0 ..]
     testCases
   where
-    directory = "src/test/regression/ModuloTheories"
+    directory = "test/regression/ModuloTheories"
     files =
       [ "next_sygus.tslmt",
         "eventually_sygus.tslmt"
@@ -172,7 +172,7 @@ sygusTests =
           zip paths numExpectedAssumptions
 
     makeTestCase (path, numExpected) = do
-      (theory, spec, _) <- loadTSLMT $ Just path
+      (theory, spec, _) <- readFile path >>= parseTSLMT (Just path)
       let preds = case predsFromSpec theory spec of
             Left err -> error $ "PREDICATES ERROR: " ++ show err
             Right ps -> ps
