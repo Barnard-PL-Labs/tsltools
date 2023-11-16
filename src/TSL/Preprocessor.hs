@@ -28,7 +28,6 @@ import Text.Parsec
     many,
     oneOf,
     option,
-    optional,
     sepBy,
     spaces,
     try,

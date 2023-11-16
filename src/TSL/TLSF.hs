@@ -109,11 +109,11 @@ toTLSF name Specification {..} =
 --   only works on tslf generated from a TSL spec
 tlsfToTslTerm :: String -> String
 tlsfToTslTerm t =
-  if isPrefixOf "p0" t
+  if "p0" `isPrefixOf` t
     then generateTSLString Check decodeInputAP t
     else generateTSLString (uncurry Update) decodeOutputAP t
 
-generateTSLString :: forall a b. _ -> (String -> Either a b) -> String -> String
+generateTSLString :: forall a b. (b -> Formula String) -> (String -> Either a b) -> String -> String
 generateTSLString tslType decoder x =
-  either (const "ERR") (\t -> (tslFormula id $ tslType t)) $
-    (decoder) x
+  either (const "ERR") (tslFormula id . tslType) $
+    decoder x

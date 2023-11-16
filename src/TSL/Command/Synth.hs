@@ -40,13 +40,7 @@ optionsParser =
             <> help "Output file (STDOUT, if not set)"
             <> action "file"
       )
-    <*> ( flag' Applicative (long "applicative" <> help "generates code for 'Applicative'-FRP libraries")
-            <|> flag' Monadic (long "monadic" <> help "generates code for 'Monadic'-FRP libraries")
-            <|> flag' Arduino (long "arduino" <> help "generates code for Arduino")
-            <|> flag' Arrow (long "arrow" <> help "generates code for 'Arrowized'-FRP libraries")
-            <|> flag' Clash (long "clash" <> help "generates code for the hardware description language 'ClaSH'")
-            <|> flag' JavaScript (long "javascript" <> help "generates code for Javascript")
-            <|> flag' WebAudio (long "webaudio" <> help "generates code for JS+WebAudio backend")
+    <*> ( flag' Arduino (long "arduino" <> help "generates code for Arduino")
             <|> flag' Python (long "python" <> help "generates code for Python")
             <|> flag' JS (long "js" <> help "generates code for JS backend")
             <|> flag' XState (long "xstate" <> help "generates code for xstate diagrams")
@@ -57,23 +51,6 @@ optionsParser =
           <> metavar "SOLVER"
           <> help "Path to SMT and SyGus solver"
       )
-
--- | Read input from file or stdin.
-readInput :: Maybe FilePath -> IO String
-readInput Nothing = getContents
-readInput (Just filename) = readFile filename
-
--- | Writes content either to given file or STDOUT
-writeOutput :: Maybe FilePath -> String -> IO ()
-writeOutput Nothing = putStrLn
-writeOutput (Just file) = writeFile file
-
--- | helper function returning valid result or exiting with an error message
-rightOrInvalidInput :: Maybe FilePath -> Either Error a -> IO a
-rightOrInvalidInput inputPath = \case
-  Right r -> return r
-  Left err -> do
-    die $ "invalid" ++ show inputPath ++ ": " ++ show err
 
 synth :: Options -> IO ()
 synth (Options {inputPath, outputPath, target, solverPath}) = do
@@ -104,6 +81,8 @@ command :: ParserInfo (IO ())
 command = synth <$> optionsParserInfo
 
 ----------------------------------------------
+-- HELPER FUNCTIONS
+----------------------------------------------
 
 callLtlsynt :: String -> IO String
 callLtlsynt tlsfContents = do
@@ -120,30 +99,42 @@ callLtlsynt tlsfContents = do
     then do
       die "TSL spec UNREALIZABLE"
     else return . unlines . tail . lines $ stdout
+  where
+    prFormulae ::
+      S.Configuration -> S.Specification -> String
+    prFormulae c s = case S.apply c s of
+      Left err -> show err
+      Right formulae -> formulae
 
-prFormulae ::
-  S.Configuration -> S.Specification -> String
-prFormulae c s = case S.apply c s of
-  Left err -> show err
-  Right formulae -> formulae
+    -- \| Prints the input signals of the given specification.
+    prInputs ::
+      S.Configuration -> S.Specification -> String
+    prInputs c s = case S.inputs c s of
+      Left err -> show err
+      Right [] -> ""
+      Right (x : xr) -> x ++ concatMap ((:) ',' . (:) ' ') xr
 
------------------------------------------------------------------------------
+    -- \| Prints the output signals of the given specification.
+    prOutputs ::
+      S.Configuration -> S.Specification -> String
+    prOutputs c s = case S.outputs c s of
+      Left err -> show err
+      Right [] -> ""
+      Right (x : xr) -> x ++ concatMap ((:) ',' . (:) ' ') xr
 
--- | Prints the input signals of the given specification.
-prInputs ::
-  S.Configuration -> S.Specification -> String
-prInputs c s = case S.inputs c s of
-  Left err -> show err
-  Right ([]) -> ""
-  Right (x : xr) -> x ++ concatMap ((:) ',' . (:) ' ') xr
+-- | Read input from file or stdin.
+readInput :: Maybe FilePath -> IO String
+readInput Nothing = getContents
+readInput (Just filename) = readFile filename
 
------------------------------------------------------------------------------
+-- | Writes content either to given file or STDOUT
+writeOutput :: Maybe FilePath -> String -> IO ()
+writeOutput Nothing = putStrLn
+writeOutput (Just file) = writeFile file
 
--- | Prints the output signals of the given specification.
-prOutputs ::
-  S.Configuration -> S.Specification -> String
-prOutputs c s = case S.outputs c s of
-  Left err -> show err
-  Right ([]) -> ""
-  Right (x : xr) -> x ++ concatMap ((:) ',' . (:) ' ') xr
-  _ -> error "Uncaught pattern match"
+-- | helper function returning valid result or exiting with an error message
+rightOrInvalidInput :: Maybe FilePath -> Either Error a -> IO a
+rightOrInvalidInput inputPath = \case
+  Right r -> return r
+  Left err -> do
+    die $ "invalid" ++ show inputPath ++ ": " ++ show err

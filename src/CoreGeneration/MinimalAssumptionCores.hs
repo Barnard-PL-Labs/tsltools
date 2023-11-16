@@ -27,7 +27,6 @@ import CoreGeneration.CoreUtilities
     sortedPowerSet,
   )
 import CoreGeneration.FindFirstConcurrent (incParallelFirst)
-import Data.List as List (splitAt)
 import Data.Set as Set (Set, difference, empty, fromList, member, toList, union)
 import TSL (Formula (..), Specification (..), SymbolTable, split, toTSL)
 

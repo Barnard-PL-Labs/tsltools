@@ -53,7 +53,6 @@ module TSL
     fromCFM,
     statistics,
     symbolTable,
-    implement,
     implementHoa,
 
     -- * Symbol Table
@@ -147,12 +146,6 @@ import TSL.TLSF
     toTLSF,
   )
 import TSL.TOML (toTOML)
-import qualified TSL.Writer.CFM.Applicative as Applicative (implement)
-import qualified TSL.Writer.CFM.Arrow as Arrow (implement)
-import qualified TSL.Writer.CFM.Clash as Clash (implement)
-import qualified TSL.Writer.CFM.JavaScript as JavaScript (implement)
-import qualified TSL.Writer.CFM.Monadic as Monadic (implement)
-import qualified TSL.Writer.CFM.WebAudio as WebAudio (implement)
 import qualified TSL.Writer.HOA.Arduino as Arduino (implementHoa)
 import qualified TSL.Writer.HOA.JavaScript as JS (implementHoa)
 import qualified TSL.Writer.HOA.Python as Python (implementHoa)
@@ -162,13 +155,7 @@ import qualified TSL.Writer.HOA.XState as XState (implementHoa)
 -----------------------------------------------------------------------------
 
 data CodeTarget
-  = Applicative
-  | Monadic
-  | Arrow
-  | Clash
-  | JavaScript
-  | WebAudio
-  | Python
+  = Python
   | Arduino
   | JS
   | Verilog
@@ -191,20 +178,5 @@ implementHoa isCounter = \case
   JS -> JS.implementHoa isCounter
   Arduino -> Arduino.implementHoa isCounter
   Verilog -> Verilog.implementHoa isCounter
-  _ -> error "Unsupported language target for given format"
-
--- | Generates code for a specific target from a CFM. The function
--- uses the given module name to generate a module that exports a
--- single function with the given function name.
-implement ::
-  CodeTarget -> ModuleName -> FunctionName -> CFM -> String
-implement = \case
-  Applicative -> Applicative.implement
-  Arrow -> Arrow.implement
-  Clash -> Clash.implement
-  Monadic -> Monadic.implement
-  JavaScript -> JavaScript.implement
-  WebAudio -> WebAudio.implement
-  _ -> error "Unsupported language target for given format"
 
 -----------------------------------------------------------------------------

@@ -2,27 +2,23 @@ module TSL.ModuloTheories (tslmt2tsl) where
 
 import Control.Monad.Trans.Except
 import Data.Maybe (catMaybes)
-import TSL
-  ( Cfg,
-    ConsistencyDebugInfo (..),
-    Error,
-    IntermediateResults (..),
-    Specification,
-    SygusDebugInfo (..),
-    Theory,
-    TheoryPredicate,
-    buildDtoList,
-    cfgFromSpec,
-    consistencyDebug,
-    fromTSL,
-    generateConsistencyAssumptions,
-    generateSygusAssumptions,
-    predsFromSpec,
-    readTheory,
-    sygusDebug,
-    tUninterpretedFunctions,
-    unwrap,
+import TSL.Error (unwrap)
+import TSL.ModuloTheories.Cfg (cfgFromSpec)
+import TSL.ModuloTheories.ConsistencyChecking
+  ( generateConsistencyAssumptions,
   )
+import TSL.ModuloTheories.Predicates (predsFromSpec)
+import TSL.ModuloTheories.Sygus
+  ( buildDtoList,
+    generateSygusAssumptions,
+  )
+import TSL.ModuloTheories.Theories
+  ( Theory,
+    readTheory,
+    tUninterpretedFunctions,
+  )
+import TSL.Reader (fromTSL)
+import TSL.Specification (Specification)
 
 tslmt2tsl :: FilePath -> Maybe FilePath -> String -> IO String
 tslmt2tsl solverPath inputPath spec = do
@@ -76,7 +72,7 @@ tslmt2tsl solverPath inputPath spec = do
     loadTSLMT :: IO (Theory, Specification, String)
     loadTSLMT = do
       let linesList = lines spec
-          hasTheoryAnnotation = '#' == (head $ head linesList)
+          hasTheoryAnnotation = '#' == head (head linesList)
           theory = readTheory $ head linesList
           specStr = unlines $ tail linesList -- FIXME: unlines.lines is computationally wasteful
       if hasTheoryAnnotation
