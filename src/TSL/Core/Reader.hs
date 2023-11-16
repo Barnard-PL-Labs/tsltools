@@ -259,8 +259,8 @@ symtable RD.Specification {..} =
         let aT = tEn so si a $ idT a
             bT = tEn so si b $ idT b
          in if
-              | aT /= bT -> compare aT bT
-              | otherwise -> cmpD a b
+                | aT /= bT -> compare aT bT
+                | otherwise -> cmpD a b
 
       -- sorted identifiers by above ordering
       is = sortBy cmp $ IM.keys names
@@ -290,10 +290,10 @@ symtable RD.Specification {..} =
               idType = t,
               idDeps =
                 if
-                  | member i so -> case IM.lookup i oa of
-                      Just xs -> i : xs
-                      Nothing -> ds
-                  | otherwise -> ds,
+                    | member i so -> case IM.lookup i oa of
+                        Just xs -> i : xs
+                        Nothing -> ds
+                    | otherwise -> ds,
               idKind = case IM.lookup i scopes of
                 Just () -> Internal
                 Nothing
