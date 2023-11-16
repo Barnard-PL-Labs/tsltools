@@ -19,6 +19,7 @@ where
 import Control.Monad (liftM)
 import Data.Functor.Identity (Identity)
 import Numeric (showFFloat)
+import TSL.ModuloTheories.Theories (Theory (..))
 import Text.Parsec
   ( alphaNum,
     char,
@@ -26,6 +27,8 @@ import Text.Parsec
     letter,
     many,
     oneOf,
+    option,
+    optional,
     sepBy,
     spaces,
     try,
@@ -56,7 +59,7 @@ bracketify = surround '[' ']'
 
 -------------------------------------------------------------------------------
 
-newtype Specification = Specification [Section]
+data Specification = Specification Theory [Section]
   deriving (Eq)
 
 data Section = Section (Maybe TemporalWrapper) SectionType [Expr]
@@ -129,7 +132,7 @@ instance Fmt Char where
   fmt c = [c]
 
 instance Fmt Specification where
-  fmt (Specification sections) = unlines $ map fmt sections
+  fmt (Specification theory sections) = unlines $ ('#' : show theory) : map fmt sections
 
 instance Show Specification where
   show = fmt
@@ -343,7 +346,18 @@ binaryFunctions =
 -- Parser
 
 specParser :: Parser Specification
-specParser = whiteSpace >> (liftM Specification $ sectionParser `sepBy` spaces)
+specParser = do
+  whiteSpace
+  theory <- option Uf theoryParser
+  sections <- sectionParser `sepBy` spaces
+  return $ Specification theory sections
+
+theoryParser :: Parser Theory
+theoryParser = do
+  reserved "#"
+  (reserved "UF" >> return Uf)
+    <|> (reserved "EUF" >> return EUf)
+    <|> (reserved "LIA" >> return Lia)
 
 sectionParser :: Parser Section
 sectionParser = do
