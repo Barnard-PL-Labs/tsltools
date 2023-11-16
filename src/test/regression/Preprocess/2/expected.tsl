@@ -1,3 +1,0 @@
-always guarantee {
-lt int1() int2();
-}

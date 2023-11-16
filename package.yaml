@@ -1,0 +1,79 @@
+name: tsl
+version: 2.0.0.0
+synopsis: Library and tools for the TSL specification format
+description: Library and tools for the TSL specification format
+license: OtherLicense
+license-file: LICENSE
+author:
+  - Felix Klein <felix.klein@cispa.de>
+  - Mark Santolucito <mark.santolucito@yale.edu>
+  - Philippe Heim <philippe.heim@cispa.de>
+  - Gideon Geier <gideon.geier@cispa.de>
+  - Marvin Stenger <marvin.stenger@cispa.de>
+  - Wonhyuk Choi <wonhyuk.choi@columbia.edu>
+  - Feitong Leo Qiao <leo.qiao@columbia.edu>
+category: Synthesis
+build-type: Simple
+
+language: Haskell2010
+default-extensions:
+  - NamedFieldPuns
+  - LambdaCase
+  - TupleSections
+
+extra-source-files:
+  - README.md
+
+ghc-options:
+  - -Wall
+  # - -fno-ignore-asserts
+  - -Wno-name-shadowing
+  # Workaround for https://github.com/haskell/cabal/issues/4739.
+  # -Wnon-noportable-include-path is a Clang diagnostic flag. See
+  # https://clang.llvm.org/docs/DiagnosticsReference.html#wnonportable-include-path
+  - -optP-Wno-nonportable-include-path
+
+dependencies:
+  - base >= 4.13 && <4.19
+
+library:
+  source-dirs: src
+  ghc-options:
+    - -Wall
+    - -Wno-name-shadowing
+    - -fno-ignore-asserts
+  dependencies:
+    - optparse-applicative
+    - parsec
+    - hanoi
+    - containers
+    - finite
+    - array
+    - mtl
+    - QuickCheck
+    - text
+    - ansi-terminal
+    - filepath
+    - directory
+    - fgl
+    - transformers
+    - process
+    - pcre-heavy
+    - syfco
+
+
+executables:
+  tsl:
+    main: Main.hs
+    source-dirs:
+      - app
+    dependencies:
+      - tsl
+      - optparse-applicative
+
+tests:
+  default:
+    main: Test.hs
+    source-dirs: test
+    dependencies:
+      - tsl

@@ -1,3 +1,0 @@
-always guarantee {
-eq x y;
-}

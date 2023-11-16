@@ -1,3 +1,0 @@
-always guarantee {
-    [y <- (sub x int47())];
-}

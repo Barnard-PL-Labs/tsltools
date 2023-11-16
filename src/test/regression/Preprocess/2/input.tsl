@@ -1,3 +1,0 @@
-always guarantee {
-1 < 2;
-}

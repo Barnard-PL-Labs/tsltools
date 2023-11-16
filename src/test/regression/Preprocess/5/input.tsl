@@ -1,3 +1,0 @@
-always assume {
-    [m <- ((p u z - x) / (a y))] <-> ( ((f y) = (g z h) ) || (y <= w));
-}

@@ -1,6 +1,0 @@
-always assume{
-
-}
-always guarantee {
-  [x <- f y1 (g y2) (h y3 (g y4))];
-}

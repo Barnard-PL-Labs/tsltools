@@ -1,3 +1,0 @@
-always guarantee {
-(x + y) = (y + x) ;
-}
