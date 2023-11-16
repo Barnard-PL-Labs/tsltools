@@ -95,11 +95,16 @@ callLtlsynt tlsfContents = do
   let ltlIns = prInputs S.defaultCfg tlsfSpec
       ltlOuts = prOutputs S.defaultCfg tlsfSpec
       ltlFormulae = prFormulae S.defaultCfg {S.outputMode = S.Fully, S.outputFormat = S.LTLXBA} tlsfSpec
-      ltlCommandArgs = [ltlFormulae, ltlIns, ltlOuts]
-  (exitCode, stdout, _) <- readProcessWithExitCode "./tlsfSynt.sh" ltlCommandArgs []
+      ltlCommandArgs =
+        [ "--formula=" ++ ltlFormulae,
+          "--ins=" ++ ltlIns,
+          "--outs=" ++ ltlOuts,
+          "--hoaf=i"
+        ]
+  (exitCode, stdout, stderr) <- readProcessWithExitCode "ltlsynt" ltlCommandArgs ""
   if exitCode /= ExitSuccess
     then do
-      die "TSL spec UNREALIZABLE"
+      die $ "TSL spec UNREALIZABLE. ltlsynt output: \n" ++ stderr
     else return . unlines . tail . lines $ stdout
   where
     prFormulae ::
