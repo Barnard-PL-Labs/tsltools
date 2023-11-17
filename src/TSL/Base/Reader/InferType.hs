@@ -73,8 +73,8 @@ finalize tt =
       TFml t t' ->
         let tf = TFml (resolveT ta t) $ resolveT ta t'
          in if
-              | onSignalLevel tf -> liftS tf
-              | otherwise -> tf
+                | onSignalLevel tf -> liftS tf
+                | otherwise -> tf
       TPoly i -> case IM.lookup i ta of
         Nothing -> TPoly i
         Just (TSet t) -> TSet $ resolveT ta t
@@ -82,8 +82,8 @@ finalize tt =
         Just (TFml t t') ->
           let tf = TFml (resolveT ta t) $ resolveT ta t'
            in if
-                | onSignalLevel tf -> liftS tf
-                | otherwise -> tf
+                  | onSignalLevel tf -> liftS tf
+                  | otherwise -> tf
         Just (TPoly j)
           | i == j -> TPoly i
           | otherwise -> assert (j < i) $ resolveT ta $ TPoly j
@@ -650,8 +650,8 @@ resolve = \case
       t2 <- resolve t'
       let tf = TFml t1 t2
       if
-        | onSignalLevel tf -> liftToSignalLevel tf
-        | otherwise -> return tf
+          | onSignalLevel tf -> liftToSignalLevel tf
+          | otherwise -> return tf
 
 lkType ::
   Int -> TypeCheck ExprType
