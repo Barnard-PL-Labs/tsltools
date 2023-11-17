@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Data types to store expressions and some helper functions.
-module TSL.Core.Expression
+module TSL.Base.Expression
   ( Constant,
     ExprId,
     Expression,

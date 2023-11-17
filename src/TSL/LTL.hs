@@ -1,5 +1,5 @@
 -- | Utilities related to LTL synthesis.
-module TSL.LTL (synthesize) where
+module TSL.LTL (synthesize, synthesize', realizable) where
 
 import Control.Monad (unless)
 import Data.Maybe (isJust)
@@ -12,6 +12,20 @@ import TSL.Error (genericError, unwrap)
 -- | Given LTL spec in TLSF format, synthesize an HOA controller
 synthesize :: FilePath -> String -> IO String
 synthesize ltlsyntPath tlsfContents = do
+  (exitCode, stdout, stderr) <- synthesize' ltlsyntPath tlsfContents
+  if exitCode /= ExitSuccess
+    then unwrap . genericError $ "TSL spec UNREALIZABLE. ltlsynt stdout:\n" ++ stdout ++ "\nltlstderr:\n" ++ stderr
+    else return . unlines . tail . lines $ stdout
+
+realizable :: FilePath -> String -> IO Bool
+realizable ltlsyntPath tlsfContents = do
+  (exitCode, _, _) <- synthesize' ltlsyntPath tlsfContents
+  if exitCode /= ExitSuccess
+    then return True
+    else return False
+
+synthesize' :: FilePath -> String -> IO (ExitCode, String, String)
+synthesize' ltlsyntPath tlsfContents = do
   -- check if ltlsynt is available on path
   ltlsyntAvailable <- checkLtlsynt ltlsyntPath
   unless ltlsyntAvailable $
@@ -34,10 +48,7 @@ synthesize ltlsyntPath tlsfContents = do
         ]
 
   -- call ltlsynt
-  (exitCode, stdout, stderr) <- readProcessWithExitCode ltlsyntPath ltlCommandArgs ""
-  if exitCode /= ExitSuccess
-    then unwrap . genericError $ "TSL spec UNREALIZABLE. ltlsynt output: \n" ++ stderr
-    else return . unlines . tail . lines $ stdout
+  readProcessWithExitCode ltlsyntPath ltlCommandArgs ""
   where
     prFormulae ::
       S.Configuration -> S.Specification -> String

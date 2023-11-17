@@ -19,11 +19,11 @@ where
 
 import Control.Exception (assert)
 import Control.Monad (filterM)
-import TSL.Core.Ast (AstInfo, fromPredicateTerm, (+++))
-import TSL.Core.Logic (Formula (..), PredicateTerm, foldFormula)
-import TSL.Core.Specification (Specification (..))
-import TSL.Core.SymbolTable (SymbolTable (..))
-import TSL.Core.Types (arity)
+import TSL.Base.Ast (AstInfo, fromPredicateTerm, (+++))
+import TSL.Base.Logic (Formula (..), PredicateTerm, foldFormula)
+import TSL.Base.Specification (Specification (..))
+import TSL.Base.SymbolTable (SymbolTable (..))
+import TSL.Base.Types (arity)
 import TSL.Error (Error)
 import TSL.ModuloTheories.Theories
   ( TAst,

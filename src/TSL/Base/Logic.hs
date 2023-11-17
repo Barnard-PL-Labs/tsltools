@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 
 -- | TSL logic data type and utility functions.
-module TSL.Core.Logic
+module TSL.Base.Logic
   ( Formula (..),
     SignalTerm (..),
     FunctionTerm (..),

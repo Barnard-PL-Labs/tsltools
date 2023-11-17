@@ -7,7 +7,7 @@
 -- a set of guarantees and their assumptions as well as functions to extract
 -- this representation out of the given 'Formula's or a given set of
 -- 'Specification's.
-module TSL.Core.Dependency
+module TSL.Base.Dependency
   ( DependencyRepresentation (..),
     formulas2dependencies,
     specifications2dependencies,
@@ -18,9 +18,9 @@ import Data.List as List (elemIndex)
 import Data.Map.Strict as Map (fromListWith, keys, (!))
 import Data.Maybe (fromJust)
 import Data.Set as Set (elems, fromList, union)
-import TSL.Core.Logic (Formula (..), tslFormula)
-import qualified TSL.Core.Specification as S
-import TSL.Core.SymbolTable (stName)
+import TSL.Base.Logic (Formula (..), tslFormula)
+import qualified TSL.Base.Specification as S
+import TSL.Base.SymbolTable (stName)
 
 -- | Representation of the dependency relation between
 -- a set of guarantees and their assumptions.

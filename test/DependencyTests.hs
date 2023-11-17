@@ -13,7 +13,7 @@ import Distribution.TestSuite
   )
 import System.Directory (listDirectory)
 import System.FilePath (joinPath)
-import TSL.Core (readTSL, specifications2dependencies)
+import TSL.Base (readTSL, specifications2dependencies)
 import TSL.Error (unwrap)
 
 tests :: [Test]

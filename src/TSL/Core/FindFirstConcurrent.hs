@@ -1,7 +1,7 @@
 -- | This module provides a function that executes multiple IO-dependent tasks
 -- concurrently and yields the result of the first task that terminates
 -- successfully. This can mainly be used to parallelize a search task.
-module CoreGeneration.FindFirstConcurrent
+module TSL.Core.FindFirstConcurrent
   ( incParallelFirst,
   )
 where

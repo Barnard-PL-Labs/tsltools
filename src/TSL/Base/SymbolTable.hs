@@ -2,7 +2,7 @@
 {-# LANGUAGE ViewPatterns #-}
 
 -- | Data type to store all identifier specific content.
-module TSL.Core.SymbolTable
+module TSL.Base.SymbolTable
   ( SymbolTable (..),
     Id,
     IdRec (..),
@@ -22,9 +22,9 @@ import qualified Data.IntMap.Strict as IM (fromList, member, (!))
 import Data.List (sortBy, transpose)
 import Data.Maybe (catMaybes, fromMaybe, mapMaybe)
 import Data.Set (fromList, toList)
-import TSL.Core.Binding (BoundExpr)
-import TSL.Core.Expression (ExprPos (..), SrcPos (..))
-import TSL.Core.Types (ExprType (..), prType)
+import TSL.Base.Binding (BoundExpr)
+import TSL.Base.Expression (ExprPos (..), SrcPos (..))
+import TSL.Base.Types (ExprType (..), prType)
 
 type Id = Int
 

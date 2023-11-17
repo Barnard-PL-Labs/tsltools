@@ -2,6 +2,7 @@
 module TSL.Command (optionsParser) where
 
 import Options.Applicative (Parser, ParserInfo, command, fullDesc, header, helper, info, progDesc, subparser)
+import qualified TSL.Command.Coregen as Coregen
 import qualified TSL.Command.Hoa as Hoa
 import qualified TSL.Command.Preprocess as Preprocess
 import qualified TSL.Command.Synthesize as Synthesize
@@ -23,3 +24,4 @@ commands =
       <> command "tlsf" Tlsf.command
       <> command "hoa" Hoa.command
       <> command "synthesize" Synthesize.command
+      <> command "coregen" Coregen.command

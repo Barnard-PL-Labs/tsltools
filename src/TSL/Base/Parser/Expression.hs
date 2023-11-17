@@ -1,5 +1,5 @@
 -- | Expression Parser.
-module TSL.Core.Parser.Expression
+module TSL.Base.Parser.Expression
   ( exprParser,
   )
 where
@@ -7,9 +7,9 @@ where
 import Control.Monad (void)
 import Data.Char (isAlpha, toLower)
 import Data.List (sort)
-import TSL.Core.Expression (Expr (..), Expr' (..), ExprPos (..), SrcPos (..))
-import TSL.Core.Parser.Data (globalDef)
-import TSL.Core.Parser.Utils (ch, getPos, identifier, positionParser)
+import TSL.Base.Expression (Expr (..), Expr' (..), ExprPos (..), SrcPos (..))
+import TSL.Base.Parser.Data (globalDef)
+import TSL.Base.Parser.Utils (ch, getPos, identifier, positionParser)
 import Text.Parsec
   ( choice,
     digit,

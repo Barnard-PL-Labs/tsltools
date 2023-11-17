@@ -1,5 +1,5 @@
 -- | Parsers for global definitions and formula sections.
-module TSL.Core.Parser.Global
+module TSL.Base.Parser.Global
   ( GlobalElement (..),
     assignmentParser,
     sectionParser,
@@ -10,12 +10,12 @@ where
 import Control.Monad (void)
 import Data.Functor.Identity (Identity)
 import Data.Maybe (catMaybes)
-import TSL.Core.Binding (Binding (..), BoundExpr (..))
-import TSL.Core.Expression (Expr (..), ExprPos (..))
-import TSL.Core.Parser.Data (globalDef)
-import TSL.Core.Parser.Expression (exprParser)
-import TSL.Core.Parser.Utils (identifier, positionParser)
-import TSL.Core.Types (SectionType (..))
+import TSL.Base.Binding (Binding (..), BoundExpr (..))
+import TSL.Base.Expression (Expr (..), ExprPos (..))
+import TSL.Base.Parser.Data (globalDef)
+import TSL.Base.Parser.Expression (exprParser)
+import TSL.Base.Parser.Utils (identifier, positionParser)
+import TSL.Base.Types (SectionType (..))
 import Text.Parsec
   ( ParsecT,
     alphaNum,

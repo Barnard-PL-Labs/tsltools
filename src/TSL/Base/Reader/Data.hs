@@ -1,5 +1,5 @@
 -- | Common data used by the 'Reader' module.
-module TSL.Core.Reader.Data
+module TSL.Base.Reader.Data
   ( NameTable,
     PositionTable,
     ArgumentTable,
@@ -12,9 +12,9 @@ module TSL.Core.Reader.Data
 where
 
 import Data.IntMap.Strict (IntMap)
-import TSL.Core.Binding (Binding, BoundExpr)
-import TSL.Core.Expression (Expr, ExprPos)
-import TSL.Core.Types (ExprType, SectionType)
+import TSL.Base.Binding (Binding, BoundExpr)
+import TSL.Base.Expression (Expr, ExprPos)
+import TSL.Base.Types (ExprType, SectionType)
 
 -- | Mapping that maps identifiers to their correpsonding names.
 type NameTable = IntMap String

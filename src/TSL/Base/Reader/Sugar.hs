@@ -1,15 +1,15 @@
 {-# LANGUAGE LambdaCase #-}
 
 -- | Removes syntactic sugar elements from the specification.
-module TSL.Core.Reader.Sugar
+module TSL.Base.Reader.Sugar
   ( replaceSugar,
   )
 where
 
 import Control.Exception (assert)
-import TSL.Core.Binding (Binding (..), BoundExpr (..))
-import TSL.Core.Expression (Expr (..), Expr' (..))
-import TSL.Core.Reader.Data (Specification (..))
+import TSL.Base.Binding (Binding (..), BoundExpr (..))
+import TSL.Base.Expression (Expr (..), Expr' (..))
+import TSL.Base.Reader.Data (Specification (..))
 import TSL.Error (Error)
 
 -- | Replaces syntactic sugar elements in the given specification by their

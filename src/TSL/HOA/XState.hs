@@ -27,7 +27,7 @@ import Hanoi
     Label,
     State,
   )
-import qualified TSL.Core.Logic as T (Formula (..), decodeInputAP, decodeOutputAP, tslFormula)
+import qualified TSL.Base.Logic as T (Formula (..), decodeInputAP, decodeOutputAP, tslFormula)
 
 implement :: HOA -> String
 implement = unlines . printHOALines

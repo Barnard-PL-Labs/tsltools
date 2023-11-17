@@ -1,13 +1,13 @@
 -- | Common data used by the parser module.
-module TSL.Core.Parser.Data
+module TSL.Base.Parser.Data
   ( Specification (..),
     globalDef,
   )
 where
 
-import TSL.Core.Binding (Binding)
-import TSL.Core.Expression (Expr, ExprPos)
-import TSL.Core.Types (SectionType)
+import TSL.Base.Binding (Binding)
+import TSL.Base.Expression (Expr, ExprPos)
+import TSL.Base.Types (SectionType)
 import Text.Parsec (alphaNum, char, letter, (<|>))
 import Text.Parsec.Language (emptyDef)
 import Text.Parsec.Token (GenLanguageDef (..), LanguageDef)

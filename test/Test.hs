@@ -15,7 +15,7 @@ import qualified JSWriterTests (tests)
 import qualified ModuloTheoriesTests (tests)
 import qualified PreprocessorTests (tests)
 import qualified SplitTests (tests)
-import TSL.Core
+import TSL.Base
   ( PredicateTerm,
     SignalTerm,
     decodeInputAP,

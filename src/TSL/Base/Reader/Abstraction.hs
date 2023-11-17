@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Abstracts from identifier names to integer IDs.
-module TSL.Core.Reader.Abstraction
+module TSL.Base.Reader.Abstraction
   ( abstract,
   )
 where
@@ -10,16 +10,16 @@ import Control.Exception (assert)
 import Control.Monad.State (StateT (..), evalStateT, foldM, get, put)
 import qualified Data.IntMap.Strict as IM (empty, insert, lookup)
 import Data.Maybe (mapMaybe)
-import TSL.Core.Binding (Binding (..), BoundExpr (..))
-import TSL.Core.Expression (Expr (..), Expr' (..), ExprPos (..))
-import qualified TSL.Core.Parser.Data as PD (Specification (..))
-import TSL.Core.Reader.Data
+import TSL.Base.Binding (Binding (..), BoundExpr (..))
+import TSL.Base.Expression (Expr (..), Expr' (..), ExprPos (..))
+import qualified TSL.Base.Parser.Data as PD (Specification (..))
+import TSL.Base.Reader.Data
   ( ArgumentTable,
     NameTable,
     PositionTable,
     Specification (..),
   )
-import qualified TSL.Core.StringMap as SM (StringMap, empty, insert, lookup, remove)
+import qualified TSL.Base.StringMap as SM (StringMap, empty, insert, lookup, remove)
 import TSL.Error (Error, errConflict, errPattern, errUnknown)
 
 type Abstractor a b = a -> StateT ST (Either Error) b

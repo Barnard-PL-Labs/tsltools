@@ -2,13 +2,13 @@
 {-# LANGUAGE TupleSections #-}
 
 -- | Parsing module containing all neccessary parsers.
-module TSL.Core.Parser
+module TSL.Base.Parser
   ( parse,
   )
 where
 
-import TSL.Core.Parser.Data (Specification (..))
-import TSL.Core.Parser.Global (GlobalElement (..), elementsParser)
+import TSL.Base.Parser.Data (Specification (..))
+import TSL.Base.Parser.Global (GlobalElement (..), elementsParser)
 import TSL.Error (Error, parseError)
 import Text.Parsec (many1)
 import qualified Text.Parsec as P (parse)

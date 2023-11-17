@@ -2,7 +2,7 @@
 
 -- | 'Splitter' implements algorithms to split TSL specifications into
 -- independent subspecifications.
-module TSL.Core.Splitter
+module TSL.Base.Splitter
   ( split,
     splitAssumptions,
   )
@@ -25,9 +25,9 @@ import Data.Set as Set
     union,
     unions,
   )
-import TSL.Core.Logic (Formula (..), inputs, outputs, symbols)
-import TSL.Core.Specification (Specification (..))
-import TSL.Core.SymbolTable (IdRec (..), Kind (..), SymbolTable (..), symbolTable)
+import TSL.Base.Logic (Formula (..), inputs, outputs, symbols)
+import TSL.Base.Specification (Specification (..))
+import TSL.Base.SymbolTable (IdRec (..), Kind (..), SymbolTable (..), symbolTable)
 
 getInOutputs :: Formula Int -> Set Int
 getInOutputs fml = inputs fml `union` outputs fml

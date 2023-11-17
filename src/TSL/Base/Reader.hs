@@ -1,5 +1,5 @@
 -- | The module reads a specification to the internal format.
-module TSL.Core.Reader
+module TSL.Base.Reader
   ( readTSL,
   )
 where
@@ -24,24 +24,24 @@ import qualified Data.IntMap as IM
 import Data.List (groupBy, sortBy)
 import Data.Maybe (fromJust, fromMaybe)
 import Data.Set (Set, empty, insert, member, toList)
-import TSL.Core.Binding (Binding (..), BoundExpr (..))
-import TSL.Core.Eval (eval)
-import TSL.Core.Expression
+import TSL.Base.Binding (Binding (..), BoundExpr (..))
+import TSL.Base.Eval (eval)
+import TSL.Base.Expression
   ( Expr (..),
     Expr' (..),
     subExpressions,
   )
-import TSL.Core.Logic (Formula (..))
-import TSL.Core.Parser (parse)
-import qualified TSL.Core.Parser.Data as PD (Specification (..))
-import TSL.Core.Reader.Abstraction (abstract)
-import TSL.Core.Reader.Bindings (specBindings)
-import qualified TSL.Core.Reader.Data as RD (Specification (..))
-import TSL.Core.Reader.InferType (inferTypes)
-import TSL.Core.Reader.Sugar (replaceSugar)
-import TSL.Core.Specification (Specification (..))
-import TSL.Core.SymbolTable (IdRec (..), Kind (..), SymbolTable, symbolTable)
-import TSL.Core.Types (ExprType (..), SectionType (..))
+import TSL.Base.Logic (Formula (..))
+import TSL.Base.Parser (parse)
+import qualified TSL.Base.Parser.Data as PD (Specification (..))
+import TSL.Base.Reader.Abstraction (abstract)
+import TSL.Base.Reader.Bindings (specBindings)
+import qualified TSL.Base.Reader.Data as RD (Specification (..))
+import TSL.Base.Reader.InferType (inferTypes)
+import TSL.Base.Reader.Sugar (replaceSugar)
+import TSL.Base.Specification (Specification (..))
+import TSL.Base.SymbolTable (IdRec (..), Kind (..), SymbolTable, symbolTable)
+import TSL.Base.Types (ExprType (..), SectionType (..))
 import TSL.Error (Error, unwrap)
 
 -- | Parses a TSL specification.

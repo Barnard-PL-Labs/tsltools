@@ -2,14 +2,14 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | A data type to store an identifier bound to an expression.
-module TSL.Core.Binding
+module TSL.Base.Binding
   ( Binding (..),
     BoundExpr (..),
   )
 where
 
 import Control.Arrow (first)
-import TSL.Core.Expression (Expr, ExprPos)
+import TSL.Base.Expression (Expr, ExprPos)
 
 data BoundExpr a
   = GuardedBinding [Expr a]

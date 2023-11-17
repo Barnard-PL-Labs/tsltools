@@ -3,7 +3,7 @@
 {-# LANGUAGE ViewPatterns #-}
 
 -- | Evaluation function for internal variables.
-module TSL.Core.Eval
+module TSL.Base.Eval
   ( eval,
   )
 where
@@ -23,15 +23,15 @@ import Data.Set
     toList,
     union,
   )
-import TSL.Core.Binding (BoundExpr (..))
-import TSL.Core.Expression (Expr (..), Expr' (..), ExprPos, Expression)
-import TSL.Core.Logic
+import TSL.Base.Binding (BoundExpr (..))
+import TSL.Base.Expression (Expr (..), Expr' (..), ExprPos, Expression)
+import TSL.Base.Logic
   ( Formula (..),
     FunctionTerm (..),
     PredicateTerm (..),
     SignalTerm (..),
   )
-import TSL.Core.SymbolTable
+import TSL.Base.SymbolTable
   ( Kind (..),
     SymbolTable (..),
     stArgs,
@@ -39,7 +39,7 @@ import TSL.Core.SymbolTable
     stKind,
     stType,
   )
-import TSL.Core.Types (ExprType (..))
+import TSL.Base.Types (ExprType (..))
 import TSL.Error (Error, runtimeError)
 
 -- | Evaluation result.

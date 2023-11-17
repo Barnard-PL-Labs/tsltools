@@ -14,7 +14,7 @@ module TSL.ModuloTheories.ConsistencyChecking
 where
 
 import Control.Monad.Trans.Except
-import TSL.Core.Ast
+import TSL.Base.Ast
   ( AstInfo (..),
     SymbolInfo (..),
     deduplicate,

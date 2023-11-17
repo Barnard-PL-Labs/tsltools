@@ -1,5 +1,5 @@
 -- | Functions shared among the different parsers.
-module TSL.Core.Parser.Utils
+module TSL.Base.Parser.Utils
   ( stringParser,
     identifier,
     positionParser,
@@ -10,8 +10,8 @@ where
 
 import Control.Monad (void)
 import Data.Functor.Identity (Identity)
-import TSL.Core.Expression (ExprPos (..), SrcPos (..))
-import TSL.Core.Parser.Data (globalDef)
+import TSL.Base.Expression (ExprPos (..), SrcPos (..))
+import TSL.Base.Parser.Data (globalDef)
 import Text.Parsec
   ( ParsecT,
     Stream,

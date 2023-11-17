@@ -1,18 +1,11 @@
 -- | This module provides functions to compute TSL unrealizability core. This is
 -- a sub-specification of a given specification (with a subset of guarantees)
 -- that is already unrealizable.
-module CoreGeneration.UnrealizabilityCores
+module TSL.Core.UnrealizabilityCores
   ( generateCore,
   )
 where
 
-import CoreGeneration.CoreUtilities
-  ( Context (..),
-    logHigh,
-    logNormal,
-    sortedPowerSet,
-  )
-import CoreGeneration.FindFirstConcurrent (incParallelFirst)
 import Data.Set as Set
   ( Set,
     difference,
@@ -27,7 +20,7 @@ import Data.Set as Set
     union,
     unions,
   )
-import TSL.Core
+import TSL.Base
   ( Formula (..),
     SignalTerm (..),
     Specification (..),
@@ -36,6 +29,13 @@ import TSL.Core
     toTSL,
     updates,
   )
+import TSL.Core.CoreUtilities
+  ( Context (..),
+    logHigh,
+    logNormal,
+    sortedPowerSet,
+  )
+import TSL.Core.FindFirstConcurrent (incParallelFirst)
 
 -- | 'Query' represents some potential core and is therefore a 'Specification'
 type Query = Specification

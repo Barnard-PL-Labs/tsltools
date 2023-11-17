@@ -1,6 +1,6 @@
 module TSL.Command.Synthesize (command) where
 
-import Options.Applicative (Parser, ParserInfo, action, flag', fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, strOption, value, (<|>))
+import Options.Applicative (Parser, ParserInfo, action, flag', fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, showDefault, strOption, value, (<|>))
 import qualified TSL.HOA as HOA
 import qualified TSL.LTL as LTL
 import qualified TSL.ModuloTheories as ModuloTheories
@@ -50,6 +50,8 @@ optionsParser =
         )
     <*> strOption
       ( long "solver"
+          <> value "cvc5"
+          <> showDefault
           <> metavar "SOLVER"
           <> help "Path to SMT and SyGus solver"
           <> action "file"
@@ -57,6 +59,7 @@ optionsParser =
     <*> strOption
       ( long "ltlsynt"
           <> value "ltlsynt"
+          <> showDefault
           <> metavar "LTLSYNT"
           <> help "Path to ltlsynt"
       )

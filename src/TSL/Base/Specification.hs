@@ -1,15 +1,15 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Internal data structure of a specification.
-module TSL.Core.Specification
+module TSL.Base.Specification
   ( Specification (..),
     toFormula,
     toTSL,
   )
 where
 
-import TSL.Core.Logic (Formula (..), tslFormula)
-import TSL.Core.SymbolTable (SymbolTable, stName)
+import TSL.Base.Logic (Formula (..), tslFormula)
+import TSL.Base.SymbolTable (SymbolTable, stName)
 
 data Specification = Specification
   { -- | List of TSL formulas that are assumed

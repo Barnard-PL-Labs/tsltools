@@ -2,7 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 -- | Types of the different expressions, semantics and targets.
-module TSL.Core.Types
+module TSL.Base.Types
   ( ExprType (..),
     SectionType (..),
     reducer,

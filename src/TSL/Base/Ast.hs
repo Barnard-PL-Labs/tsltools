@@ -5,7 +5,7 @@
 -- All signal/function/predicate Abstract Data Types in TSL.Logic are curried,
 -- but the AST structure can be necessary, e.g. as input to SMT/SyGuS solvers.
 -- This module defines the AST type, and the transformative functions thereof.
-module TSL.Core.Ast
+module TSL.Base.Ast
   ( Ast (..),
     AstInfo (..),
     SymbolInfo (..),
@@ -26,7 +26,7 @@ where
 import Control.Applicative (liftA2)
 import Control.Exception (assert)
 import Data.List (nub)
-import TSL.Core.Logic
+import TSL.Base.Logic
   ( FunctionTerm (..),
     PredicateTerm (..),
     SignalTerm (..),

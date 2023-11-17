@@ -11,7 +11,7 @@ import Distribution.TestSuite
     Test (..),
     TestInstance (..),
   )
-import TSL.Core (Specification, readTSL, split, toTSL)
+import TSL.Base (Specification, readTSL, split, toTSL)
 
 tests :: [Test]
 tests =

@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Extracts the static expression bindings from the specification.
-module TSL.Core.Reader.Bindings
+module TSL.Base.Reader.Bindings
   ( specBindings,
   )
 where
@@ -13,9 +13,9 @@ import Data.IntMap.Strict (empty, findMax, insert, member, toList, (!))
 import qualified Data.IntMap.Strict as IM (lookup, map)
 import Data.Set (elems, fromList)
 import Data.Tree (flatten)
-import TSL.Core.Binding (Binding (..), BoundExpr (..))
-import TSL.Core.Expression (Expr (..), Expr' (..), ExprId, subExpressions)
-import TSL.Core.Reader.Data
+import TSL.Base.Binding (Binding (..), BoundExpr (..))
+import TSL.Base.Expression (Expr (..), Expr' (..), ExprId, subExpressions)
+import TSL.Base.Reader.Data
   ( ArgumentTable,
     ExpressionTable,
     NameTable,
@@ -23,7 +23,7 @@ import TSL.Core.Reader.Data
     ScopeTable,
     Specification (..),
   )
-import TSL.Core.Types (SectionType)
+import TSL.Base.Types (SectionType)
 import TSL.Error (Error, errCircularDep, errConditional)
 
 type GetBindings a = StateT ST (Either Error) a

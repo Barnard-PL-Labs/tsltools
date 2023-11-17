@@ -1,6 +1,6 @@
 module TSL.Command.Tlsf (command) where
 
-import Options.Applicative (Parser, ParserInfo, action, fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, strOption)
+import Options.Applicative (Parser, ParserInfo, action, fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, showDefault, strOption, value)
 import qualified TSL.ModuloTheories as ModuloTheories
 import qualified TSL.Preprocessor as Preprocessor
 import qualified TSL.TLSF as TLSF
@@ -40,6 +40,8 @@ optionsParser =
       )
     <*> strOption
       ( long "solver"
+          <> value "cvc5"
+          <> showDefault
           <> metavar "SOLVER"
           <> help "Path to SMT and SyGus solver"
           <> action "file"

@@ -12,8 +12,8 @@ where
 
 import Control.Monad.Trans.Except
 import Data.Maybe (catMaybes)
-import TSL.Core.Reader (readTSL)
-import TSL.Core.Specification (Specification)
+import TSL.Base.Reader (readTSL)
+import TSL.Base.Specification (Specification)
 import TSL.Error (unwrap)
 import TSL.ModuloTheories.Cfg
 import TSL.ModuloTheories.ConsistencyChecking

@@ -15,7 +15,7 @@ import Data.List
   )
 import Data.Set (elems, toList, union)
 import qualified Data.Set as S (map)
-import TSL.Core.Logic
+import TSL.Base.Logic
   ( Formula (..),
     SignalTerm (..),
     checks,
@@ -27,9 +27,9 @@ import TSL.Core.Logic
     tslFormula,
     updates,
   )
-import TSL.Core.Reader (readTSL)
-import TSL.Core.Specification (Specification (..), toFormula)
-import TSL.Core.SymbolTable (stName)
+import TSL.Base.Reader (readTSL)
+import TSL.Base.Specification (Specification (..), toFormula)
+import TSL.Base.SymbolTable (stName)
 import TSL.Error (unwrap)
 
 -- | Creates the LTL under-approximation in TLSF for a given TSL

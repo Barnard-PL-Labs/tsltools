@@ -1,6 +1,6 @@
 module TSL.Command.Hoa (command) where
 
-import Options.Applicative (Parser, ParserInfo, action, fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, strOption, value)
+import Options.Applicative (Parser, ParserInfo, action, fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, showDefault, strOption, value)
 import qualified TSL.LTL as LTL
 import qualified TSL.ModuloTheories as ModuloTheories
 import qualified TSL.Preprocessor as Preprocessor
@@ -42,6 +42,8 @@ optionsParser =
       )
     <*> strOption
       ( long "solver"
+          <> value "cvc5"
+          <> showDefault
           <> metavar "SOLVER"
           <> help "Path to SMT and SyGus solver"
           <> action "file"
@@ -49,6 +51,7 @@ optionsParser =
     <*> strOption
       ( long "ltlsynt"
           <> value "ltlsynt"
+          <> showDefault
           <> metavar "LTLSYNT"
           <> help "Path to ltlsynt"
       )

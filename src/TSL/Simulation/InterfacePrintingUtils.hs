@@ -36,7 +36,7 @@ import System.Console.ANSI
     clearScreen,
     setSGR,
   )
-import TSL.Core.Logic (Formula (..), PredicateTerm, SignalTerm, tslFormula)
+import TSL.Base.Logic (Formula (..), PredicateTerm, SignalTerm, tslFormula)
 
 -- | 'updateToString' prints an update as a string.
 updateToString :: (String, SignalTerm String) -> String

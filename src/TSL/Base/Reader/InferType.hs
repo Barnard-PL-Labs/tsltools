@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Infers and checks types of all bound expressions.
-module TSL.Core.Reader.InferType
+module TSL.Base.Reader.InferType
   ( inferTypes,
   )
 where
@@ -14,10 +14,10 @@ import Data.Graph (Graph, buildG, topSort, transposeG)
 import Data.IntMap.Strict (IntMap, empty, fromList, insert, keys, member, (!))
 import qualified Data.IntMap.Strict as IM (lookup)
 import qualified Data.Set as S (fromList, intersection, toList)
-import TSL.Core.Binding (Binding (..), BoundExpr (..))
-import TSL.Core.Expression (Expr (..), Expr' (..), Expression)
-import TSL.Core.Reader.Data (ArgumentTable, Specification (..), TypeTable)
-import TSL.Core.Types (ExprType (..))
+import TSL.Base.Binding (Binding (..), BoundExpr (..))
+import TSL.Base.Expression (Expr (..), Expr' (..), Expression)
+import TSL.Base.Reader.Data (ArgumentTable, Specification (..), TypeTable)
+import TSL.Base.Types (ExprType (..))
 import TSL.Error (Error, errExpect, errRange)
 
 type Id = Int
@@ -73,8 +73,8 @@ finalize tt =
       TFml t t' ->
         let tf = TFml (resolveT ta t) $ resolveT ta t'
          in if
-                | onSignalLevel tf -> liftS tf
-                | otherwise -> tf
+              | onSignalLevel tf -> liftS tf
+              | otherwise -> tf
       TPoly i -> case IM.lookup i ta of
         Nothing -> TPoly i
         Just (TSet t) -> TSet $ resolveT ta t
@@ -82,8 +82,8 @@ finalize tt =
         Just (TFml t t') ->
           let tf = TFml (resolveT ta t) $ resolveT ta t'
            in if
-                  | onSignalLevel tf -> liftS tf
-                  | otherwise -> tf
+                | onSignalLevel tf -> liftS tf
+                | otherwise -> tf
         Just (TPoly j)
           | i == j -> TPoly i
           | otherwise -> assert (j < i) $ resolveT ta $ TPoly j
@@ -650,8 +650,8 @@ resolve = \case
       t2 <- resolve t'
       let tf = TFml t1 t2
       if
-          | onSignalLevel tf -> liftToSignalLevel tf
-          | otherwise -> return tf
+        | onSignalLevel tf -> liftToSignalLevel tf
+        | otherwise -> return tf
 
 lkType ::
   Int -> TypeCheck ExprType

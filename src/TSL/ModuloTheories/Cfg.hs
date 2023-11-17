@@ -24,11 +24,11 @@ import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
-import TSL.Core.Ast (Ast, fromSignalTerm)
-import TSL.Core.Logic (updates)
-import TSL.Core.Specification (Specification (..))
-import TSL.Core.SymbolTable (Id, SymbolTable (..))
-import TSL.Core.Types (arity)
+import TSL.Base.Ast (Ast, fromSignalTerm)
+import TSL.Base.Logic (updates)
+import TSL.Base.Specification (Specification (..))
+import TSL.Base.SymbolTable (Id, SymbolTable (..))
+import TSL.Base.Types (arity)
 import TSL.Error (Error)
 import TSL.ModuloTheories.Theories
   ( TAst,

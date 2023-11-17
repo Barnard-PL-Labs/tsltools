@@ -3,19 +3,22 @@
 -- | 'CoreUtilities' provides different functionalities that are used to
 -- generate different kind of cores. This includes the wrapping of
 -- different IO-operations into a context.
-module CoreGeneration.CoreUtilities
+module TSL.Core.CoreUtilities
   ( Context (..),
     Verbosity (..),
     logNormal,
     logHigh,
     sortedPowerSet,
     optimizeSpec,
+    createContext,
   )
 where
 
 import Control.Monad (when)
 import Data.Set as Set (Set, empty, fromList, insert, notMember, size, toList)
-import TSL.Core (Formula (..), Specification (..))
+import TSL.Base (Formula (..), Specification (..))
+import qualified TSL.LTL as LTL
+import qualified TSL.TLSF as TLSF
 
 -- | 'Context' holds the necessary informations that are used for the
 -- synthesis calls and the program logging
@@ -44,6 +47,16 @@ data Verbosity
   | -- | Output all intermediate steps including the content of the queries
     DETAILED
   deriving (Eq)
+
+createContext :: Int -> Verbosity -> FilePath -> Context
+createContext poolSize verbosity ltlsyntPath =
+  Context
+    { verbosityLevel = verbosity,
+      threadPoolSize = poolSize,
+      tslSpecRealizable = tslSpecRealizable
+    }
+  where
+    tslSpecRealizable tslSpec = LTL.realizable ltlsyntPath $ TLSF.lower tslSpec
 
 -- | 'logOn' writes a log message if the 'Verbosity' specified in the
 -- context is one that has been given as argument.

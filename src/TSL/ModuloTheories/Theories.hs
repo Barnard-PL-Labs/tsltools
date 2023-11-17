@@ -40,7 +40,7 @@ module TSL.ModuloTheories.Theories
   )
 where
 
-import TSL.Core.Ast
+import TSL.Base.Ast
   ( Ast,
     AstInfo,
     getAstInfo,

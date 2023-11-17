@@ -1,5 +1,5 @@
 -- | A simple data structure to map strings to integers.
-module TSL.Core.StringMap
+module TSL.Base.StringMap
   ( StringMap,
     empty,
     lookup,

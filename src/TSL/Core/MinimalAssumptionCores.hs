@@ -2,22 +2,22 @@
 
 -- | This module provides methods to search for a minimal amount of assumptions
 -- needed to realize a specification.
-module CoreGeneration.MinimalAssumptionCores
+module TSL.Core.MinimalAssumptionCores
   ( generateMinimalAssumptions,
     treeBasedMinimalAssumptions,
   )
 where
 
-import CoreGeneration.CoreUtilities
+import Data.Set as Set (Set, difference, empty, fromList, member, toList, union)
+import TSL.Base (Formula (..), Specification (..), SymbolTable, split, toTSL)
+import TSL.Core.CoreUtilities
   ( Context (..),
     logHigh,
     logNormal,
     optimizeSpec,
     sortedPowerSet,
   )
-import CoreGeneration.FindFirstConcurrent (incParallelFirst)
-import Data.Set as Set (Set, difference, empty, fromList, member, toList, union)
-import TSL.Core (Formula (..), Specification (..), SymbolTable, split, toTSL)
+import TSL.Core.FindFirstConcurrent (incParallelFirst)
 
 -- | 'generateMinimalAssumptions' searches for a 'Specification' a minimal
 -- sub-specification (w.r.t. the assuptions) that is realizable (a so-called
