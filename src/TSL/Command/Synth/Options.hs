@@ -6,5 +6,6 @@ data Options = Options
   { inputPath :: Maybe FilePath,
     outputPath :: Maybe FilePath,
     target :: CodeTarget,
-    solverPath :: FilePath
+    solverPath :: FilePath,
+    ltlsyntPath :: FilePath
   }

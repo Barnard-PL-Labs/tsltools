@@ -1,13 +1,24 @@
 -- | Utilities related to LTL synthesis.
 module TSL.LTL (synthesize) where
 
+import Control.Monad (unless)
+import Data.Maybe (isJust)
 import qualified Syfco as S
+import System.Directory (findExecutable)
 import System.Exit (ExitCode (ExitSuccess), die)
 import System.Process (readProcessWithExitCode)
+import TSL.Error (genericError, unwrap)
 
 -- | Given LTL spec in TLSF format, synthesize an HOA controller
-synthesize :: String -> IO String
-synthesize tlsfContents = do
+synthesize :: FilePath -> String -> IO String
+synthesize ltlsyntPath tlsfContents = do
+  -- check if ltlsynt is available on path
+  ltlsyntAvailable <- checkLtlsynt ltlsyntPath
+  unless ltlsyntAvailable $
+    unwrap . genericError $
+      "Invalid path to ltlsynt: " ++ ltlsyntPath
+
+  -- prepare arguments for ltlsynt
   let tlsfSpec =
         case S.fromTLSF tlsfContents of
           Left err -> error $ show err
@@ -21,7 +32,7 @@ synthesize tlsfContents = do
           "--outs=" ++ ltlOuts,
           "--hoaf=i"
         ]
-  (exitCode, stdout, stderr) <- readProcessWithExitCode "ltlsynt" ltlCommandArgs ""
+  (exitCode, stdout, stderr) <- readProcessWithExitCode ltlsyntPath ltlCommandArgs ""
   if exitCode /= ExitSuccess
     then do
       die $ "TSL spec UNREALIZABLE. ltlsynt output: \n" ++ stderr
@@ -48,3 +59,9 @@ synthesize tlsfContents = do
       Left err -> show err
       Right [] -> ""
       Right (x : xr) -> x ++ concatMap ((:) ',' . (:) ' ') xr
+
+-- | Check if 'ltlsynt' is available on path
+checkLtlsynt :: FilePath -> IO Bool
+checkLtlsynt path = do
+  m <- findExecutable path
+  return $ isJust m

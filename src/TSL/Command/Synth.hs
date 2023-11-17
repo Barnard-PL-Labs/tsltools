@@ -1,6 +1,6 @@
 module TSL.Command.Synth where
 
-import Options.Applicative (Parser, ParserInfo, action, flag', fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, strOption, (<|>))
+import Options.Applicative (Parser, ParserInfo, action, flag', fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, strOption, value, (<|>))
 import TSL.Command.Synth.Options (Options (..))
 import qualified TSL.HOA as HOA
 import qualified TSL.LTL as LTL
@@ -45,10 +45,17 @@ optionsParser =
       ( long "solver"
           <> metavar "SOLVER"
           <> help "Path to SMT and SyGus solver"
+          <> action "file"
+      )
+    <*> strOption
+      ( long "ltlsynt"
+          <> value "ltlsynt"
+          <> metavar "LTLSYNT"
+          <> help "Path to ltlsynt"
       )
 
 synth :: Options -> IO ()
-synth (Options {inputPath, outputPath, target, solverPath}) = do
+synth (Options {inputPath, outputPath, target, solverPath, ltlsyntPath}) = do
   -- Read input
   input <- readInput inputPath
 
@@ -62,7 +69,7 @@ synth (Options {inputPath, outputPath, target, solverPath}) = do
   tlsfSpec <- TLSF.lower' theorizedSpec
 
   -- TLSF (String) -> HOA controller (String)
-  hoaController <- LTL.synthesize tlsfSpec
+  hoaController <- LTL.synthesize ltlsyntPath tlsfSpec
 
   -- HOA controller (String) -> controller in target language (String)
   targetController <- HOA.implement' False target hoaController
