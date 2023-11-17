@@ -1,16 +1,7 @@
------------------------------------------------------------------------------
------------------------------------------------------------------------------
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ViewPatterns #-}
 
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.SymbolTable
--- Maintainer  :  Felix Klein
---
--- Data type to store all identifier specific content.
+-- | Data type to store all identifier specific content.
 module TSL.Core.SymbolTable
   ( SymbolTable (..),
     Id,
@@ -21,8 +12,6 @@ module TSL.Core.SymbolTable
     csvFormat,
   )
 where
-
------------------------------------------------------------------------------
 
 import Control.Exception (assert)
 import Control.Monad.ST (ST, runST)
@@ -37,11 +26,7 @@ import TSL.Core.Binding (BoundExpr)
 import TSL.Core.Expression (ExprPos (..), SrcPos (..))
 import TSL.Core.Types (ExprType (..), prType)
 
------------------------------------------------------------------------------
-
 type Id = Int
-
------------------------------------------------------------------------------
 
 data Kind
   = Input
@@ -51,8 +36,6 @@ data Kind
   | Function
   | Internal
   deriving (Eq, Ord, Show)
-
------------------------------------------------------------------------------
 
 data SymbolTable = SymbolTable
   { symtable :: Array Id IdRec,
@@ -65,8 +48,6 @@ data SymbolTable = SymbolTable
     stDeps :: Id -> [Id],
     stKind :: Id -> Kind
   }
-
------------------------------------------------------------------------------
 
 symbolTable ::
   Array Int IdRec -> SymbolTable
@@ -82,8 +63,6 @@ symbolTable a =
       stDeps = idDeps . (a !),
       stKind = idKind . (a !)
     }
-
------------------------------------------------------------------------------
 
 -- | Data type representing a single entry in the symbol table.
 data IdRec = IdRec
@@ -105,8 +84,6 @@ data IdRec = IdRec
     -- | The expression, the identifier is bound to.
     idBindings :: Maybe (BoundExpr Id)
   }
-
------------------------------------------------------------------------------
 
 -- | Prints the symbol table in the CSV format.
 toCSV ::
@@ -185,8 +162,6 @@ toCSV SymbolTable {..} =
              )
           ++ show (srcColumn srcEnd)
 
------------------------------------------------------------------------------
-
 -- | Removes double entries of an 'Int' list without distorting the
 -- order by using a lookup table.
 rmDouble ::
@@ -210,8 +185,6 @@ rmDouble xs =
           writeArray a x True
           return (x, True)
 
------------------------------------------------------------------------------
-
 -- | Layouts the CSV table by adding whitespaces to be more easy to
 -- read.
 csvFormat ::
@@ -224,16 +197,12 @@ csvFormat xs =
    in -- add the CSV separators
       unlines $ map csvSep zs
 
------------------------------------------------------------------------------
-
 -- | CSV table entries are printed as a semicolon separated list.
 csvSep ::
   [String] -> String
 csvSep = \case
   (x : xr) -> x ++ concatMap ((' ' :) . (';' :) . (' ' :)) xr
   [] -> ""
-
------------------------------------------------------------------------------
 
 -- | Fills up strings 'x' of length 'i' by white spaces up to the
 -- length 'n'.
@@ -243,8 +212,6 @@ fill (i, n, x)
   | length x >= n = x
   | i == 0 = replicate (n - length x) ' ' ++ x
   | otherwise = x ++ replicate (n - length x) ' '
-
------------------------------------------------------------------------------
 
 {-
 prPrettyExpr
@@ -322,4 +289,3 @@ prPrettyExpr st e = pr e
       BlnROr xs x      -> "⋁ [" ++ concatMap (flip (++) " " . pr) xs ++ "] " ++ pr x
       BlnRAnd xs x     -> "⋀ [ " ++ concatMap (flip (++) " " . pr) xs ++ "] " ++ pr x
 -}
------------------------------------------------------------------------------

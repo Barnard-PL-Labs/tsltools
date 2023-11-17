@@ -1,24 +1,10 @@
-----------------------------------------------------------------------------
------------------------------------------------------------------------------
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE RecordWildCards #-}
-
------------------------------------------------------------------------------
-
--- |
--- Module      :  Test
--- Maintainer  :  Felix Klein
---
--- Standard TestSuite.
+-- | Standard TestSuite.
 module Test
   ( tests,
   )
 where
 
------------------------------------------------------------------------------
-
 import Data.Char (chr, ord)
-import qualified DependencyTests (tests)
 import Distribution.TestSuite
   ( Progress (..),
     Result (..),
@@ -46,13 +32,9 @@ import Test.QuickCheck
     quickCheckResult,
   )
 
------------------------------------------------------------------------------
-
 -- | String wrapper to create special arbitrary instance for identifiers.
 newtype Identifier = Identifier {identifier :: String}
   deriving (Show, Ord, Eq)
-
------------------------------------------------------------------------------
 
 -- | Arbitrary instance for identifiers.
 instance Arbitrary Identifier where
@@ -70,8 +52,6 @@ instance Arbitrary Identifier where
         | c == 64 = '.'
         | otherwise = '\''
 
------------------------------------------------------------------------------
-
 -- | The encoding of TSL predicates as atomic input propositions and
 -- the corresponing decoding are compatible with each other.
 propReadInput ::
@@ -81,8 +61,6 @@ propReadInput p =
     Right x -> x == fmap identifier p
     Left _ -> False
 
------------------------------------------------------------------------------
-
 -- | The encoding or TSL updates as atomic output propositions and the
 -- corresponing decoding are compatible with each other.
 propReadOutput ::
@@ -91,8 +69,6 @@ propReadOutput (o, s) =
   case decodeOutputAP $ encodeOutputAP identifier o s of
     Right x -> x == (identifier o, fmap identifier s)
     Left _ -> False
-
------------------------------------------------------------------------------
 
 tests ::
   IO [Test]
@@ -111,12 +87,12 @@ tests = do
   where
     qc01 =
       quickCheckResult propReadInput >>= \case
-        Success {..} -> return $ Finished Pass
+        Success {} -> return $ Finished Pass
         x -> return $ Finished $ Fail $ show x
 
     qc02 =
       quickCheckResult propReadOutput >>= \case
-        Success {..} -> return $ Finished Pass
+        Success {} -> return $ Finished Pass
         x -> return $ Finished $ Fail $ show x
 
     -- cfm <- loadCFM input
@@ -130,5 +106,3 @@ tests = do
                 setOption = \_ _ -> Right t
               }
        in Test t
-
------------------------------------------------------------------------------

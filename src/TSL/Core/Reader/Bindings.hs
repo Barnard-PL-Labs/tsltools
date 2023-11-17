@@ -1,22 +1,10 @@
------------------------------------------------------------------------------
------------------------------------------------------------------------------
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TupleSections #-}
 
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Core.Reader.Bindings
--- Maintainer  :  Felix Klein
---
--- Extracts the static expression bindings from the specification.
+-- | Extracts the static expression bindings from the specification.
 module TSL.Core.Reader.Bindings
   ( specBindings,
   )
 where
-
------------------------------------------------------------------------------
 
 import Control.Exception (assert)
 import Control.Monad.State (StateT (..), execStateT, get, put, when)
@@ -38,11 +26,7 @@ import TSL.Core.Reader.Data
 import TSL.Core.Types (SectionType)
 import TSL.Error (Error, errCircularDep, errConditional)
 
------------------------------------------------------------------------------
-
 type GetBindings a = StateT ST (Either Error) a
-
------------------------------------------------------------------------------
 
 data ST = ST
   { tBinding :: ExpressionTable,
@@ -51,8 +35,6 @@ data ST = ST
     tArgs :: ArgumentTable,
     tInternal :: ScopeTable
   }
-
------------------------------------------------------------------------------
 
 -- | Extracts the static expression bindings from the specification and
 -- stores them in a corresponding mapping. Furthermore, depencency
@@ -80,15 +62,11 @@ specBindings spec' = do
         dependencies = IM.map deps tBinding
       }
 
------------------------------------------------------------------------------
-
 specificationBindings ::
   Specification -> GetBindings ()
 specificationBindings Specification {..} = do
   mapM_ binding definitions
   mapM_ (exprBindings . snd) sections
-
------------------------------------------------------------------------------
 
 binding ::
   Binding Int -> GetBindings ()
@@ -113,8 +91,6 @@ binding Binding {..} = do
     PatternBinding x y -> exprBindings x >> exprBindings y
     SetBinding x -> exprBindings x
     RangeBinding x _ y _ -> exprBindings x >> exprBindings y
-
------------------------------------------------------------------------------
 
 exprBindings ::
   Expr Int -> GetBindings ()
@@ -238,8 +214,6 @@ exprBindings e@Expr {..} = case expr of
         _ -> errConditional srcPos
       _ -> errConditional srcPos
 
------------------------------------------------------------------------------
-
 deps ::
   BoundExpr Int -> [Int]
 deps = elems . fromList . deps' []
@@ -276,8 +250,6 @@ deps = elems . fromList . deps' []
         BlnLEQ l _ -> deps'' (deps'' a r) l
         _ -> deps'' a x
       _ -> deps'' a x
-
------------------------------------------------------------------------------
 
 checkCircularDeps ::
   Specification -> Either Error Specification
@@ -328,8 +300,6 @@ checkCircularDeps s@Specification {..} = do
             )
           ]
           (assert (member i positions) (positions ! i))
-
------------------------------------------------------------------------------
 
 -- | Assign every expression of the input specification a unique id.
 fixExprIds ::
@@ -467,5 +437,3 @@ fixExprIds s@Specification {..} = do
       xs' <- mapM updExpr xs
       x' <- updExpr x
       return $ c xs' x'
-
------------------------------------------------------------------------------

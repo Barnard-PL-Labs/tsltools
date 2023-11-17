@@ -1,9 +1,5 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
-
--------------------------------------------------------------------------------
 
 -- |
 -- Module      :  TSL.Simulation.FiniteTraceChecker
@@ -23,13 +19,9 @@ module TSL.Simulation.FiniteTraceChecker
   )
 where
 
--------------------------------------------------------------------------------
-
 import Control.Exception (assert)
 import Data.Map as Map (Map, empty, insert, lookup, union)
 import TSL.Core.Logic as Logic (Formula (..), PredicateTerm, SignalTerm)
-
--------------------------------------------------------------------------------
 
 -- | A 'FiniteTrace' describes a trace of evaluations and 'Obligation's
 data FiniteTrace c = FiniteTrace
@@ -39,8 +31,6 @@ data FiniteTrace c = FiniteTrace
     -- fulfilled
     obligations :: [[Obligation c]]
   }
-
--------------------------------------------------------------------------------
 
 -- | An 'Obligation' describes what has to be fulfilled at a certain point.
 data Obligation c = Obligation
@@ -54,8 +44,6 @@ data Obligation c = Obligation
     -- without assumptions
     expGuarantee :: Formula c
   }
-
--------------------------------------------------------------------------------
 
 -- | 'append' extends a 'FiniteTrace' by some predicate and update evaluation.
 append ::
@@ -77,8 +65,6 @@ append ft@FiniteTrace {..} updates predicates =
           (nextObligations ft)
    in ft {trace = newTrace, obligations = newOb : obligations}
 
--------------------------------------------------------------------------------
-
 -- | 'rewind' undoes the last extensions by 'append'.
 rewind :: (Ord c) => FiniteTrace c -> FiniteTrace c
 rewind ft@FiniteTrace {..} =
@@ -88,8 +74,6 @@ rewind ft@FiniteTrace {..} =
     -- this should never happen as 'append' only add on element to each list
     -- and trace is initially empty
     _ -> assert False undefined
-
--------------------------------------------------------------------------------
 
 -- | 'emptyTrace' initializes a 'FiniteTrace'. To compute the initial
 -- obligation the initial specification has to be passed in form of a list
@@ -111,14 +95,10 @@ emptyTrace (assumptions, guarantees) =
         ]
     }
 
--------------------------------------------------------------------------------
-
 -- | 'violated' returns the 'Formula' that some finite trace violates.
 violated :: (Eq c) => FiniteTrace c -> [Formula c]
 violated ft =
   guarantee <$> filter ((== FFalse) . expTotalFormula) (nextObligations ft)
-
--------------------------------------------------------------------------------
 
 -- | 'nextObligation' returns the obligation that has to be fulfilled with the
 -- next evaluation step.
@@ -128,8 +108,6 @@ nextObligations FiniteTrace {..} =
     o : _ -> o
     -- this should never happen as there is always an initial obligation
     [] -> assert False undefined
-
--------------------------------------------------------------------------------
 
 -- | 'checkNext' expands a 'Formula' by a single evaluation step by applying
 -- and simplifying temporal operations. E.g. if the 'Formula' has the form
@@ -235,8 +213,6 @@ checkNextC ts@(t : tr) cache form =
                 insert simpForm (simplify nextForm) (cache `union` cache')
               )
 
--------------------------------------------------------------------------------
-
 -- | 'simplify' simplifies a TSL 'formula' by applying some easy syntactic
 -- conversion on the boolean level.
 simplify :: (Eq c) => Formula c -> Formula c
@@ -309,5 +285,3 @@ simplify =
       if x `elem` xr
         then removeDoubles xr
         else x : removeDoubles xr
-
--------------------------------------------------------------------------------

@@ -1,15 +1,7 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
--------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Ast
--- Description :  Abstract Syntax Tree form for signals, functions, and predicates.
--- Maintainer  :  Wonhyuk Choi
--- Alternate data structure format for ADT's in TSL.Logic.
+-- | Alternate data structure format for ADT's in TSL.Logic.
 -- All signal/function/predicate Abstract Data Types in TSL.Logic are curried,
 -- but the AST structure can be necessary, e.g. as input to SMT/SyGuS solvers.
 -- This module defines the AST type, and the transformative functions thereof.
@@ -29,8 +21,6 @@ module TSL.Core.Ast
   )
 where
 
--------------------------------------------------------------------------------
-
 -- import Data.Map(Map)
 
 import Control.Applicative (liftA2)
@@ -41,8 +31,6 @@ import TSL.Core.Logic
     PredicateTerm (..),
     SignalTerm (..),
   )
-
--------------------------------------------------------------------------------
 
 -- | The Abstract Syntax Tree (AST) datatype.
 -- SignalTerm as defined by Logic.hs are all curried,

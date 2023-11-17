@@ -1,10 +1,6 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
-
--------------------------------------------------------------------------------
 
 -- |
 -- Module      :  TSL.ModuloTheories.Sygus.Assumption
@@ -15,15 +11,11 @@ module TSL.ModuloTheories.Sygus.Assumption
   )
 where
 
--------------------------------------------------------------------------------
-
 import Data.List (intersperse)
 import TSL.Error (Error, errSygus)
 import TSL.ModuloTheories.Predicates (pred2Tsl)
 import TSL.ModuloTheories.Sygus.Common (Dto (..), Temporal (..))
 import TSL.ModuloTheories.Sygus.Update (Update (..))
-
--------------------------------------------------------------------------------
 
 tslAnd :: String
 tslAnd = "&&"

@@ -1,17 +1,7 @@
------------------------------------------------------------------------------
------------------------------------------------------------------------------
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeSynonymInstances #-}
 
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Types
--- Maintainer  :  Felix Klein
---
--- Types of the different expressions, semantics and targets.
+-- | Types of the different expressions, semantics and targets.
 module TSL.Core.Types
   ( ExprType (..),
     SectionType (..),
@@ -22,13 +12,9 @@ module TSL.Core.Types
   )
 where
 
------------------------------------------------------------------------------
-
 import Data.Char (chr, ord)
 import Data.IntMap (empty, insert, (!))
 import qualified Data.IntMap as IM (lookup)
-
------------------------------------------------------------------------------
 
 -- | Expression types.
 data ExprType
@@ -42,8 +28,6 @@ data ExprType
   | TFml ExprType ExprType
   deriving (Eq)
 
------------------------------------------------------------------------------
-
 instance Show ExprType where
   show = \case
     TSignal s -> "signal " ++ show s
@@ -55,8 +39,6 @@ instance Show ExprType where
     TPoly x -> "a" ++ show x
     TSet x -> show x ++ " set"
 
------------------------------------------------------------------------------
-
 -- | Section types.
 data SectionType
   = InitiallyAssume
@@ -66,8 +48,6 @@ data SectionType
   | AlwaysGuarantee Int
   | Guarantee Int
   deriving (Show, Eq, Ord)
-
------------------------------------------------------------------------------
 
 -- | Extracts all poly type ids.
 polyIds ::
@@ -84,8 +64,6 @@ polyIds = reverse . collect []
       TPoly i -> i : a
       TSet x -> collect a x
 
------------------------------------------------------------------------------
-
 -- | Creates an update mapping that reduces poly identifiers to a
 -- uniform range.
 reducer ::
@@ -95,8 +73,6 @@ reducer xs =
         Nothing -> (n + 1, insert i n im)
         Just _ -> (n, im)
    in ((snd $ foldl f (0, empty) $ concatMap polyIds xs) !)
-
------------------------------------------------------------------------------
 
 -- | Type printer that encooperates a poly id updater.
 prType ::
@@ -115,8 +91,6 @@ prType f = \case
       | i >= 0 && i < 26 = [chr (i + ord 'a')]
       | otherwise = "a" ++ show i
 
------------------------------------------------------------------------------
-
 -- | Calculates the arity of each expression.
 arity :: ExprType -> Int
 arity = \case
@@ -124,5 +98,3 @@ arity = \case
   TSignal s -> arity s
   TFml _ g -> 1 + arity g
   _ -> 0
-
------------------------------------------------------------------------------

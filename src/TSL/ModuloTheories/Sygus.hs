@@ -1,10 +1,6 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
-
--------------------------------------------------------------------------------
 
 -- |
 -- Module      :  TSL.ModuloTheories.Sygus
@@ -17,8 +13,6 @@ module TSL.ModuloTheories.Sygus
     sygusDebug,
   )
 where
-
--------------------------------------------------------------------------------
 
 import Control.Exception (assert)
 import Control.Monad (liftM2)
@@ -44,8 +38,6 @@ import TSL.ModuloTheories.Sygus.Recursion
   )
 import TSL.ModuloTheories.Sygus.Update (Update, term2Updates)
 import TSL.ModuloTheories.Theories (TheorySymbol, sygus2Supported)
-
--------------------------------------------------------------------------------
 
 data SygusDebugInfo
   = NextDebug IntermediateResults String

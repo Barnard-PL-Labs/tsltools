@@ -1,23 +1,12 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 
--------------------------------------------------------------------------------
-
--- |
--- Module      : MinimalAssumptionCores
--- Description : TSL minimal-assumptions finder
--- Maintainer  : Philippe Heim
---
--- This module provides methods to search for a minimal amount of assumptions
+-- | This module provides methods to search for a minimal amount of assumptions
 -- needed to realize a specification.
 module CoreGeneration.MinimalAssumptionCores
   ( generateMinimalAssumptions,
     treeBasedMinimalAssumptions,
   )
 where
-
--------------------------------------------------------------------------------
 
 import CoreGeneration.CoreUtilities
   ( Context (..),
@@ -29,8 +18,6 @@ import CoreGeneration.CoreUtilities
 import CoreGeneration.FindFirstConcurrent (incParallelFirst)
 import Data.Set as Set (Set, difference, empty, fromList, member, toList, union)
 import TSL.Core (Formula (..), Specification (..), SymbolTable, split, toTSL)
-
--------------------------------------------------------------------------------
 
 -- | 'generateMinimalAssumptions' searches for a 'Specification' a minimal
 -- sub-specification (w.r.t. the assuptions) that is realizable (a so-called
@@ -73,8 +60,6 @@ generateMinimalAssumptions context tsl =
         [s] -> length (assumptions s) == num
         _ -> False
 
--------------------------------------------------------------------------------
-
 -- | 'AssumptionTree' is a binary tree which representing which assumptions are
 -- needed for some combination of guarantees. The guarantees are in the leafs
 -- of the tree. The nodes are annotated with assumptions representing that its
@@ -87,8 +72,6 @@ data AssumptionTree
     -- assumptions that allows the conjunction of both sub-trees
     -- to by synthesized.
     Node (Set (Formula Int)) AssumptionTree AssumptionTree
-
--------------------------------------------------------------------------------
 
 -- | 'liftAssumption' aims to reduce the amount of assumptions in an
 -- 'AssumptionTree' without changing the realizability by lifting the common
@@ -116,8 +99,6 @@ liftAssumptions =
         Leaf asmpt g -> Leaf (difference asmpt rmAsmpt) g
         Node asmpt t1 t2 -> Node (difference asmpt rmAsmpt) t1 t2
 
--------------------------------------------------------------------------------
-
 -- | 'cleanAssumptions' aims to reduce the amount of assumptions in an
 -- 'AssumptionTree' without changing the realizability by removing (redundant)
 -- assumptions that are already required in the parent.
@@ -135,16 +116,12 @@ cleanAssumptions = help empty
                 (help newKnown t1)
                 (help newKnown t2)
 
--------------------------------------------------------------------------------
-
 -- | 'reduce' removes unnecessary assumptions of an 'AssumptionTree' by first
 -- lifting assumptions (using 'liftAssumpions') and then cleaning up
 -- (using 'cleanAssumptions'). This functions should be used when reducing
 -- assumption trees over the individual optimizations
 reduce :: AssumptionTree -> AssumptionTree
 reduce = cleanAssumptions . liftAssumptions
-
--------------------------------------------------------------------------------
 
 -- | 'flatten' converts an 'AssumptionTree' into a conjunction of formulas
 -- (represented as list of 'Formula' 'Int') which are equivalent to
@@ -161,8 +138,6 @@ flatten =
         [] -> formula
         xs -> Or $ fmap Not xs ++ [formula]
 
--------------------------------------------------------------------------------
-
 -- | 'assumptionTreeToSpec' generates a 'Specification' out of an
 -- 'AssumtptionTree', representing the guarantees, a list of 'Formula Int'
 -- representing additional assumptions and a respective 'SymbolTable'.
@@ -175,15 +150,11 @@ assumptionTreeToSpec sym asmpt atree =
       symboltable = sym
     }
 
--------------------------------------------------------------------------------
-
 -- | 'SearchTree' represents a (generic) binary search tree, where the
 -- searched objects are at the leafs.
 data SearchTree a
   = STLeaf a
   | STNode (SearchTree a) (SearchTree a)
-
------------------------------------------------------------------------------
 
 -- | 'searchTree' generates a 'SearchTree' out of a list where the elements
 -- of the list are at the leaf of the 'SearchTree'. Note that 'searchTree'
@@ -200,8 +171,6 @@ searchTree =
             (Just s, Nothing) -> Just s
             (Nothing, Just s) -> Just s
             (Just s, Just t) -> Just (STNode s t)
-
------------------------------------------------------------------------------
 
 -- | 'minimalAssumptionTree' searches for an 'AssuptionTree' with a minimal
 -- amount of assumptions provided a 'SearchTree' defining the order the
@@ -251,8 +220,6 @@ minimalAssumptionTree context asmpt sym =
   where
     subGeneration = generateMinimalAssumptions context
 
--------------------------------------------------------------------------------
-
 -- | Similar to 'generateMinimalAssumptions', 'treeBasedMinimalAssumptions'
 -- searches for a 'Specification' a minimal sub-specification (w.r.t. the
 -- assumptions) that is realizable (a so-called assumption core) if it exists.
@@ -270,5 +237,3 @@ treeBasedMinimalAssumptions context spec =
         Nothing -> return Nothing
         Just aTree ->
           return $ Just $ assumptionTreeToSpec (symboltable spec) [] aTree
-
--------------------------------------------------------------------------------

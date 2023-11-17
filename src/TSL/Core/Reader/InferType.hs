@@ -1,23 +1,11 @@
------------------------------------------------------------------------------
------------------------------------------------------------------------------
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TupleSections #-}
 
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Core.Reader.InferType
--- Maintainer  :  Felix Klein
---
--- Infers and checks types of all bound expressions.
+-- | Infers and checks types of all bound expressions.
 module TSL.Core.Reader.InferType
   ( inferTypes,
   )
 where
-
------------------------------------------------------------------------------
 
 import Control.Exception (assert)
 import Control.Monad (foldM_, void)
@@ -32,11 +20,7 @@ import TSL.Core.Reader.Data (ArgumentTable, Specification (..), TypeTable)
 import TSL.Core.Types (ExprType (..))
 import TSL.Error (Error, errExpect, errRange)
 
------------------------------------------------------------------------------
-
 type Id = Int
-
------------------------------------------------------------------------------
 
 data ST = ST
   { -- | number of used type identifiers
@@ -51,11 +35,7 @@ data ST = ST
     curBinding :: Id
   }
 
------------------------------------------------------------------------------
-
 type TypeCheck a = StateT ST (Either Error) a
-
------------------------------------------------------------------------------
 
 -- | Infers and checks types of all bound expressions as well as of
 -- the assumptions, the invariants and the guarantees. Additionally, a
@@ -79,8 +59,6 @@ inferTypes s@Specification {..} = do
       { types = finalize $ tTypes tt
       }
 
------------------------------------------------------------------------------
-
 finalize ::
   TypeTable -> TypeTable
 finalize tt =
@@ -95,8 +73,8 @@ finalize tt =
       TFml t t' ->
         let tf = TFml (resolveT ta t) $ resolveT ta t'
          in if
-                | onSignalLevel tf -> liftS tf
-                | otherwise -> tf
+              | onSignalLevel tf -> liftS tf
+              | otherwise -> tf
       TPoly i -> case IM.lookup i ta of
         Nothing -> TPoly i
         Just (TSet t) -> TSet $ resolveT ta t
@@ -104,15 +82,13 @@ finalize tt =
         Just (TFml t t') ->
           let tf = TFml (resolveT ta t) $ resolveT ta t'
            in if
-                  | onSignalLevel tf -> liftS tf
-                  | otherwise -> tf
+                | onSignalLevel tf -> liftS tf
+                | otherwise -> tf
         Just (TPoly j)
           | i == j -> TPoly i
           | otherwise -> assert (j < i) $ resolveT ta $ TPoly j
         Just t -> t
       t -> t
-
------------------------------------------------------------------------------
 
 inferTypeSpec ::
   TypeCheck ()
@@ -127,8 +103,6 @@ inferTypeSpec = do
   mapM_ typeCheckDefinition $ zip bs ps
   -- type-check sections
   mapM_ (inferType TTSL . snd) sections
-
------------------------------------------------------------------------------
 
 -- | Returns the list of bindings, which is ordered accoring to the
 -- respective dependencies of the entries.
@@ -164,8 +138,6 @@ depOrderedBindings Specification {..} =
           (S.fromList $ assert (member x dependencies) (dependencies ! x))
           (S.fromList xs)
 
------------------------------------------------------------------------------
-
 initiateArgumentTypes ::
   Id -> TypeCheck Id
 initiateArgumentTypes i = do
@@ -184,8 +156,6 @@ initiateArgumentTypes i = do
       (x : xr) -> TFml (TPoly x) $ buildArgType j xr
       [] -> TPoly j
 
------------------------------------------------------------------------------
-
 typeCheckDefinition ::
   (Id, Id) -> TypeCheck ()
 typeCheckDefinition (i, j) =
@@ -196,8 +166,6 @@ typeCheckDefinition (i, j) =
         (TPoly j)
         xs
     _ -> assert False undefined
-
------------------------------------------------------------------------------
 
 inferType ::
   ExprType -> Expression -> TypeCheck ()
@@ -418,16 +386,12 @@ inferType t e = case expr e of
       (TFml _ t) -> tslFn t
       _ -> False
 
------------------------------------------------------------------------------
-
 newP ::
   TypeCheck ExprType
 newP = do
   s@ST {..} <- get
   put s {tCount = tCount + 1}
   return $ TPoly tCount
-
------------------------------------------------------------------------------
 
 -- | Checks consistencty of types with respect to the type enforced by the
 -- parent expression, the type of the current expression, and the type
@@ -442,8 +406,6 @@ checkExprType e pT eT =
   vt pT eT >>= \case
     Nothing -> errExpect pT eT $ srcPos e
     Just t -> updExprType t e
-
------------------------------------------------------------------------------
 
 vt :: ExprType -> ExprType -> TypeCheck (Maybe ExprType)
 -- enforced by parent  enforced by current
@@ -504,14 +466,10 @@ vt (TFml a b) (TFml a' b')
             Just bT -> return $ Just $ TFml aT bT
 vt _ _ = return Nothing
 
------------------------------------------------------------------------------
-
 updExprType ::
   ExprType -> Expression -> TypeCheck ()
 updExprType t Expr {..} =
   modify $ \st -> st {tTypes = insert exprId t $ tTypes st}
-
------------------------------------------------------------------------------
 
 -- | Updates a poly parent type by the given expression type.
 updParent ::
@@ -560,8 +518,6 @@ updParent i = \case
             update i t''
             return $ Just t''
 
------------------------------------------------------------------------------
-
 -- | Updates a given poly type by the expression type of the parent.
 updCurrent ::
   Int -> ExprType -> TypeCheck (Maybe ExprType)
@@ -609,8 +565,6 @@ updCurrent i = \case
             update i t''
             return $ Just t''
 
------------------------------------------------------------------------------
-
 -- | Updates the expression type of the given id.
 update ::
   Id -> ExprType -> TypeCheck ()
@@ -620,8 +574,6 @@ update i t =
       | i == j -> modify $ \st -> st {tTypes = insert i t $ tTypes st}
       | otherwise -> assert (j < i) $ update j t
     _ -> modify $ \st -> st {tTypes = insert i t $ tTypes st}
-
------------------------------------------------------------------------------
 
 -- | Lifts a type to the signal level under the assumption that every
 -- poly is already an inner signal type.
@@ -637,8 +589,6 @@ liftS = \case
       TFml x y -> TFml (liftS x) (liftS' y)
       TTSL -> TSignal TBoolean
       x -> TSignal x
-
------------------------------------------------------------------------------
 
 -- | Lifts a type to the signal level.
 liftToSignalLevel ::
@@ -668,8 +618,6 @@ liftToSignalLevel = \case
       update j $ TSignal p
       return $ TSignal p
 
------------------------------------------------------------------------------
-
 -- | Checks, whether a type is on the signal level.
 onSignalLevel ::
   ExprType -> Bool
@@ -677,8 +625,6 @@ onSignalLevel = \case
   TSignal {} -> True
   TFml x y -> onSignalLevel y || onSignalLevel x
   _ -> False
-
------------------------------------------------------------------------------
 
 -- | Resolves all poly-type-pointers to their final target
 resolve ::
@@ -704,14 +650,10 @@ resolve = \case
       t2 <- resolve t'
       let tf = TFml t1 t2
       if
-          | onSignalLevel tf -> liftToSignalLevel tf
-          | otherwise -> return tf
-
------------------------------------------------------------------------------
+        | onSignalLevel tf -> liftToSignalLevel tf
+        | otherwise -> return tf
 
 lkType ::
   Int -> TypeCheck ExprType
 lkType =
   resolve . TPoly
-
------------------------------------------------------------------------------

@@ -1,20 +1,10 @@
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-
 -- |
 -- Module      :  TSL.ModuloTheories.Theories.Uf
 -- Description :  Uninterpreted Functions
 -- Maintainer  :  Wonhyuk Choi
 module TSL.ModuloTheories.Theories.Uf (UfSymbol) where
 
--------------------------------------------------------------------------------
-
 import TSL.ModuloTheories.Theories.Base (TheorySymbol (..))
-
--------------------------------------------------------------------------------
 
 data UfSymbol = Uninterpreted String deriving (Eq, Ord)
 

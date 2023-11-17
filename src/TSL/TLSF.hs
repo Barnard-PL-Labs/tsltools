@@ -1,23 +1,12 @@
-{-# LANGUAGE PartialTypeSignatures #-}
-{-# LANGUAGE RankNTypes #-}
------------------------------------------------------------------------------
------------------------------------------------------------------------------
-{-# LANGUAGE RecordWildCards #-}
-
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.TLSF
--- Maintainer  :  Felix Klein
---
--- TLSF writer, which transforms a TSL formula into TLSF.
+-- | Utilities to translate between TSL and TLSF.
+-- Note that the translation from TSL to TLSF
+-- is an under-approximation.
 module TSL.TLSF
-  ( toTLSF,
+  ( lower,
+    lower',
     tlsfToTslTerm,
   )
 where
-
------------------------------------------------------------------------------
 
 import Data.Function (on)
 import Data.List
@@ -38,19 +27,26 @@ import TSL.Core.Logic
     tslFormula,
     updates,
   )
+import TSL.Core.Reader (readTSL)
 import TSL.Core.Specification (Specification (..), toFormula)
 import TSL.Core.SymbolTable (stName)
+import TSL.Error (unwrap)
 
------------------------------------------------------------------------------
+-- | Creates the LTL under-approximation in TLSF for a given TSL
+-- specification (String).
+lower' :: String -> IO String
+lower' specStr = do
+  spec <- readTSL specStr
+  spec' <- unwrap spec
+  return $ lower spec'
 
 -- | Creates the LTL under-approximation in TLSF for a given TSL
 -- specification.
-toTLSF ::
-  String -> Specification -> String
-toTLSF name Specification {..} =
+lower :: Specification -> String
+lower Specification {assumptions, guarantees, symboltable} =
   unlines
     [ "INFO {",
-      "  TITLE:       \"Converted TSL Specification: " ++ name ++ "\"",
+      "  TITLE:       \"Converted TSL Specification\"",
       "  DESCRIPTION: \"TSL specification, which has been converted to TLSF.\"",
       "  SEMANTICS:   Mealy",
       "  TARGET:      Mealy",
@@ -103,17 +99,15 @@ toTLSF name Specification {..} =
       map (Globally . exactlyOne . map (uncurry Update)) $
         groupBy ((==) `on` fst) upds
 
------------------------------------------------------------------------------
-
 -- | Translates tlsf term back into a TSL predicate or update term
---   only works on tslf generated from a TSL spec
+-- only works on tslf generated from a TSL spec
 tlsfToTslTerm :: String -> String
 tlsfToTslTerm t =
   if "p0" `isPrefixOf` t
     then generateTSLString Check decodeInputAP t
     else generateTSLString (uncurry Update) decodeOutputAP t
 
-generateTSLString :: forall a b. (b -> Formula String) -> (String -> Either a b) -> String -> String
+generateTSLString :: (b -> Formula String) -> (String -> Either a b) -> String -> String
 generateTSLString tslType decoder x =
   either (const "ERR") (tslFormula id . tslType) $
     decoder x

@@ -1,14 +1,4 @@
-----------------------------------------------------------------------------
------------------------------------------------------------------------------
-{-# LANGUAGE LambdaCase #-}
-
------------------------------------------------------------------------------
-
--- |
--- Module      :  ModuloTheoriesTests
--- Maintainer  :  Wonhyuk Choi
---
--- Test for Modulo Theories work.
+-- | Test for Modulo Theories work.
 -- These tests are meant for regression.
 -- There are four types of tests corresponding to each flag of tslmt2tsl,
 -- each with increasing amount of complexity:
@@ -21,8 +11,6 @@ module ModuloTheoriesTests
   ( tests,
   )
 where
-
------------------------------------------------------------------------------
 
 import Control.Monad.Trans.Except
 import Data.Either (isRight)
@@ -46,8 +34,6 @@ import qualified TSL.ModuloTheories as MT
 import Test.HUnit ((@=?))
 import qualified Test.HUnit as H
 
------------------------------------------------------------------------------
-
 convert2Cabal :: String -> IO H.Test -> Test
 convert2Cabal name = Test . testInstance name
 
@@ -68,10 +54,10 @@ runTest = (fmap snd . H.performTest onStart onError onFailure us =<<)
     onStart _ = return
 
     onError :: a -> String -> H.State -> Progress -> IO Progress
-    onError _ msg _ _ = return $ Finished (Error $ concat $ map (++ " ") (lines msg))
+    onError _ msg _ _ = return $ Finished (Error $ concatMap (++ " ") (lines msg))
 
     onFailure :: a -> String -> H.State -> Progress -> IO Progress
-    onFailure _ msg _ _ = return $ Finished (Fail $ concat $ map (++ " ") (lines msg))
+    onFailure _ msg _ _ = return $ Finished (Fail $ concatMap (++ " ") (lines msg))
 
     us :: Progress
     us = Finished Pass
@@ -89,7 +75,7 @@ predicatesTests = [convert2Cabal (makeTestName "Predicates") hUnitTest]
     expectedNumPreds = 2
 
     hUnitTest = do
-      (theory, spec, _) <- readFile path >>= MT.parse (Just path)
+      (theory, spec, _) <- readFile path >>= MT.parse
       return $
         H.TestCase $ case predsFromSpec theory spec of
           Right preds -> expectedNumPreds @=? length preds
@@ -103,7 +89,7 @@ cfgTests = [convert2Cabal (makeTestName "CFG") hUnitTest]
     expectedProductionRuleSize = 1
 
     hUnitTest = do
-      (theory, spec, _) <- readFile path >>= MT.parse (Just path)
+      (theory, spec, _) <- readFile path >>= MT.parse
       return $ case cfgFromSpec theory spec of
         Right cfg ->
           let assocs = Map.assocs $ grammar cfg
@@ -115,10 +101,10 @@ cfgTests = [convert2Cabal (makeTestName "CFG") hUnitTest]
         Left errMsg -> H.TestCase $ H.assertFailure $ show errMsg
 
 isSuccess :: (Monad m) => ExceptT e m a -> m Bool
-isSuccess = (fmap isRight) . runExceptT
+isSuccess = fmap isRight . runExceptT
 
 countSuccess :: (Monad m) => [ExceptT e m a] -> m Int
-countSuccess = fmap (length . filter id) . sequence . (map isSuccess)
+countSuccess = fmap (length . filter id) . mapM isSuccess
 
 consistencyTests :: [Test]
 consistencyTests = [convert2Cabal (makeTestName "Consistency") hUnitTest]
@@ -128,7 +114,7 @@ consistencyTests = [convert2Cabal (makeTestName "Consistency") hUnitTest]
     expectedNumQueries = 15
 
     hUnitTest = do
-      (theory, spec, _) <- readFile path >>= MT.parse (Just path)
+      (theory, spec, _) <- readFile path >>= MT.parse
       let preds = case predsFromSpec theory spec of
             Left err -> error $ show err
             Right ps -> ps
@@ -146,10 +132,12 @@ consistencyTests = [convert2Cabal (makeTestName "Consistency") hUnitTest]
 
 sygusTests :: [Test]
 sygusTests =
-  zipWith
-    (\a b -> convert2Cabal (makeTestName ("SyGuS " ++ show a)) b)
-    [0 ..]
-    testCases
+  let f :: Integer -> IO H.Test -> Test
+      f a = convert2Cabal (makeTestName ("SyGuS " ++ show a))
+   in zipWith
+        f
+        [0 ..]
+        testCases
   where
     directory = "test/regression/ModuloTheories"
     files =
@@ -164,15 +152,14 @@ sygusTests =
     lengthsMatch =
       return $
         H.TestCase $
-          (length paths)
-            @=? (length numExpectedAssumptions)
+          length paths
+            @=? length numExpectedAssumptions
     testCases =
       (lengthsMatch :) $
-        map makeTestCase $
-          zip paths numExpectedAssumptions
+        zipWith (curry makeTestCase) paths numExpectedAssumptions
 
     makeTestCase (path, numExpected) = do
-      (theory, spec, _) <- readFile path >>= MT.parse (Just path)
+      (theory, spec, _) <- readFile path >>= MT.parse
       let preds = case predsFromSpec theory spec of
             Left err -> error $ "PREDICATES ERROR: " ++ show err
             Right ps -> ps

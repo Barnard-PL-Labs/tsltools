@@ -1,24 +1,12 @@
------------------------------------------------------------------------------
------------------------------------------------------------------------------
-{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TupleSections #-}
 
------------------------------------------------------------------------------
-
--- |
--- Module      :  Splitter
--- Maintainer  :  Gideon Geier
---
--- 'Splitter' implements algorithms to split TSL specifications into
+-- | 'Splitter' implements algorithms to split TSL specifications into
 -- independent subspecifications.
 module TSL.Core.Splitter
   ( split,
     splitAssumptions,
   )
 where
-
------------------------------------------------------------------------------
 
 import Data.Array as Array (listArray, (!))
 import Data.Graph.Inductive.Graph (LEdge, Node, mkGraph)
@@ -41,12 +29,8 @@ import TSL.Core.Logic (Formula (..), inputs, outputs, symbols)
 import TSL.Core.Specification (Specification (..))
 import TSL.Core.SymbolTable (IdRec (..), Kind (..), SymbolTable (..), symbolTable)
 
------------------------------------------------------------------------------
-
 getInOutputs :: Formula Int -> Set Int
 getInOutputs fml = inputs fml `union` outputs fml
-
------------------------------------------------------------------------------
 
 -- | Create symboltable for specification part
 cleanSymboltable :: Specification -> Specification
@@ -67,8 +51,6 @@ cleanSymboltable spec@Specification {..} =
   where
     list2array l = Array.listArray (1, length l) l
 
------------------------------------------------------------------------------
-
 -- | Update the identifiers in one symboltable record
 updateRec :: (Int -> Int) -> IdRec -> IdRec
 updateRec dict rec@IdRec {idArgs, idDeps, idBindings} =
@@ -77,8 +59,6 @@ updateRec dict rec@IdRec {idArgs, idDeps, idBindings} =
       idDeps = dict <$> idDeps,
       idBindings = (dict <$>) <$> idBindings
     }
-
------------------------------------------------------------------------------
 
 -- | Splits a list of formulas by disjoint sets of variables
 splitFormulas :: [Formula Int] -> [Set Int] -> [[Formula Int]]
@@ -93,8 +73,6 @@ insertFormula formula ((formulas, variableSet) : xr) =
   if not $ disjoint (getInOutputs formula) variableSet
     then (formula : formulas, variableSet) : xr
     else (formulas, variableSet) : insertFormula formula xr
-
------------------------------------------------------------------------------
 
 -- | 'split' implements an optimized decomposition algorithm which analyses
 -- assumptions and guarantees. This algorithm preserves equisynthesizeability
@@ -113,8 +91,6 @@ split spec@Specification {assumptions, guarantees} =
   where
     buildSpecs = map (\(a, g) -> spec {assumptions = a, guarantees = g})
 
------------------------------------------------------------------------------
-
 -- | 'splitAssumptions' splits assumptions into specifications of the form
 -- (a1 /\ a2) -> false, such that if any of the subspecifications is realizable
 -- the whole specification is realizable by assumption violation.
@@ -127,8 +103,6 @@ splitAssumptions spec@Specification {assumptions} =
    in cleanSymboltable <$> buildSpecs splittedAssumptions
   where
     buildSpecs = map (\a -> spec {assumptions = a, guarantees = [FFalse]})
-
------------------------------------------------------------------------------
 
 -- | 'addFreeAssumptions' requires a list of input-only assumptions and a list
 -- of assumption - guarantee specification pairs. It then adds the assumptions
@@ -149,8 +123,6 @@ addFreeAssumptions freeAssumptions specs =
           matchAssmpt = concat $ filter (not . disjoint props . Set.unions . (map getInOutputs)) freeAssumptionParts
        in (matchAssmpt ++ assmpts, guars)
 
------------------------------------------------------------------------------
-
 -- | 'decompRelProps' implements an algorithm to find propositions relevant for
 -- decomposition. Those are all outputs and all inputs that can be influenced
 -- by outputs.
@@ -161,8 +133,6 @@ decompRelProps spec =
       graph = buildGraph (out ++ inp) preEdges
       preEdges = map (elems . getInOutputs) (assumptions spec)
    in Set.fromList $ udfs out graph
-
------------------------------------------------------------------------------
 
 -- | 'buildGraph' builds a graph with all elements of intNodes as nodes and
 -- guarantees nodes in the same list in intOutputs to be in the same connected

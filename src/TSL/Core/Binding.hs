@@ -1,27 +1,15 @@
------------------------------------------------------------------------------
------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Binding
--- Maintainer  :  Felix Klein
---
--- A data type to store an identifier bound to an expression.
+-- | A data type to store an identifier bound to an expression.
 module TSL.Core.Binding
   ( Binding (..),
     BoundExpr (..),
   )
 where
 
------------------------------------------------------------------------------
-
 import Control.Arrow (first)
 import TSL.Core.Expression (Expr, ExprPos)
-
------------------------------------------------------------------------------
 
 data BoundExpr a
   = GuardedBinding [Expr a]
@@ -29,16 +17,12 @@ data BoundExpr a
   | SetBinding (Expr a)
   | RangeBinding (Expr a) (Int -> Int) (Expr a) (Int -> Int)
 
------------------------------------------------------------------------------
-
 instance Functor BoundExpr where
   fmap f = \case
     GuardedBinding xs -> GuardedBinding $ map (fmap f) xs
     PatternBinding x y -> PatternBinding (fmap f x) $ fmap f y
     SetBinding x -> SetBinding $ fmap f x
     RangeBinding x g y h -> RangeBinding (fmap f x) g (fmap f y) h
-
------------------------------------------------------------------------------
 
 -- | The data type @Bind a@ expresses a binding of some instance of
 -- type @a@ to some expression. The identifiers inside this expression
@@ -53,8 +37,6 @@ data Binding a = Binding
     bVal :: BoundExpr a
   }
 
------------------------------------------------------------------------------
-
 instance Functor Binding where
   fmap f Binding {..} =
     Binding
@@ -63,5 +45,3 @@ instance Functor Binding where
         bPos = bPos,
         bVal = fmap f bVal
       }
-
------------------------------------------------------------------------------

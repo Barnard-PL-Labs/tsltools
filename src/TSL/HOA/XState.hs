@@ -1,20 +1,11 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ImplicitParams #-}
-{-# LANGUAGE LambdaCase #-}
-----------------------------------------------------------------------------
------------------------------------------------------------------------------
-{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PartialTypeSignatures #-}
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 
--- |
--- Module      :  Main
--- Maintainer  :  Mark Santolucito
---
--- Generates an XState from a HOA file generated from a TSL spec
+-- | Generates an XState from a HOA file generated from a TSL spec
 module TSL.HOA.XState
   ( implement,
   )
@@ -39,7 +30,7 @@ import Hanoi
 import qualified TSL.Core.Logic as T (Formula (..), decodeInputAP, decodeOutputAP, tslFormula)
 
 implement :: HOA -> String
-implement = (unlines . printHOALines)
+implement = unlines . printHOALines
 
 printHOALines :: HOA -> [String]
 printHOALines hoa@HOA {..} =
@@ -54,21 +45,9 @@ printHOALines hoa@HOA {..} =
                   ++ [": {"]
                   ++ ["\n on: {"]
               )
-              : zipWith (curry printEdge) (filterDupes' (toList $ edges s)) [1 ..]
+              : zipWith (curry printEdge) (toList $ edges s) [1 ..]
               ++ ["}"]
               ++ ["},"]
-
-          -- take only one transition for each edge between states
-          filterDupes' = id
-          filterDupes :: [([State], Maybe Label, Maybe a)] -> [([State], Maybe Label, Maybe a)]
-          filterDupes xs = filterDupesHelper (reverse xs) []
-          filterDupesHelper :: [([State], Maybe Label, Maybe a)] -> [([State], Maybe Label, Maybe a)] -> [([State], Maybe Label, Maybe a)]
-          filterDupesHelper [] ys = ys
-          filterDupesHelper (x : xs) ys =
-            let (target, _, _) = x
-             in if any (\(t, _, _) -> target == t) ys
-                  then filterDupesHelper xs ys
-                  else filterDupesHelper xs (x : ys)
 
           printEdge ::
             (FiniteBounds HOA) =>
@@ -84,10 +63,11 @@ printHOALines hoa@HOA {..} =
             let splitFormulas = formulaToList label
                 termStringList = map (map (printTSLFormula strInd2)) splitFormulas :: [[String]]
                 predUpds = splitPredUpdates termStringList
+                predUpdToCode :: (([String], [String]), Integer) -> [Char]
                 predUpdToCode (predsupds, num) =
                   let (preds, upds) = predsupds
-                      conditional = if preds == [] then "True" else intercalate (" and ") preds
-                      body = indent 4 ++ intercalate (indent 4) (((["actions: ["] ++ map (wrap "\'" "\',") (map updateToAssignment (upds)) ++ ["],"]) ++ [stateUpdate]))
+                      conditional = if null preds then "True" else intercalate " and " preds
+                      body = indent 4 ++ intercalate (indent 4) ((["actions: ["] ++ map (wrap "\'" "\'," . updateToAssignment) upds ++ ["],"]) ++ [stateUpdate])
                    in "t" ++ show n ++ show num ++ ":\n {description: \'" ++ conditional ++ "\'," ++ body
              in -- add zip below
                 concatMap (\x -> indent 2 ++ predUpdToCode x) (zip predUpds [1 ..])
@@ -97,8 +77,6 @@ printHOALines hoa@HOA {..} =
 
           strInd2 = strIndWithMap apNamesMap
        in ["import { createMachine } from 'xstate';"] ++ ["const musicMachine = createMachine("] ++ ["{"] ++ ["id: 'music',"] ++ ["initial: '0',"] ++ ["states: {"] ++ concatMap printState values ++ ["}"] ++ ["}"] ++ [");"]
-
------------------------------------------------------------------------------
 
 -- | Different library related printing methods
 updateToAssignment :: String -> String
@@ -130,13 +108,13 @@ brRound = wrap "(" ")"
 
 translateToTSL :: String -> String
 translateToTSL t =
-  if isPrefixOf "p0" t
+  if "p0" `isPrefixOf` t
     then generateTSLString T.Check T.decodeInputAP t
     else generateTSLString (uncurry T.Update) T.decodeOutputAP t
 
 -- TODO need to specialize this to Python syntax, rather than just using TSL syntax
 -- for pred terms just add parens, for update terms, a little bit more parsing needed
-generateTSLString :: forall a b. (Show a) => (b -> T.Formula String) -> (String -> Either a b) -> String -> String
+generateTSLString :: (Show a) => (b -> T.Formula String) -> (String -> Either a b) -> String -> String
 generateTSLString tslType decoder x =
   either show (T.tslFormula id . tslType) $
     decoder x
@@ -144,9 +122,9 @@ generateTSLString tslType decoder x =
 splitPredUpdates :: [[String]] -> [([String], [String])]
 splitPredUpdates terms =
   let sortTerm t (preds, upds) =
-        if isInfixOf "<-" t
+        if "<-" `isInfixOf` t
           then
-            if isPrefixOf negationSymbol t
+            if negationSymbol `isPrefixOf` t
               then (preds, upds)
               else (preds, t : upds)
           else (t : preds, upds)

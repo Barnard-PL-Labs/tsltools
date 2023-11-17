@@ -1,8 +1,4 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
-
--------------------------------------------------------------------------------
 
 -- |
 -- Module      :  TSL.ModuloTheories.Theories.EUf
@@ -11,11 +7,7 @@
 -- For a primer on EUF, check https://www21.in.tum.de/teaching/sar/SS20/6.pdf.
 module TSL.ModuloTheories.Theories.EUf (EUfSymbol) where
 
--------------------------------------------------------------------------------
-
 import TSL.ModuloTheories.Theories.Base (TheorySymbol (..))
-
--------------------------------------------------------------------------------
 
 data EUfSymbol
   = Eq

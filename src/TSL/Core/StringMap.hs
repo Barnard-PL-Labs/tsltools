@@ -1,14 +1,4 @@
------------------------------------------------------------------------------
------------------------------------------------------------------------------
-{-# LANGUAGE LambdaCase #-}
-
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.StringMap
--- Maintainer  :  Felix Klein
---
--- A simple data structure to map strings to integers.
+-- | A simple data structure to map strings to integers.
 module TSL.Core.StringMap
   ( StringMap,
     empty,
@@ -18,11 +8,7 @@ module TSL.Core.StringMap
   )
 where
 
------------------------------------------------------------------------------
-
 import Prelude hiding (lookup)
-
------------------------------------------------------------------------------
 
 -- | Internal data structure of the mapping.
 data StringMap
@@ -31,14 +17,10 @@ data StringMap
   | Node (Maybe Int, [(Char, StringMap)])
   deriving (Show)
 
------------------------------------------------------------------------------
-
 -- | Returns the empty mapping.
 empty ::
   StringMap
 empty = Empty
-
------------------------------------------------------------------------------
 
 -- | Lookups a string in the mapping.
 lookup ::
@@ -59,8 +41,6 @@ lookup str = \case
       ((y, n) : xr)
         | x == y -> Just n
         | otherwise -> findMatch x xr
-
------------------------------------------------------------------------------
 
 -- | Inserts a new string-int pair to the given mapping. If the mapping
 -- already containts the given string, then the corresponding value is
@@ -87,8 +67,6 @@ insert s i = \case
       ((c, n) : yr)
         | x == c -> (c, insert xr j n) : yr
         | otherwise -> (c, n) : add x xr j yr
-
------------------------------------------------------------------------------
 
 -- | Removes an entry from the map, if it exists.
 remove ::
@@ -119,5 +97,3 @@ remove str = \case
       | otherwise = case remove xr m of
           Empty -> a
           y -> (c, y) : a
-
------------------------------------------------------------------------------

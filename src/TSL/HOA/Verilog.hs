@@ -1,3 +1,4 @@
+-- | Implement HOA controller in Verilog
 module TSL.HOA.Verilog
   ( implement,
   )

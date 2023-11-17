@@ -1,15 +1,7 @@
------------------------------------------------------------------------------
------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Expression
--- Maintainer  :  Felix Klein
---
--- Data types to store expressions and some helper functions.
+-- | Data types to store expressions and some helper functions.
 module TSL.Core.Expression
   ( Constant,
     ExprId,
@@ -24,17 +16,11 @@ module TSL.Core.Expression
   )
 where
 
------------------------------------------------------------------------------
-
 -- | A constant is represented by an integer
 type Constant = Int
 
------------------------------------------------------------------------------
-
 -- | Expressions are identified by their unique expression id
 type ExprId = Int
-
------------------------------------------------------------------------------
 
 -- | Each expression consists of two parts, the main expression
 -- itself, i.e., the basic term or an operation, and the position of
@@ -47,19 +33,13 @@ data Expr a = Expr
   }
   deriving (Show, Eq)
 
------------------------------------------------------------------------------
-
 instance Functor Expr where
   fmap f e@Expr {..} =
     e {expr = fmap f expr}
 
------------------------------------------------------------------------------
-
 -- | We use the type @Expression@ as a shortcut for expressions, where
 -- identifiers are denoted by integers.
 type Expression = Expr Int
-
------------------------------------------------------------------------------
 
 -- | An expression is either a basic term or the composition of
 -- multiple sub-expressions using an operator. To obtain a stepwise
@@ -130,8 +110,6 @@ data Expr' a
   | Pattern (Expr a) (Expr a)
   deriving (Show, Eq)
 
------------------------------------------------------------------------------
-
 instance Functor Expr' where
   fmap f = \case
     BaseWild -> BaseWild
@@ -195,8 +173,6 @@ instance Functor Expr' where
     Colon x y -> Colon (fmap f x) $ fmap f y
     Pattern x y -> Pattern (fmap f x) $ fmap f y
 
------------------------------------------------------------------------------
-
 -- | The position of an expression is denoted by its starting position
 -- and ending position in the source code.
 data ExprPos = ExprPos
@@ -206,8 +182,6 @@ data ExprPos = ExprPos
   }
   deriving (Eq, Ord, Show)
 
------------------------------------------------------------------------------
-
 -- | A position in the source code is uniquely identified by its line and
 -- column.
 data SrcPos = SrcPos
@@ -215,8 +189,6 @@ data SrcPos = SrcPos
     srcColumn :: Int
   }
   deriving (Eq, Ord, Show)
-
------------------------------------------------------------------------------
 
 -- | Returns all direct sub-formulas of the given formula, i.e., the
 -- formulas that appear under the first operator. If the given formula
@@ -285,8 +257,6 @@ subExpressions e = case expr e of
   BlnROr xs x -> x : xs
   BlnRAnd xs x -> x : xs
 
------------------------------------------------------------------------------
-
 -- | Applies function 'f' to the fist level sup-expressions of 'e'.
 applySub ::
   (Expr a -> Expr a) -> Expr a -> Expr a
@@ -353,8 +323,6 @@ applySub f e =
         BlnROr xs x -> BlnROr (map f xs) (f x)
         BlnRAnd xs x -> BlnRAnd (map f xs) (f x)
    in e {expr = e'}
-
------------------------------------------------------------------------------
 
 -- | Some debugging function to give a more readable version of the
 -- expression.  In constrast to @show@, this function drops all
@@ -424,7 +392,6 @@ prExpr f e = case expr e of
   BlnROr xs x -> "(OR[" ++ concatMap (flip (++) " " . prExpr f) xs ++ "] " ++ prExpr f x ++ ")"
   BlnRAnd xs x -> "(AND[" ++ concatMap (flip (++) " " . prExpr f) xs ++ "] " ++ prExpr f x ++ ")"
 
------------------------------------------------------------------------------
 {-
 -- | Some debugging function to give a very well readable version of
 -- the expression.  In constrast to @show@, this function drops all
@@ -493,4 +460,3 @@ prPrettyExpr e = case expr e of
   BlnROr xs x      -> "(OR[" ++ concatMap (flip (++) " " . prExpr) xs ++ "] " ++ prExpr x ++ ")"
   BlnRAnd xs x     -> "(AND[" ++ concatMap (flip (++) " " . prExpr) xs ++ "] " ++ prExpr x ++ ")"
 -}
------------------------------------------------------------------------------

@@ -1,12 +1,4 @@
------------------------------------------------------------------------------
-
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Core.Reader.Data
--- Maintainer  :  Felix Klein
---
--- Common data used by the 'Reader' module.
+-- | Common data used by the 'Reader' module.
 module TSL.Core.Reader.Data
   ( NameTable,
     PositionTable,
@@ -19,55 +11,37 @@ module TSL.Core.Reader.Data
   )
 where
 
------------------------------------------------------------------------------
-
 import Data.IntMap.Strict (IntMap)
 import TSL.Core.Binding (Binding, BoundExpr)
 import TSL.Core.Expression (Expr, ExprPos)
 import TSL.Core.Types (ExprType, SectionType)
 
------------------------------------------------------------------------------
-
 -- | Mapping that maps identifiers to their correpsonding names.
 type NameTable = IntMap String
-
------------------------------------------------------------------------------
 
 -- | Mapping that maps identifiers to their defined position in the
 -- source file.
 type PositionTable = IntMap ExprPos
 
------------------------------------------------------------------------------
-
 -- | Mapping that maps identifiers to their arguments, in case the bound
 -- expression is a function (only for globally bound identifiers).
 type ArgumentTable = IntMap [Int]
-
------------------------------------------------------------------------------
 
 -- | Mapping that maps identifiers to their bound expression (only for
 -- globally bound identifiers). An expression may consist of multiple
 -- sub-expressions, if guarded by different patterns.
 type ExpressionTable = IntMap (BoundExpr Int)
 
------------------------------------------------------------------------------
-
 -- | Mapping that maps identifiers to their correspoinging type.
 type TypeTable = IntMap ExprType
 
------------------------------------------------------------------------------
-
 -- | Mapping that maps identifiers to the identifiers it depends on.
 type DependencyTable = IntMap [Int]
-
------------------------------------------------------------------------------
 
 -- | Mapping that maps all identifiers to unit that are bound
 -- internally by the specification and not externally through the
 -- logic.
 type ScopeTable = IntMap ()
-
------------------------------------------------------------------------------
 
 -- | The internal representation of a specification used by the reader
 -- module.
@@ -95,5 +69,3 @@ data Specification = Specification
     -- | Number of different expressions in the input.
     exprRange :: (Int, Int)
   }
-
------------------------------------------------------------------------------

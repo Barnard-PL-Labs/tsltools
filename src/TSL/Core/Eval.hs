@@ -1,22 +1,12 @@
------------------------------------------------------------------------------
------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ViewPatterns #-}
 
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Eval
--- Maintainer  :  Felix Klein
---
--- Evaluation function for internal variables.
+-- | Evaluation function for internal variables.
 module TSL.Core.Eval
   ( eval,
   )
 where
-
------------------------------------------------------------------------------
 
 import Control.Exception (assert)
 import Control.Monad (foldM, liftM2, liftM3)
@@ -52,8 +42,6 @@ import TSL.Core.SymbolTable
 import TSL.Core.Types (ExprType (..))
 import TSL.Error (Error, runtimeError)
 
------------------------------------------------------------------------------
-
 -- | Evaluation result.
 data Value
   = VEmpty
@@ -67,8 +55,6 @@ data Value
   | VPTerm (PredicateTerm Int)
   | VError ExprPos String
   deriving (Show, Ord, Eq)
-
------------------------------------------------------------------------------
 
 eval ::
   SymbolTable -> [Expression] -> Either Error [Formula Int]
@@ -84,8 +70,6 @@ eval s@SymbolTable {..} es = runST $ do
         VBoolean False -> return $ Right FFalse
         VError p str -> return $ runtimeError p str
         _ -> assert False undefined
-
------------------------------------------------------------------------------
 
 evalExpression ::
   SymbolTable -> STArray s Int Value -> Expression -> ST s Value
@@ -294,14 +278,10 @@ evalExpression s a e =
           vr
       _ -> assert False undefined
 
------------------------------------------------------------------------------
-
 vMin ::
   Value -> Value -> Value
 vMin (VInt x) (VInt y) = VInt $ min x y
 vMin _ _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vMinS ::
   Value -> Value
@@ -309,14 +289,10 @@ vMinS (VSet (toList -> x : xr)) = foldl vMin x xr
 vMinS (VSet (toList -> [])) = VError undefined "Minimum of empty set"
 vMinS _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vMax ::
   Value -> Value -> Value
 vMax (VInt x) (VInt y) = VInt $ max x y
 vMax _ _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vMaxS ::
   Value -> Value
@@ -324,126 +300,90 @@ vMaxS (VSet (toList -> x : xr)) = foldl vMax x xr
 vMaxS (VSet (toList -> [])) = VError undefined "Maximum of empty set"
 vMaxS _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vElem ::
   Value -> Value -> Value
 vElem x (VSet y) = VBoolean $ member x y
 vElem _ _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vPlus ::
   Value -> Value -> Value
 vPlus (VInt x) (VInt y) = VInt $ x + y
 vPlus _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vMinus ::
   Value -> Value -> Value
 vMinus (VInt x) (VInt y) = VInt $ x - y
 vMinus _ _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vDiv ::
   Value -> Value -> Value
 vDiv (VInt x) (VInt y) = VInt $ x `div` y
 vDiv _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vMod ::
   Value -> Value -> Value
 vMod (VInt x) (VInt y) = VInt $ x `mod` y
 vMod _ _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vMul ::
   Value -> Value -> Value
 vMul (VInt x) (VInt y) = VInt $ x * y
 vMul _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vCup ::
   Value -> Value -> Value
 vCup (VSet x) (VSet y) = VSet $ union x y
 vCup _ _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vCap ::
   Value -> Value -> Value
 vCap (VSet x) (VSet y) = VSet $ intersection x y
 vCap _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vDif ::
   Value -> Value -> Value
 vDif (VSet x) (VSet y) = VSet $ difference x y
 vDif _ _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vSize ::
   Value -> Value
 vSize (VSet x) = VInt $ size x
 vSize _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vRange ::
   Value -> Value -> Value -> Value
 vRange (VInt x) (VInt y) (VInt z) = VSet $ fromList $ map VInt [x, y .. z]
 vRange _ _ _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vEQ ::
   Value -> Value -> Value
 vEQ (VInt x) (VInt y) = VBoolean $ x == y
 vEQ _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vNEQ ::
   Value -> Value -> Value
 vNEQ (VInt x) (VInt y) = VBoolean $ x /= y
 vNEQ _ _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vLE ::
   Value -> Value -> Value
 vLE (VInt x) (VInt y) = VBoolean $ x < y
 vLE _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vLEQ ::
   Value -> Value -> Value
 vLEQ (VInt x) (VInt y) = VBoolean $ x <= y
 vLEQ _ _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vGE ::
   Value -> Value -> Value
 vGE (VInt x) (VInt y) = VBoolean $ x > y
 vGE _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vGEQ ::
   Value -> Value -> Value
 vGEQ (VInt x) (VInt y) = VBoolean $ x >= y
 vGEQ _ _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vNot ::
   Value -> Value
@@ -453,8 +393,6 @@ vNot (VPTerm x) = VTSL $ Not $ Check x
 vNot (VSTerm (Signal x)) = VTSL $ Not $ cb x
 vNot (VTSL x) = VTSL $ Not x
 vNot _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vOr ::
   Value -> Value -> Value
@@ -478,8 +416,6 @@ vOr (VPTerm x) (VSTerm (Signal y)) = VTSL $ Or [Check x, cb y]
 vOr (VSTerm (Signal x)) (VSTerm (Signal y)) = VTSL $ Or [cb x, cb y]
 vOr _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vAnd ::
   Value -> Value -> Value
 vAnd (VBoolean False) _ = VBoolean False
@@ -502,8 +438,6 @@ vAnd (VPTerm x) (VSTerm (Signal y)) = VTSL $ And [Check x, cb y]
 vAnd (VSTerm (Signal x)) (VSTerm (Signal y)) = VTSL $ And [cb x, cb y]
 vAnd _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vImpl ::
   Value -> Value -> Value
 vImpl (VBoolean True) (VBoolean False) = VBoolean False
@@ -525,8 +459,6 @@ vImpl (VTSL x) (VSTerm (Signal y)) = VTSL $ Implies x $ cb y
 vImpl (VPTerm x) (VSTerm (Signal y)) = VTSL $ Implies (Check x) $ cb y
 vImpl (VSTerm (Signal x)) (VSTerm (Signal y)) = VTSL $ Implies (cb x) $ cb y
 vImpl _ _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vEquiv ::
   Value -> Value -> Value
@@ -551,8 +483,6 @@ vEquiv (VPTerm x) (VSTerm (Signal y)) = VTSL $ Equiv (Check x) $ cb y
 vEquiv (VSTerm (Signal x)) (VSTerm (Signal y)) = VTSL $ Equiv (cb x) $ cb y
 vEquiv _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vNext ::
   Value -> Value
 vNext (VBoolean True) = VBoolean True
@@ -561,8 +491,6 @@ vNext (VPTerm x) = VTSL $ Next $ Check x
 vNext (VSTerm (Signal x)) = VTSL $ Next $ cb x
 vNext (VTSL x) = VTSL $ Next x
 vNext _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vNextN ::
   Value -> Value -> Value
@@ -591,8 +519,6 @@ vNextN (VInt n) (VSTerm (Signal x))
   | otherwise = VTSL $ (!! n) $ iterate Next $ cb x
 vNextN _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vPrevious ::
   Value -> Value
 vPrevious (VBoolean False) = VBoolean False
@@ -600,8 +526,6 @@ vPrevious (VPTerm x) = VTSL $ Previous $ Check x
 vPrevious (VSTerm (Signal x)) = VTSL $ Previous $ cb x
 vPrevious (VTSL x) = VTSL $ Previous x
 vPrevious _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vPreviousN ::
   Value -> Value -> Value
@@ -629,8 +553,6 @@ vPreviousN (VInt n) (VSTerm (Signal x))
   | otherwise = VTSL $ (!! n) $ iterate Previous $ cb x
 vPreviousN _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vGlobally ::
   Value -> Value
 vGlobally (VBoolean True) = VBoolean True
@@ -639,8 +561,6 @@ vGlobally (VPTerm x) = VTSL $ Globally $ Check x
 vGlobally (VSTerm (Signal x)) = VTSL $ Globally $ cb x
 vGlobally (VTSL x) = VTSL $ Globally x
 vGlobally _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vGloballyR ::
   Value -> Value -> Value -> Value
@@ -675,8 +595,6 @@ vGloballyR (VInt n) (VInt m) (VSTerm (Signal x))
       VError undefined $ "Invalid range: [" ++ show n ++ ":" ++ show m ++ "]"
 vGloballyR _ _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vFinally ::
   Value -> Value
 vFinally (VBoolean True) = VBoolean True
@@ -685,8 +603,6 @@ vFinally (VPTerm x) = VTSL $ Finally $ Check x
 vFinally (VSTerm (Signal x)) = VTSL $ Finally $ cb x
 vFinally (VTSL x) = VTSL $ Finally x
 vFinally _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vFinallyR ::
   Value -> Value -> Value -> Value
@@ -721,8 +637,6 @@ vFinallyR (VInt n) (VInt m) (VSTerm (Signal x))
       VError undefined $ "Invalid range: [" ++ show n ++ ":" ++ show m ++ "]"
 vFinallyR _ _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vHistorically ::
   Value -> Value
 vHistorically (VBoolean True) = VBoolean True
@@ -731,8 +645,6 @@ vHistorically (VPTerm x) = VTSL $ Historically $ Check x
 vHistorically (VSTerm (Signal x)) = VTSL $ Historically $ cb x
 vHistorically (VTSL x) = VTSL $ Historically x
 vHistorically _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vHistoricallyR ::
   Value -> Value -> Value -> Value
@@ -767,8 +679,6 @@ vHistoricallyR (VInt n) (VInt m) (VSTerm (Signal x))
       VError undefined $ "Invalid range: [" ++ show n ++ ":" ++ show m ++ "]"
 vHistoricallyR _ _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vOnce ::
   Value -> Value
 vOnce (VBoolean True) = VBoolean True
@@ -777,8 +687,6 @@ vOnce (VPTerm x) = VTSL $ Once $ Check x
 vOnce (VSTerm (Signal x)) = VTSL $ Once $ cb x
 vOnce (VTSL x) = VTSL $ Once x
 vOnce _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vOnceR ::
   Value -> Value -> Value -> Value
@@ -813,8 +721,6 @@ vOnceR (VInt n) (VInt m) (VSTerm (Signal x))
       VError undefined $ "Invalid range: [" ++ show n ++ ":" ++ show m ++ "]"
 vOnceR _ _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vUntil ::
   Value -> Value -> Value
 vUntil _ (VBoolean True) = VBoolean True
@@ -835,8 +741,6 @@ vUntil (VTSL x) (VSTerm (Signal y)) = VTSL $ Until x $ cb y
 vUntil (VPTerm x) (VSTerm (Signal y)) = VTSL $ Until (Check x) $ cb y
 vUntil (VSTerm (Signal x)) (VSTerm (Signal y)) = VTSL $ Until (cb x) $ cb y
 vUntil _ _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vWeak ::
   Value -> Value -> Value
@@ -860,8 +764,6 @@ vWeak (VPTerm x) (VSTerm (Signal y)) = VTSL $ Weak (Check x) $ cb y
 vWeak (VSTerm (Signal x)) (VSTerm (Signal y)) = VTSL $ Weak (cb x) $ cb y
 vWeak _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vRelease ::
   Value -> Value -> Value
 vRelease _ (VBoolean False) = VBoolean False
@@ -882,8 +784,6 @@ vRelease (VTSL x) (VSTerm (Signal y)) = VTSL $ Release x $ cb y
 vRelease (VPTerm x) (VSTerm (Signal y)) = VTSL $ Release (Check x) $ cb y
 vRelease (VSTerm (Signal x)) (VSTerm (Signal y)) = VTSL $ Release (cb x) $ cb y
 vRelease _ _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vAsSoonAs ::
   Value -> Value -> Value
@@ -907,8 +807,6 @@ vAsSoonAs (VPTerm x) (VSTerm (Signal y)) = VTSL $ Weak (Not $ cb y) $ And [Check
 vAsSoonAs (VSTerm (Signal x)) (VSTerm (Signal y)) = VTSL $ Weak (Not $ cb y) $ And [cb x, cb y]
 vAsSoonAs _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 vSince ::
   Value -> Value -> Value
 vSince _ (VBoolean True) = VBoolean True
@@ -929,8 +827,6 @@ vSince (VTSL x) (VSTerm (Signal y)) = VTSL $ Since x $ cb y
 vSince (VPTerm x) (VSTerm (Signal y)) = VTSL $ Since (Check x) $ cb y
 vSince (VSTerm (Signal x)) (VSTerm (Signal y)) = VTSL $ Since (cb x) $ cb y
 vSince _ _ = assert False undefined
-
------------------------------------------------------------------------------
 
 vTriggered ::
   Value -> Value -> Value
@@ -953,11 +849,7 @@ vTriggered (VPTerm x) (VSTerm (Signal y)) = VTSL $ Triggered (Check x) $ cb y
 vTriggered (VSTerm (Signal x)) (VSTerm (Signal y)) = VTSL $ Triggered (cb x) $ cb y
 vTriggered _ _ = assert False undefined
 
------------------------------------------------------------------------------
-
 cb ::
   a -> Formula a
 cb =
   Check . BooleanInput
-
------------------------------------------------------------------------------

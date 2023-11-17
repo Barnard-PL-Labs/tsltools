@@ -1,12 +1,4 @@
------------------------------------------------------------------------------
-
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Core.Parser.Utils
--- Maintainer  :  Felix Klein
---
--- Functions shared among the different parsers.
+-- | Functions shared among the different parsers.
 module TSL.Core.Parser.Utils
   ( stringParser,
     identifier,
@@ -15,8 +7,6 @@ module TSL.Core.Parser.Utils
     ch,
   )
 where
-
------------------------------------------------------------------------------
 
 import Control.Monad (void)
 import Data.Functor.Identity (Identity)
@@ -36,8 +26,6 @@ import Text.Parsec
   )
 import Text.Parsec.String (Parser)
 import Text.Parsec.Token (identLetter, identStart)
-
------------------------------------------------------------------------------
 
 -- | Parses a string surrounded by double quotation marks.  Double
 -- quotation marks inside the string have to be escabed by a
@@ -65,8 +53,6 @@ stringParser = do
       c <- noneOf "\""
       return [c]
 
------------------------------------------------------------------------------
-
 -- | @identifier wp@ is an exteded version of its equivalent exported
 -- by 'Text.Parser.Token', which additionally stores the starting
 -- source position and the ending source position. The parser @wp@ is
@@ -77,8 +63,6 @@ identifier wp = positionParser wp $ do
   x <- identStart globalDef
   xr <- many $ identLetter globalDef
   return (x : xr)
-
------------------------------------------------------------------------------
 
 -- | @positionParser wp p@ parses the same as parser @p@, but
 -- additionally returns the starting and ending source positions of
@@ -96,8 +80,6 @@ positionParser wp p = do
   wp
   return (e, ExprPos x y Nothing)
 
------------------------------------------------------------------------------
-
 -- | Return the current position of the parser in the source file.
 getPos ::
   (Stream s m t) => ParsecT s u m SrcPos
@@ -105,10 +87,6 @@ getPos = do
   x <- getPosition
   return $ SrcPos (sourceLine x) (sourceColumn x - 1)
 
------------------------------------------------------------------------------
-
 ch ::
   Char -> Parser ()
 ch = void . char
-
------------------------------------------------------------------------------

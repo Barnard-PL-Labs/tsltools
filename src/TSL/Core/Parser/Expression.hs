@@ -1,20 +1,8 @@
------------------------------------------------------------------------------
------------------------------------------------------------------------------
-{-# LANGUAGE LambdaCase #-}
-
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Core.Parser.Expression
--- Maintainer  :  Felix Klein
---
--- Expression Parser.
+-- | Expression Parser.
 module TSL.Core.Parser.Expression
   ( exprParser,
   )
 where
-
------------------------------------------------------------------------------
 
 import Control.Monad (void)
 import Data.Char (isAlpha, toLower)
@@ -46,8 +34,6 @@ import Text.Parsec.Token
     reservedOp,
     whiteSpace,
   )
-
------------------------------------------------------------------------------
 
 -- | Parses an expression.
 exprParser ::
@@ -515,5 +501,3 @@ exprParser = (~~) >> buildExpressionParser table term
 
     ch2 c1 c2 = do ch c1; ch c2
     ch4 c1 c2 c3 c4 = do ch2 c1 c2; ch2 c3 c4
-
------------------------------------------------------------------------------

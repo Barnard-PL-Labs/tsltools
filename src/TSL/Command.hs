@@ -1,3 +1,4 @@
+-- | CLI commands and options parser
 module TSL.Command where
 
 import Options.Applicative (Parser, ParserInfo, command, fullDesc, header, helper, info, progDesc, subparser)

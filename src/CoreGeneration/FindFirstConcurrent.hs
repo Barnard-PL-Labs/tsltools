@@ -1,13 +1,4 @@
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-
--- |
--- Module      :  FindFirstConcurrent
--- Description :  Concurrent computation of IO-dependent search task
--- Maintainer  :  Philippe Heim
---
--- This module provides a function that executes multiple IO-dependent tasks
+-- | This module provides a function that executes multiple IO-dependent tasks
 -- concurrently and yields the result of the first task that terminates
 -- successfully. This can mainly be used to parallelize a search task.
 module CoreGeneration.FindFirstConcurrent
@@ -15,13 +6,9 @@ module CoreGeneration.FindFirstConcurrent
   )
 where
 
--------------------------------------------------------------------------------
-
 import Control.Concurrent (ThreadId, forkOS, killThread, myThreadId)
 import Control.Concurrent.MVar (MVar, newEmptyMVar, putMVar, takeMVar)
 import Data.Set as Set (Set, delete, empty, fromList, insert, toList)
-
--------------------------------------------------------------------------------
 
 -- | Provided a list of IO tasks (returning a Maybe) and a pool size
 -- 'incParallelFirst' returns the first Just value that some of these tasks
@@ -55,13 +42,9 @@ incParallelFirst poolSize values =
                     return (insert newId threads', qr)
               loop semaphore threads'' queue'
 
--------------------------------------------------------------------------------
-
 -- | 'killWorkers' kills all threads a pool of threads.
 killWorkers :: Set ThreadId -> IO ()
 killWorkers threads = sequence_ (killThread <$> toList threads)
-
--------------------------------------------------------------------------------
 
 -- | 'startWorker' starts a worker who – after finishing his task – puts his
 -- result and thread id into the MVar (he blocks until it is free) and gives
@@ -74,5 +57,3 @@ startWorker op semaphore = forkOS (worker op semaphore)
       id <- myThreadId
       result <- op
       putMVar semaphore (id, result)
-
--------------------------------------------------------------------------------

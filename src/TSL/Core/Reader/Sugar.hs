@@ -1,27 +1,16 @@
------------------------------------------------------------------------------
------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 
--- |
--- Module      :  TSL.Core.Reader.Sugar
--- License     :  MIT (see the LICENSE file)
--- Maintainer  :  Felix Klein
---
--- Removes syntactic sugar elements from the specification.
+-- | Removes syntactic sugar elements from the specification.
 module TSL.Core.Reader.Sugar
   ( replaceSugar,
   )
 where
-
------------------------------------------------------------------------------
 
 import Control.Exception (assert)
 import TSL.Core.Binding (Binding (..), BoundExpr (..))
 import TSL.Core.Expression (Expr (..), Expr' (..))
 import TSL.Core.Reader.Data (Specification (..))
 import TSL.Error (Error)
-
------------------------------------------------------------------------------
 
 -- | Replaces syntactic sugar elements in the given specification by their
 -- corresponding standard elements.
@@ -30,8 +19,6 @@ replaceSugar ::
 replaceSugar s = do
   vs <- mapM replaceBinding $ definitions s
   return s {definitions = vs}
-
------------------------------------------------------------------------------
 
 replaceBinding ::
   Binding Int -> Either Error (Binding Int)
@@ -46,8 +33,6 @@ replaceBinding b =
       }
   where
     rpE x = head $ replaceExpr [x]
-
------------------------------------------------------------------------------
 
 replaceExpr ::
   [Expr Int] -> [Expr Int]
@@ -83,5 +68,3 @@ replaceExpr = \case
 
     fldOr p e1 e2 =
       Expr (BlnOr e1 e2) (-1) p
-
------------------------------------------------------------------------------

@@ -1,3 +1,4 @@
+-- | Implement HOA controller in Python
 module TSL.HOA.Python
   ( implement,
   )

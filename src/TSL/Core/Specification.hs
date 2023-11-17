@@ -1,14 +1,6 @@
------------------------------------------------------------------------------
-------------------------------------------------------------------------------
 {-# LANGUAGE RecordWildCards #-}
 
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Specification
--- Maintainer  :  Felix Klein
---
--- Internal data structure of a specification.
+-- | Internal data structure of a specification.
 module TSL.Core.Specification
   ( Specification (..),
     toFormula,
@@ -16,12 +8,8 @@ module TSL.Core.Specification
   )
 where
 
------------------------------------------------------------------------------
-
 import TSL.Core.Logic (Formula (..), tslFormula)
 import TSL.Core.SymbolTable (SymbolTable, stName)
-
------------------------------------------------------------------------------
 
 data Specification = Specification
   { -- | List of TSL formulas that are assumed
@@ -32,14 +20,11 @@ data Specification = Specification
     symboltable :: SymbolTable
   }
 
------------------------------------------------------------------------------
 instance Show Specification where
   show (Specification a g s) = "Assumptions\n:" ++ stringify a ++ "\nGuarantees:\n" ++ stringify g
     where
       getName = fmap (stName s)
       stringify = unlines . (map (show . getName))
-
------------------------------------------------------------------------------
 
 -- | Create one formula out of assumptions and guarantees.
 --   TODO, look into this.
@@ -57,8 +42,6 @@ toFormula assumptions guarantees =
     (as, [g]) -> Implies (And as) g
     (as, gs) -> Implies (And as) $ And gs
 
------------------------------------------------------------------------------
-
 -- | Prints a TSL specification in the TSL format
 toTSL ::
   Specification -> String
@@ -72,5 +55,3 @@ toTSL Specification {..} =
   where
     prFormulas =
       concatMap $ ("\n  " ++) . (++ ";") . tslFormula (stName symboltable)
-
------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
+-- | Utilities related to TSLMT.
 module TSL.ModuloTheories
   ( theorize,
     parse,
-    module TSL.ModuloTheories,
     module TSL.ModuloTheories.Cfg,
     module TSL.ModuloTheories.ConsistencyChecking,
     module TSL.ModuloTheories.Predicates,
@@ -12,7 +12,7 @@ where
 
 import Control.Monad.Trans.Except
 import Data.Maybe (catMaybes)
-import TSL.Core.Reader (fromTSL)
+import TSL.Core.Reader (readTSL)
 import TSL.Core.Specification (Specification)
 import TSL.Error (unwrap)
 import TSL.ModuloTheories.Cfg
@@ -21,9 +21,9 @@ import TSL.ModuloTheories.Predicates
 import TSL.ModuloTheories.Sygus
 import TSL.ModuloTheories.Theories
 
-theorize :: FilePath -> Maybe FilePath -> String -> IO String
-theorize solverPath inputPath spec = do
-  (theory, tslSpec, specStr) <- parse inputPath spec
+theorize :: FilePath -> String -> IO String
+theorize solverPath spec = do
+  (theory, tslSpec, specStr) <- parse spec
   let cfg = unError $ cfgFromSpec theory tslSpec
       preds = unError $ predsFromSpec theory tslSpec
 
@@ -75,16 +75,16 @@ theorize solverPath inputPath spec = do
       Left err -> error $ show err
       Right val -> val
 
-parse :: Maybe FilePath -> String -> IO (Theory, Specification, String)
-parse inputPath spec = do
+parse :: String -> IO (Theory, Specification, String)
+parse spec = do
   let linesList = lines spec
       hasTheoryAnnotation = '#' == head (head linesList)
       theory = readTheory $ head linesList
       specStr = unlines $ tail linesList -- FIXME: unlines.lines is computationally wasteful
   if hasTheoryAnnotation
     then do
-      tslmt <- fromTSL inputPath specStr
+      tslmt <- readTSL specStr
       unwrap $ (,,specStr) <$> theory <*> tslmt
     else do
-      rawTSL <- fromTSL inputPath spec
+      rawTSL <- readTSL spec
       unwrap $ (,,spec) <$> Right tUninterpretedFunctions <*> rawTSL

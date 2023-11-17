@@ -1,20 +1,7 @@
-----------------------------------------------------------------------------
------------------------------------------------------------------------------
-{-# LANGUAGE LambdaCase #-}
-
------------------------------------------------------------------------------
-
--- |
--- Module      :  Test
--- Maintainer  :  Gideon Geier
---
--- Splitting Test cases.
 module SplitTests
   ( tests,
   )
 where
-
------------------------------------------------------------------------------
 
 import Data.Char (isSpace)
 import Data.Set as Set (fromList, (\\))
@@ -24,9 +11,7 @@ import Distribution.TestSuite
     Test (..),
     TestInstance (..),
   )
-import TSL.Core (Specification, fromTSL, split, toTSL)
-
------------------------------------------------------------------------------
+import TSL.Core (Specification, readTSL, split, toTSL)
 
 tests :: [Test]
 tests =
@@ -37,7 +22,7 @@ genSplitTest i (spec, splits) =
   let x =
         TestInstance
           { run =
-              fromTSL Nothing spec
+              readTSL spec
                 >>= \case
                   Left _ -> do
                     putStrLn $ "Incorrect Specification:\n\n" ++ spec
@@ -489,5 +474,3 @@ splitTestsRaw =
       ]
     )
   ]
-
------------------------------------------------------------------------------

@@ -1,16 +1,4 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE RecordWildCards #-}
-
--------------------------------------------------------------------------------
-
--- |
--- Module      : UnrealizabilityCores
--- Description : Computes TSL unrealizablility cores
--- Maintainer  : Philippe Heim
---
--- This module provides functions to compute TSL unrealizability core. This is
+-- | This module provides functions to compute TSL unrealizability core. This is
 -- a sub-specification of a given specification (with a subset of guarantees)
 -- that is already unrealizable.
 module CoreGeneration.UnrealizabilityCores
@@ -18,7 +6,6 @@ module CoreGeneration.UnrealizabilityCores
   )
 where
 
--------------------------------------------------------------------------------
 import CoreGeneration.CoreUtilities
   ( Context (..),
     logHigh,
@@ -50,12 +37,8 @@ import TSL.Core
     updates,
   )
 
--------------------------------------------------------------------------------
-
 -- | 'Query' represents some potential core and is therefore a 'Specification'
 type Query = Specification
-
--------------------------------------------------------------------------------
 
 -- | 'getCores' computes a list of possible queries that can be used to find
 -- a unrealizability core. Note that the queries are sorted in such a way
@@ -79,7 +62,7 @@ getCores tsl@Specification {guarantees = g} =
   where
     choose indices =
       fmap snd $ Prelude.filter (\(a, _) -> member a indices) $ zip [0 ..] g
-    --
+
     addMissingUpdates choosen =
       let otherUpdates =
             Or $
@@ -90,15 +73,13 @@ getCores tsl@Specification {guarantees = g} =
                       (Set.map (uncurry Update) $ updates (And g))
                   )
        in choosen ++ [otherUpdates]
-    --
+
     getPossibleUpdates :: (Ord c) => Formula c -> Set c -> Set (Formula c)
     getPossibleUpdates form outps =
       let selfUpdates = Set.map (\o -> (o, Signal o)) (outputs form)
        in Set.map (uncurry Update) $
             Set.filter (\(s, _) -> member s outps) $
               union (updates form) selfUpdates
-
--------------------------------------------------------------------------------
 
 -- | 'testCoreQuery' checks whether some potential unrealizable core is
 -- actually one. To make this more efficient, assumption searching is used
@@ -146,8 +127,6 @@ testCoreQuery context minimalAssumptions tsl =
         then return (Just True)
         else return Nothing
 
--------------------------------------------------------------------------------
-
 -- | 'generateCore' computes for a 'Specification' a minimal
 -- sub-specification with a subset of guarantees that is unrealizable
 -- (if it exists). This is called a unrealizable core. The computation is
@@ -178,5 +157,3 @@ generateCore context tsl = do
             )
             qr
         core -> return core
-
--------------------------------------------------------------------------------

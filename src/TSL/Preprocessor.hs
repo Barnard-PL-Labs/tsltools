@@ -1,27 +1,16 @@
-{-# LANGUAGE LambdaCase #-}
-
--------------------------------------------------------------------------------
-
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Preprocessor
--- Description :  Adds preprocessing capabilities to TSL syntax.
--- Maintainer  :  Wonhyuk Choi
+-- | Adds preprocessing capabilities to TSL syntax.
 module TSL.Preprocessor
   ( preprocess,
     parse,
   )
 where
 
------------------------------------------------------------------------------
 -- Imports
 
-import Control.Arrow (left)
-import Control.Monad (liftM)
+import Control.Monad (void)
 import Data.Functor.Identity (Identity)
 import Numeric (showFFloat)
-import TSL.Error (Error, parseError, syntaxError, unwrap)
+import TSL.Error (Error, parseError, unwrap)
 import TSL.ModuloTheories.Theories (Theory (..))
 import Text.Parsec
   ( alphaNum,
@@ -47,7 +36,6 @@ import Text.Parsec.Language (emptyDef)
 import Text.Parsec.String (Parser)
 import qualified Text.Parsec.Token as Token
 
------------------------------------------------------------------------------
 -- Utility Functions
 
 surround :: a -> a -> [a] -> [a]
@@ -58,8 +46,6 @@ parenthize = surround '(' ')'
 
 bracketify :: String -> String
 bracketify = surround '[' ']'
-
--------------------------------------------------------------------------------
 
 data Specification = Specification (Maybe Theory) [Section]
   deriving (Eq)
@@ -121,14 +107,13 @@ data BinaryFunction
   | Div
   deriving (Show, Eq)
 
--------------------------------------------------------------------------------
 -- Fmt instances
 
 class (Show a) => Fmt a where
   fmt :: a -> String
 
 instance (Fmt a) => Fmt [a] where
-  fmt = concat . (map fmt)
+  fmt = concatMap fmt
 
 instance Fmt Char where
   fmt c = [c]
@@ -174,7 +159,7 @@ instance Fmt Predicate where
   fmt = \case
     BinaryPredicate comp lhs rhs ->
       parenthize $ unwords [fmt comp, fmt lhs, fmt rhs]
-    UninterpretedPredicate p args -> parenthize $ unwords $ p : (map fmt args)
+    UninterpretedPredicate p args -> parenthize $ unwords $ p : map fmt args
 
 instance Fmt UnaryOp where
   fmt = \case
@@ -199,11 +184,11 @@ numSign x = if x < 0 then "Neg" else ""
 instance Fmt Signal where
   fmt = \case
     TSLInt s -> "int" ++ numSign s ++ show (abs s) ++ "()"
-    TSLReal s -> "real" ++ numSign s ++ (showFFloat Nothing (abs s) "") ++ "()"
+    TSLReal s -> "real" ++ numSign s ++ showFFloat Nothing (abs s) "" ++ "()"
     Symbol s -> s
     BinaryFunction f lhs rhs -> parenthize $ unwords [fmt f, fmt lhs, fmt rhs]
     UninterpretedFunction f [] -> f
-    UninterpretedFunction f args -> parenthize $ unwords $ f : (map fmt args)
+    UninterpretedFunction f args -> parenthize $ unwords $ f : map fmt args
 
 instance Fmt BinaryFunction where
   fmt = \case
@@ -220,7 +205,6 @@ instance Fmt BinaryComparator where
     Lte -> "lte"
     Gte -> "gte"
 
----------------------------------------------------------------------------
 -- Eq instances
 
 instance Eq Predicate where
@@ -229,7 +213,7 @@ instance Eq Predicate where
       (BinaryPredicate comp' lhs' rhs') ->
         comp == comp' && lhs == lhs' && rhs == rhs'
       (UninterpretedPredicate p [lhs', rhs']) ->
-        (fmt comp) == p && lhs == lhs' && rhs == rhs'
+        fmt comp == p && lhs == lhs' && rhs == rhs'
       _ -> False
     u@(UninterpretedPredicate p1 args1) -> \case
       (UninterpretedPredicate p2 args2) -> p1 == p2 && args1 == args2
@@ -244,12 +228,11 @@ instance Eq Signal where
     f == g && lhs == lhs' && rhs == rhs'
   (BinaryFunction f lhs rhs) == (UninterpretedFunction g [lhs', rhs']) =
     fmt f == g && lhs == lhs' && rhs == rhs'
-  (BinaryFunction _ _ _) == _ = False
+  (BinaryFunction {}) == _ = False
   (UninterpretedFunction f args) == (UninterpretedFunction g args') =
     f == g && args == args'
   uninterpreted@(UninterpretedFunction _ _) == other = other == uninterpreted
 
----------------------------------------------------------------------------
 -- Lexer
 
 binOpNames :: [String]
@@ -317,7 +300,7 @@ float :: Parser Double
 float = lexeme (sign <*> Token.float lexer) <?> "float"
 
 semicolon :: Parser ()
-semicolon = Token.semi lexer >> return ()
+semicolon = void (Token.semi lexer)
 
 exprOperators :: [[Operator String () Identity Expr]]
 exprOperators =
@@ -345,7 +328,6 @@ binaryFunctions =
     ]
   ]
 
----------------------------------------------------------------------------
 -- Parser
 
 specParser :: Parser Specification
@@ -373,7 +355,7 @@ sectionParser = do
     temporalParser =
       (reserved "initially" >> return (Just Initially))
         <|> (reserved "always" >> return (Just Always))
-        <|> (return Nothing)
+        <|> return Nothing
 
     sectionTypeParser :: Parser SectionType
     sectionTypeParser =
@@ -396,22 +378,21 @@ exprPrefixParser = prefixParser <*> exprParser
 exprTerm :: Parser Expr
 exprTerm =
   updateTerm
-    <|> try (liftM PredicateExpr predicateParser)
+    <|> try (fmap PredicateExpr predicateParser)
     <|> parens exprParser
     <|> exprPrefixParser
 
 predicateParser :: Parser Predicate
-predicateParser = (try interpreted) <|> uninterpreted
+predicateParser = try interpreted <|> uninterpreted
   where
     uninterpreted :: Parser Predicate
-    uninterpreted = liftM (uncurry UninterpretedPredicate) functionLiteralParser
+    uninterpreted = fmap (uncurry UninterpretedPredicate) functionLiteralParser
 
     interpreted :: Parser Predicate
     interpreted = do
       lhs <- signalParser
       comparator <- comparatorParser
-      rhs <- signalParser
-      return $ BinaryPredicate comparator lhs rhs
+      BinaryPredicate comparator lhs <$> signalParser
 
 comparatorParser :: Parser BinaryComparator
 comparatorParser =
@@ -425,17 +406,16 @@ updateTerm :: Parser Expr
 updateTerm = brackets $ do
   dst <- identifier
   _ <- reservedOp "<-"
-  src <- signalParser
-  return $ Update (Symbol dst) src
+  Update (Symbol dst) <$> signalParser
 
 signalParser :: Parser Signal
 signalParser = buildExpressionParser binaryFunctions signalTerm
 
 literalParser :: Parser Signal
-literalParser = (try realParser) <|> intParser <|> constantParser
+literalParser = try realParser <|> intParser <|> constantParser
   where
-    intParser = liftM TSLInt integer
-    realParser = liftM TSLReal float
+    intParser = fmap TSLInt integer
+    realParser = fmap TSLReal float
     constantParser = do
       symbol <- identifier
       nullary <- Parsec.string "()"
@@ -446,8 +426,8 @@ signalTerm :: Parser Signal
 signalTerm =
   parens signalParser
     <|> try literalParser
-    <|> try (liftM (uncurry UninterpretedFunction) functionLiteralParser)
-    <|> liftM Symbol identifier
+    <|> try (fmap (uncurry UninterpretedFunction) functionLiteralParser)
+    <|> fmap Symbol identifier
 
 functionLiteralParser :: Parser (String, [Signal])
 functionLiteralParser = do
@@ -456,7 +436,7 @@ functionLiteralParser = do
   return (function, args)
   where
     argParser =
-      try literalParser <|> liftM Symbol (try identifier) <|> try signalParser
+      try literalParser <|> fmap Symbol (try identifier) <|> try signalParser
 
 parse :: String -> Either Error Specification
 parse input =

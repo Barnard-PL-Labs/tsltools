@@ -1,10 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE QuasiQuotes #-}
-
--------------------------------------------------------------------------------
 
 -- |
 -- Module      :  TSL.ModuloTheories.Lia
@@ -12,12 +8,8 @@
 -- Maintainer  :  Wonhyuk Choi
 module TSL.ModuloTheories.Theories.Lia (LiaSymbol) where
 
--------------------------------------------------------------------------------
-
 import TSL.ModuloTheories.Theories.Base (TheorySymbol (..))
 import Text.Regex.PCRE.Heavy (re, scan)
-
--------------------------------------------------------------------------------
 
 data LiaSymbol
   = Int (Int)

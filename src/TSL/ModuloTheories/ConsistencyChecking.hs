@@ -1,10 +1,6 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
-
--------------------------------------------------------------------------------
 
 -- |
 -- Module      :  TSL.ModuloTheories.ConsistencyChecking
@@ -16,8 +12,6 @@ module TSL.ModuloTheories.ConsistencyChecking
     ConsistencyDebugInfo (..),
   )
 where
-
--------------------------------------------------------------------------------
 
 import Control.Monad.Trans.Except
 import TSL.Core.Ast
@@ -44,8 +38,6 @@ import TSL.ModuloTheories.Theories
     symbol2Smt,
     symbolType,
   )
-
--------------------------------------------------------------------------------
 
 pred2Assumption :: TheoryPredicate -> String
 pred2Assumption p = "G " ++ pred2Tsl (NotPLit p) ++ ";"

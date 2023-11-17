@@ -1,20 +1,10 @@
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-
 -- |
 -- Module      :  TSL.ModuloTheories.Theories.Base
 -- Description :  Typeclass declarations for all theories
 -- Maintainer  :  Wonhyuk Choi
 module TSL.ModuloTheories.Theories.Base (TheorySymbol (..)) where
 
--------------------------------------------------------------------------------
-
 import TSL.Error (Error)
-
--------------------------------------------------------------------------------
 
 class TheorySymbol a where
   readT :: String -> Either Error a

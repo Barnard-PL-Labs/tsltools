@@ -1,22 +1,10 @@
------------------------------------------------------------------------------
------------------------------------------------------------------------------
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TupleSections #-}
 
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Core.Reader.Abstraction
--- Maintainer  :  Felix Klein
---
--- Abstracts from identifier names to integer IDs.
+-- | Abstracts from identifier names to integer IDs.
 module TSL.Core.Reader.Abstraction
   ( abstract,
   )
 where
-
------------------------------------------------------------------------------
 
 import Control.Exception (assert)
 import Control.Monad.State (StateT (..), evalStateT, foldM, get, put)
@@ -34,11 +22,7 @@ import TSL.Core.Reader.Data
 import qualified TSL.Core.StringMap as SM (StringMap, empty, insert, lookup, remove)
 import TSL.Error (Error, errConflict, errPattern, errUnknown)
 
------------------------------------------------------------------------------
-
 type Abstractor a b = a -> StateT ST (Either Error) b
-
------------------------------------------------------------------------------
 
 data ST = ST
   { count :: Int,
@@ -47,8 +31,6 @@ data ST = ST
     tPos :: PositionTable,
     tArgs :: ArgumentTable
   }
-
------------------------------------------------------------------------------
 
 -- | Abstracts from identifiers represeted by strings to identifiers
 -- represented by integers. Additionally, a mapping from the integer
@@ -67,8 +49,6 @@ abstract spec =
         tPos = IM.empty,
         tArgs = IM.empty
       }
-
------------------------------------------------------------------------------
 
 abstractSpec ::
   Abstractor PD.Specification Specification
@@ -96,15 +76,11 @@ abstractSpec PD.Specification {..} = do
         exprRange = (0, 0)
       }
 
------------------------------------------------------------------------------
-
 -- | Shortcut to lookup a string identifier in the global lookup table.
 lookupName ::
   Abstractor String (Maybe Int)
 lookupName str =
   get >>= \ST {..} -> return $ SM.lookup str tIndex
-
------------------------------------------------------------------------------
 
 -- | Adds a new idententifier name to the lookup tables.
 add ::
@@ -127,8 +103,6 @@ add (str, pos) =
         Just str' -> errConflict str str' pos
         Nothing -> assert False undefined
 
------------------------------------------------------------------------------
-
 -- | Removes an idententifier from the lookup tables.
 del ::
   Abstractor String ()
@@ -141,8 +115,6 @@ del str =
             { tIndex = SM.remove str tIndex
             }
     Nothing -> return ()
-
------------------------------------------------------------------------------
 
 -- | Exchanges the string identifiers of an expression binding by the
 -- respective int identifiers.
@@ -187,8 +159,6 @@ abstractBinding Binding {..} = do
         bPos = bPos,
         bVal = be
       }
-
------------------------------------------------------------------------------
 
 -- | Updates the identifiers within an expression.
 abstractExpr ::
@@ -350,5 +320,3 @@ abstractExpr Expr {..} = case expr of
       _ -> errPattern srcPos
 
     expr' x = Expr x exprId srcPos
-
------------------------------------------------------------------------------

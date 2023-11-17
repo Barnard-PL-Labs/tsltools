@@ -1,16 +1,7 @@
------------------------------------------------------------------------------
------------------------------------------------------------------------------
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ViewPatterns #-}
 
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Error
--- Maintainer  :  Felix Klein
---
--- Data structures to wrap all contents, that are needed to print nice
+-- | Data structures to wrap all contents, that are needed to print nice
 -- error messages.
 module TSL.Error
   ( Error,
@@ -43,8 +34,6 @@ module TSL.Error
   )
 where
 
------------------------------------------------------------------------------
-
 import Control.Monad.State (StateT (..))
 import Data.IntMap (empty, insert)
 import qualified Data.IntMap as IM (lookup)
@@ -54,8 +43,6 @@ import System.IO (hPrint, stderr)
 import TSL.Core.Expression (ExprPos (..), SrcPos (..))
 import TSL.Core.Types (ExprType (..), prType, reducer)
 import Text.Parsec.Error (ParseError)
-
------------------------------------------------------------------------------
 
 data Error
   = ErrType TypeError
@@ -74,19 +61,13 @@ data Error
   | ErrModel ModelError
   | ErrSygus SygusError
 
------------------------------------------------------------------------------
-
 newtype GenericError = GenericError
   { errGen :: String
   }
 
------------------------------------------------------------------------------
-
 newtype FormatError = FormatError
   { errFmt :: String
   }
-
------------------------------------------------------------------------------
 
 data TypeError = TypeError
   { errTPos :: ExprPos,
@@ -94,15 +75,11 @@ data TypeError = TypeError
   }
   deriving (Eq, Ord)
 
------------------------------------------------------------------------------
-
 data BindingError = BindingError
   { errBPos :: ExprPos,
     errBMsgs :: [String]
   }
   deriving (Eq, Ord)
-
------------------------------------------------------------------------------
 
 data DependencyError = DependencyError
   { errDPos :: ExprPos,
@@ -110,15 +87,11 @@ data DependencyError = DependencyError
   }
   deriving (Eq, Ord)
 
------------------------------------------------------------------------------
-
 data SyntaxError = SyntaxError
   { errSPos :: ExprPos,
     errSMsgs :: [String]
   }
   deriving (Eq, Ord)
-
------------------------------------------------------------------------------
 
 data RunTimeError = RunTimeError
   { errRPos :: ExprPos,
@@ -126,57 +99,41 @@ data RunTimeError = RunTimeError
   }
   deriving (Eq, Ord)
 
------------------------------------------------------------------------------
-
 data ConvError = ConvError
   { title :: String,
     cmsg :: String
   }
   deriving (Eq, Ord)
 
------------------------------------------------------------------------------
-
 newtype CfgError = ConfigError
   { fmsg :: String
   }
   deriving (Eq, Ord)
-
------------------------------------------------------------------------------
 
 newtype TheoryParseError = TheoryParseError
   { mtRaw :: String
   }
   deriving (Eq, Ord)
 
------------------------------------------------------------------------------
-
 newtype SolverError = SolverError
   { solverErr :: String
   }
   deriving (Eq, Ord)
-
------------------------------------------------------------------------------
 
 newtype ConsistencyError = ConsistencyError
   { consistencyErr :: String
   }
   deriving (Eq, Ord)
 
------------------------------------------------------------------------------
-
 newtype ModelError = ModelError
   { modelErr :: String
   }
   deriving (Eq, Ord)
 
------------------------------------------------------------------------------
-
 newtype SygusError = SygusError
   { sygusErr :: String
   }
   deriving (Eq, Ord)
-
------------------------------------------------------------------------------
 
 instance Show Error where
   show = \case
@@ -203,14 +160,10 @@ instance Show Error where
       pr errname pos msgs =
         "\"" ++ errname ++ "\" (" ++ prErrPos pos ++ "):\n" ++ concat msgs
 
------------------------------------------------------------------------------
-
 unwrap :: Either Error a -> IO a
 unwrap = \case
   Left err -> die $ show err
   Right val -> return val
-
------------------------------------------------------------------------------
 
 -- | Use this error constructor, if some sytax related misbehavior is
 -- detected.
@@ -219,15 +172,11 @@ syntaxError ::
 syntaxError pos =
   Left . ErrSyntax . SyntaxError pos . return
 
------------------------------------------------------------------------------
-
 -- | Use this error constructor, if some runtime execution fails.
 runtimeError ::
   ExprPos -> String -> Either Error a
 runtimeError pos =
   Left . ErrRunT . RunTimeError pos . return
-
------------------------------------------------------------------------------
 
 -- | Use this error constructor, if some type related misbehavior is
 -- detected.
@@ -236,16 +185,12 @@ typeError ::
 typeError pos =
   Left . ErrType . TypeError pos . return
 
------------------------------------------------------------------------------
-
 -- | Use this error constructor, if some identifier binding related
 -- misbehavior is detected.
 bindingError ::
   ExprPos -> String -> Either Error a
 bindingError pos =
   Left . ErrBnd . BindingError pos . return
-
------------------------------------------------------------------------------
 
 -- | Use this error constructor, if some misbehavior concerning dependencies
 -- between identifiers is detected.
@@ -254,16 +199,12 @@ depError ::
 depError pos =
   Left . ErrDep . DependencyError pos . return
 
------------------------------------------------------------------------------
-
 -- | Use this error constructor, if some unresolvable inconsistency in the
 -- configuration exists.
 cfgError ::
   String -> Either Error a
 cfgError =
   Left . ErrCfg . ConfigError
-
------------------------------------------------------------------------------
 
 -- | Use this error constructor, if an invalid command line setting is
 -- detected.
@@ -272,15 +213,11 @@ conversionError ::
 conversionError t =
   Left . ErrConv . ConvError t
 
------------------------------------------------------------------------------
-
 -- | Use this error constructor, whenever a parser fails.
 parseError ::
   ParseError -> Either Error a
 parseError =
   Left . ErrParse
-
------------------------------------------------------------------------------
 
 -- | Use this error, whenever something failed internally
 genericError ::
@@ -288,15 +225,11 @@ genericError ::
 genericError =
   Left . ErrGeneric . GenericError
 
------------------------------------------------------------------------------
-
 -- | Prints an error to STDERR and then terminates the program.
 prError ::
   Error -> IO a
 prError err =
   hPrint stderr (show err) >> exitFailure
-
------------------------------------------------------------------------------
 
 -- | Prints the position of an error related token.
 prErrPos ::
@@ -320,16 +253,12 @@ prErrPos pos =
             Just path -> ", " ++ path
         ]
 
------------------------------------------------------------------------------
-
 -- | Throws an error that indicates an unbound identifier name.
 errUnknown ::
   String -> ExprPos -> StateT a (Either Error) b
 errUnknown i pos =
   let msg = "identifiyer not in scope: " ++ i
    in StateT $ const $ bindingError pos msg
-
------------------------------------------------------------------------------
 
 -- | Throws an error that indicates two conflicting identifier bindings.
 errConflict ::
@@ -343,8 +272,6 @@ errConflict i x y =
           ++ prErrPos x
    in StateT $ const $ bindingError y msg
 
------------------------------------------------------------------------------
-
 -- | Throws an error informing the user that formulas cannot be used
 -- as a right hand side of a pattern matching.
 errPattern ::
@@ -355,8 +282,6 @@ errPattern pos =
           ++ "of a pattern match."
    in StateT $ const $ typeError pos msg
 
------------------------------------------------------------------------------
-
 -- | Throws an error that indicates a sub-expression that does not conform
 -- to the big-operator notation.
 errConditional ::
@@ -366,8 +291,6 @@ errConditional pos =
         "expecting expression of the form:\n"
           ++ "  identifyer <- set"
    in StateT $ const $ syntaxError pos msg
-
------------------------------------------------------------------------------
 
 -- | Throws an error that indicates a set of identifiers that decribe a
 -- circular dependency between each other.
@@ -392,8 +315,6 @@ errCircularDep xs pos =
             else " depends on itself"
    in depError pos msg
 
------------------------------------------------------------------------------
-
 -- | Throws an error that indicates a set of imports that decribe a
 -- circular dependency between each other.
 errCircularImp ::
@@ -413,8 +334,6 @@ errCircularImp xs pos =
             )
             xs
    in depError pos msg
-
------------------------------------------------------------------------------
 
 -- | Throws an error that incicates a wrongly typed subexpression.
 errExpect ::
@@ -479,8 +398,6 @@ errExpect x y pos =
         TSignal x -> rmS x
         x -> x
 
------------------------------------------------------------------------------
-
 -- | Throws an error that incicates a sub-expression that does not conform
 -- to the range syntax.
 errRange ::
@@ -493,8 +410,6 @@ errRange x pos =
           ++ " expression"
    in StateT $ \_ -> typeError pos msg
 
------------------------------------------------------------------------------
-
 -- | Throws an error that indicates the occurence of an unexpected
 -- format.
 errFormat ::
@@ -502,15 +417,11 @@ errFormat ::
 errFormat =
   Left . ErrFormat . FormatError
 
------------------------------------------------------------------------------
-
 -- | Modulo Theories Theory Parse Error.
 errMtParse ::
   String -> Either Error a
 errMtParse =
   Left . ErrMtParse . TheoryParseError
-
------------------------------------------------------------------------------
 
 -- | SMT or SyGuS Solver Error.
 errSolver ::
@@ -518,15 +429,11 @@ errSolver ::
 errSolver =
   Left . ErrSolver . SolverError
 
------------------------------------------------------------------------------
-
 -- | Consistency Error.
 errConsistency ::
   String -> Either Error a
 errConsistency =
   Left . ErrConsistency . ConsistencyError
-
------------------------------------------------------------------------------
 
 -- | Model Error.
 errModel ::
@@ -534,12 +441,8 @@ errModel ::
 errModel =
   Left . ErrModel . ModelError
 
------------------------------------------------------------------------------
-
 -- | SyGuS Error.
 errSygus ::
   String -> Either Error a
 errSygus =
   Left . ErrSygus . SygusError
-
------------------------------------------------------------------------------

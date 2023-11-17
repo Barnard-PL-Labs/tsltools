@@ -1,18 +1,13 @@
 module TSL.Command.Synth where
 
-import qualified Hanoi
 import Options.Applicative (Parser, ParserInfo, action, flag', fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, strOption, (<|>))
-import qualified Syfco as S
-import System.Exit (ExitCode (ExitSuccess), die)
-import System.FilePath (takeBaseName)
-import System.Process (readProcessWithExitCode)
 import TSL.Command.Synth.Options (Options (..))
-import TSL.Core.Reader (fromTSL)
-import TSL.Error (Error)
-import TSL.HOA (CodeTarget (..), implement)
-import TSL.ModuloTheories (theorize)
-import TSL.Preprocessor (preprocess)
-import TSL.TLSF (toTLSF)
+import qualified TSL.HOA as HOA
+import qualified TSL.LTL as LTL
+import qualified TSL.ModuloTheories as ModuloTheories
+import qualified TSL.Preprocessor as Preprocessor
+import qualified TSL.TLSF as TLSF
+import TSL.Utils (readInput, writeOutput)
 
 optionsParserInfo :: ParserInfo Options
 optionsParserInfo =
@@ -40,11 +35,11 @@ optionsParser =
             <> help "Output file (STDOUT, if not set)"
             <> action "file"
       )
-    <*> ( flag' Arduino (long "arduino" <> help "generates code for Arduino")
-            <|> flag' Python (long "python" <> help "generates code for Python")
-            <|> flag' JS (long "js" <> help "generates code for JS backend")
-            <|> flag' XState (long "xstate" <> help "generates code for xstate diagrams")
-            <|> flag' Verilog (long "verilog" <> help "generates code for Verilog")
+    <*> ( flag' HOA.Arduino (long "arduino" <> help "generates code for Arduino")
+            <|> flag' HOA.Python (long "python" <> help "generates code for Python")
+            <|> flag' HOA.JS (long "js" <> help "generates code for JS backend")
+            <|> flag' HOA.XState (long "xstate" <> help "generates code for xstate diagrams")
+            <|> flag' HOA.Verilog (long "verilog" <> help "generates code for Verilog")
         )
     <*> strOption
       ( long "solver"
@@ -54,92 +49,26 @@ optionsParser =
 
 synth :: Options -> IO ()
 synth (Options {inputPath, outputPath, target, solverPath}) = do
-  let fileBaseName = maybe "input" takeBaseName inputPath
-
   -- Read input
   input <- readInput inputPath
 
   -- user-provided TSLMT spec (String) -> desugared TSLMT spec (String)
-  preprocessedSpec <- preprocess input
+  preprocessedSpec <- Preprocessor.preprocess input
 
   -- desugared TSLMT spec (String) -> theory-encoded TSL spec (String)
-  theorizedSpec <- theorize solverPath inputPath preprocessedSpec
+  theorizedSpec <- ModuloTheories.theorize solverPath preprocessedSpec
 
   -- theory-encoded TSL spec (String) -> TLSF (String)
-  tlsfSpec <- toTLSF fileBaseName <$> (fromTSL inputPath theorizedSpec >>= rightOrInvalidInput inputPath)
+  tlsfSpec <- TLSF.lower' theorizedSpec
 
   -- TLSF (String) -> HOA controller (String)
-  hoaController <- callLtlsynt tlsfSpec
+  hoaController <- LTL.synthesize tlsfSpec
 
   -- HOA controller (String) -> controller in target language (String)
-  let targetController = either id (implement False target) $ Hanoi.parse hoaController
+  targetController <- HOA.implement' False target hoaController
 
   -- Write to output
   writeOutput outputPath targetController
 
 command :: ParserInfo (IO ())
 command = synth <$> optionsParserInfo
-
-----------------------------------------------
--- HELPER FUNCTIONS
-----------------------------------------------
-
-callLtlsynt :: String -> IO String
-callLtlsynt tlsfContents = do
-  let tlsfSpec =
-        case S.fromTLSF tlsfContents of
-          Left err -> error $ show err
-          Right spec -> spec
-  let ltlIns = prInputs S.defaultCfg tlsfSpec
-      ltlOuts = prOutputs S.defaultCfg tlsfSpec
-      ltlFormulae = prFormulae S.defaultCfg {S.outputMode = S.Fully, S.outputFormat = S.LTLXBA} tlsfSpec
-      ltlCommandArgs =
-        [ "--formula=" ++ ltlFormulae,
-          "--ins=" ++ ltlIns,
-          "--outs=" ++ ltlOuts,
-          "--hoaf=i"
-        ]
-  (exitCode, stdout, stderr) <- readProcessWithExitCode "ltlsynt" ltlCommandArgs ""
-  if exitCode /= ExitSuccess
-    then do
-      die $ "TSL spec UNREALIZABLE. ltlsynt output: \n" ++ stderr
-    else return . unlines . tail . lines $ stdout
-  where
-    prFormulae ::
-      S.Configuration -> S.Specification -> String
-    prFormulae c s = case S.apply c s of
-      Left err -> show err
-      Right formulae -> formulae
-
-    -- \| Prints the input signals of the given specification.
-    prInputs ::
-      S.Configuration -> S.Specification -> String
-    prInputs c s = case S.inputs c s of
-      Left err -> show err
-      Right [] -> ""
-      Right (x : xr) -> x ++ concatMap ((:) ',' . (:) ' ') xr
-
-    -- \| Prints the output signals of the given specification.
-    prOutputs ::
-      S.Configuration -> S.Specification -> String
-    prOutputs c s = case S.outputs c s of
-      Left err -> show err
-      Right [] -> ""
-      Right (x : xr) -> x ++ concatMap ((:) ',' . (:) ' ') xr
-
--- | Read input from file or stdin.
-readInput :: Maybe FilePath -> IO String
-readInput Nothing = getContents
-readInput (Just filename) = readFile filename
-
--- | Writes content either to given file or STDOUT
-writeOutput :: Maybe FilePath -> String -> IO ()
-writeOutput Nothing = putStrLn
-writeOutput (Just file) = writeFile file
-
--- | helper function returning valid result or exiting with an error message
-rightOrInvalidInput :: Maybe FilePath -> Either Error a -> IO a
-rightOrInvalidInput inputPath = \case
-  Right r -> return r
-  Left err -> do
-    die $ "invalid" ++ show inputPath ++ ": " ++ show err

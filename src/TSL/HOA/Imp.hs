@@ -1,7 +1,7 @@
 {-# LANGUAGE PatternSynonyms #-}
-{- Template code writer for imperative languages -}
 {-# LANGUAGE RecordWildCards #-}
 
+-- | Template code writer for imperative languages
 module TSL.HOA.Imp where
 
 import Control.Monad (zipWithM)
@@ -118,7 +118,6 @@ writeUpdate (CG.Update var term) = do
 
 writeTerm :: CG.Term -> Imp String
 writeTerm term = do
-  ImpConfig {..} <- Reader.ask
   case term of
     CG.Var x -> return x
     CG.App f args ->
@@ -130,7 +129,6 @@ writeTerm term = do
 
 writeTermNoParens :: CG.Term -> Imp String
 writeTermNoParens term = do
-  ImpConfig {..} <- Reader.ask
   case term of
     CG.Var x -> return x
     CG.App f args -> writeTermApp f args
@@ -140,8 +138,9 @@ writeTermApp f args
   | isTSLMTLiteral f args = return $ replaceTSLMTLiteral f
   | isTSLMTBinOp f args = do
       args' <- mapM writeTerm args
-      let [x1, x2] = args'
-      replaceTSLMTBinOp f x1 x2
+      case args' of
+        [x1, x2] -> replaceTSLMTBinOp f x1 x2
+        _ -> error "BUG: writeTermApp isTSLMTBinOp - should only have 2 arguments for binary operations."
   | otherwise = do
       ImpConfig {..} <- Reader.ask
       impFuncApp f <$> mapM writeTermNoParens args

@@ -1,6 +1,10 @@
-module TSL.HOA (CodeTarget (..), implement) where
+-- | HOA is the controller specification format after synthesis.
+-- This HOA module provides utilities to implement the controller
+-- in other languages.
+module TSL.HOA (CodeTarget (..), implement, implement') where
 
 import qualified Hanoi as H
+import TSL.Error (genericError, unwrap)
 import qualified TSL.HOA.Arduino as Arduino (implement)
 import qualified TSL.HOA.JavaScript as JS (implement)
 import qualified TSL.HOA.Python as Python (implement)
@@ -22,3 +26,8 @@ implement isCounter = \case
   JS -> JS.implement isCounter
   Arduino -> Arduino.implement isCounter
   Verilog -> Verilog.implement isCounter
+
+implement' :: Bool -> CodeTarget -> String -> IO String
+implement' isCounter target hoaStr = case H.parse hoaStr of
+  Left err -> unwrap $ genericError $ "HOA parsing failed with the following error message:\n" ++ err
+  Right hoa -> return $ implement isCounter target hoa

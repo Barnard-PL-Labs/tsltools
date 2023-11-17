@@ -1,20 +1,8 @@
-----------------------------------------------------------------------------
------------------------------------------------------------------------------
-{-# LANGUAGE LambdaCase #-}
-
------------------------------------------------------------------------------
-
--- |
--- Module      :  PreprocessorTests
--- Maintainer  :  Wonhyuk Choi
 module PreprocessorTests
   ( tests,
   )
 where
 
------------------------------------------------------------------------------
-
-import Control.Monad (liftM)
 import Data.Either (isRight)
 import Distribution.TestSuite
   ( Progress (..),
@@ -23,13 +11,10 @@ import Distribution.TestSuite
     TestInstance (..),
   )
 import System.Directory (listDirectory)
-import System.Exit (die)
 import System.FilePath (combine)
 import TSL.Preprocessor (parse, preprocess)
 import Test.HUnit ((@=?))
 import qualified Test.HUnit as H
-
------------------------------------------------------------------------------
 
 convert2Cabal :: String -> IO H.Test -> Test
 convert2Cabal name = Test . testInstance name
@@ -52,11 +37,11 @@ runTest = (fmap snd . H.performTest onStart onError onFailure us =<<)
 
     onError :: a -> String -> H.State -> Progress -> IO Progress
     onError _ msg _ _ =
-      return $ Finished (Error $ concat $ map (++ " ") (lines msg))
+      return $ Finished (Error $ concatMap (++ " ") (lines msg))
 
     onFailure :: a -> String -> H.State -> Progress -> IO Progress
     onFailure _ msg _ _ =
-      return $ Finished (Fail $ concat $ map (++ " ") (lines msg))
+      return $ Finished (Fail $ concatMap (++ " ") (lines msg))
 
     us :: Progress
     us = Finished Pass
@@ -89,7 +74,7 @@ unitTests = map runTest testNums
             return $ H.TestCase $ expected @=? actual
 
 specTests :: IO [Test]
-specTests = liftM (map runTest) filePaths
+specTests = fmap (map runTest) filePaths
   where
     dir :: FilePath
     dir = "test/res/specs/"
@@ -100,12 +85,11 @@ specTests = liftM (map runTest) filePaths
     validSpec :: FilePath -> Bool
     validSpec =
       let ignoreList = ["Caching.tsl", "NoteButton.tsl"]
-       in not . (flip elem) ignoreList
+       in not . flip elem ignoreList
 
     filePaths :: IO [FilePath]
     filePaths = do
-      fileNames' <- fileNames
-      return $ map (combine dir) $ filter validSpec fileNames'
+      map (combine dir) . filter validSpec <$> fileNames
 
     runTest :: FilePath -> Test
     runTest path = convert2Cabal ("Preprocess Spec Test: " ++ path) $ do
@@ -114,4 +98,4 @@ specTests = liftM (map runTest) filePaths
       return $ H.TestCase $ H.assertBool "Preprocess failed!" parseSuccess
 
 tests :: IO [Test]
-tests = liftM (unitTests ++) specTests
+tests = fmap (unitTests ++) specTests

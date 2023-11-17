@@ -1,17 +1,11 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
-
--------------------------------------------------------------------------------
 
 -- |
 -- Module      :  TSL.ModuloTheories.Sygus.Query
 -- Description :  Generates SyGuS problems from a Data Transformation Obligation.
 -- Maintainer  :  Wonhyuk Choi
 module TSL.ModuloTheories.Sygus.Query (generateSygusQuery) where
-
--------------------------------------------------------------------------------
 
 import qualified Data.Map as Map
 import Data.Set (Set)
@@ -44,8 +38,6 @@ import TSL.ModuloTheories.Theories
     tast2Smt,
     tastSignals,
   )
-
--------------------------------------------------------------------------------
 
 minitab :: Int -> String -> String
 minitab n = (++) (replicate (2 * n) ' ')

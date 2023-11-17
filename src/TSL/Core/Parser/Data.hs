@@ -1,19 +1,9 @@
------------------------------------------------------------------------------
-
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Core.Parser.Data
--- Maintainer  :  Felix Klein
---
--- Common data used by the parser module.
+-- | Common data used by the parser module.
 module TSL.Core.Parser.Data
   ( Specification (..),
     globalDef,
   )
 where
-
------------------------------------------------------------------------------
 
 import TSL.Core.Binding (Binding)
 import TSL.Core.Expression (Expr, ExprPos)
@@ -21,8 +11,6 @@ import TSL.Core.Types (SectionType)
 import Text.Parsec (alphaNum, char, letter, (<|>))
 import Text.Parsec.Language (emptyDef)
 import Text.Parsec.Token (GenLanguageDef (..), LanguageDef)
-
------------------------------------------------------------------------------
 
 -- | The @Specification@ record contains all the data of a
 -- specification that is extracted by the parsing process.
@@ -36,8 +24,6 @@ data Specification = Specification
     -- of expressions for that respective section.
     sections :: [(SectionType, Expr String)]
   }
-
------------------------------------------------------------------------------
 
 -- | The language definition which is shared among all parsers.
 globalDef ::
@@ -57,5 +43,3 @@ globalDef =
       nestedComments = True,
       caseSensitive = True
     }
-
------------------------------------------------------------------------------

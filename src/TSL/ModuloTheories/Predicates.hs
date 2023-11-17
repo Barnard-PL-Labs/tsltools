@@ -1,9 +1,5 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
-
--------------------------------------------------------------------------------
 
 -- |
 -- Module      :  TSL.ModuloTheories.Predicates Description :  Predicate term operations for TSL-MT
@@ -20,8 +16,6 @@ module TSL.ModuloTheories.Predicates
     predReplacedSmt,
   )
 where
-
--------------------------------------------------------------------------------
 
 import Control.Exception (assert)
 import Control.Monad (filterM)
@@ -43,8 +37,6 @@ import TSL.ModuloTheories.Theories
     tastSignals,
     tastTheory,
   )
-
--------------------------------------------------------------------------------
 
 data TheoryPredicate
   = PLiteral TAst

@@ -1,9 +1,5 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
-
--------------------------------------------------------------------------------
 
 -- |
 -- Module      :  TSL.ModuloTheories.Sygus.Common
@@ -20,12 +16,8 @@ module TSL.ModuloTheories.Sygus.Common
   )
 where
 
--------------------------------------------------------------------------------
-
 import TSL.ModuloTheories.Predicates (TheoryPredicate)
 import TSL.ModuloTheories.Theories (Theory)
-
--------------------------------------------------------------------------------
 
 targetPostfix :: String
 targetPostfix = "_target"

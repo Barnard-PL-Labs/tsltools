@@ -1,10 +1,6 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-
--------------------------------------------------------------------------------
 
 -- |
 -- Module      :  TSL.ModuloTheories.Sygus.Recursion
@@ -16,8 +12,6 @@ module TSL.ModuloTheories.Sygus.Recursion
     config_SUBQUERY_AST_MAX_SIZE,
   )
 where
-
--------------------------------------------------------------------------------
 
 import Control.Monad (liftM2)
 import Control.Monad.Trans.Except
@@ -42,8 +36,6 @@ import TSL.ModuloTheories.Theories
     read2Symbol,
     symbolType,
   )
-
--------------------------------------------------------------------------------
 
 config_NUM_SUBQUERIES :: Int
 config_NUM_SUBQUERIES = 3

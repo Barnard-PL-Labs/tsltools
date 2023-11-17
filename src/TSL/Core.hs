@@ -1,3 +1,4 @@
+-- | Core TSL constructs and related functions
 module TSL.Core
   ( module TSL.Core.Binding,
     module TSL.Core.Dependency,

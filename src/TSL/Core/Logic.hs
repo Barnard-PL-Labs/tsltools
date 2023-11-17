@@ -1,13 +1,6 @@
------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Logic
--- Maintainer  :  Felix Klein
---
--- TSL logic data type and utility functions.
+-- | TSL logic data type and utility functions.
 module TSL.Core.Logic
   ( Formula (..),
     SignalTerm (..),
@@ -32,8 +25,6 @@ module TSL.Core.Logic
   )
 where
 
------------------------------------------------------------------------------
-
 import Control.Monad (void)
 import Data.Char (isUpper, toLower, toUpper)
 import Data.Set (Set, difference, empty, insert, unions)
@@ -43,16 +34,12 @@ import Test.QuickCheck (Arbitrary, arbitrary, choose)
 import Text.Parsec (alphaNum, char, eof, lookAhead, parse, string, try, (<|>))
 import Text.Parsec.String (Parser)
 
------------------------------------------------------------------------------
-
 -- | Representation of TSL signal terms.
 data SignalTerm a
   = Signal a
   | FunctionTerm (FunctionTerm a)
   | PredicateTerm (PredicateTerm a)
   deriving (Eq, Ord, Show)
-
------------------------------------------------------------------------------
 
 instance Functor SignalTerm where
   fmap f = \case
@@ -73,15 +60,11 @@ instance (Arbitrary a) => Arbitrary (SignalTerm a) where
       1 -> FunctionTerm <$> arbitrary
       _ -> PredicateTerm <$> arbitrary
 
------------------------------------------------------------------------------
-
 -- | Representation of TSL function terms.
 data FunctionTerm a
   = FunctionSymbol a
   | FApplied (FunctionTerm a) (SignalTerm a)
   deriving (Eq, Ord, Show)
-
------------------------------------------------------------------------------
 
 instance Functor FunctionTerm where
   fmap f = \case
@@ -105,8 +88,6 @@ instance (Arbitrary a) => Arbitrary (FunctionTerm a) where
       then FunctionSymbol <$> arbitrary
       else FApplied <$> arbitrary <*> arbitrary
 
------------------------------------------------------------------------------
-
 -- | Represenation of TSL predicate terms.
 data PredicateTerm a
   = BooleanTrue
@@ -115,8 +96,6 @@ data PredicateTerm a
   | PredicateSymbol a
   | PApplied (PredicateTerm a) (SignalTerm a)
   deriving (Eq, Ord)
-
------------------------------------------------------------------------------
 
 instance Functor PredicateTerm where
   fmap f = \case
@@ -151,8 +130,6 @@ instance (Arbitrary a) => Arbitrary (PredicateTerm a) where
       3 -> PredicateSymbol <$> arbitrary
       _ -> PApplied <$> arbitrary <*> arbitrary
 
------------------------------------------------------------------------------
-
 data Formula a
   = TTrue
   | FFalse
@@ -175,8 +152,6 @@ data Formula a
   | Since (Formula a) (Formula a)
   | Triggered (Formula a) (Formula a)
   deriving (Eq, Ord, Show)
-
------------------------------------------------------------------------------
 
 instance Functor Formula where
   fmap f = \case
@@ -246,8 +221,6 @@ foldFormula f acc = \case
   Triggered p q -> foldFormula f (foldFormula f acc q) p
   _ -> acc
 
------------------------------------------------------------------------------
-
 -- | Returns the size of the given TSL formula.
 size ::
   Formula a -> Int
@@ -274,8 +247,6 @@ size = size' 0
       Weak x y -> size' (size' (a + 1) x) y
       Since x y -> size' (size' (a + 1) x) y
       Triggered x y -> size' (size' (a + 1) x) y
-
------------------------------------------------------------------------------
 
 -- | Returns all predicate terms that are checked as part of the formula.
 checks ::
@@ -304,8 +275,6 @@ checks = preds empty
       Since x y -> preds (preds s x) y
       Triggered x y -> preds (preds s x) y
 
------------------------------------------------------------------------------
-
 -- | Returns all updates that appear in the formula
 updates ::
   (Ord a) => Formula a -> Set (a, SignalTerm a)
@@ -333,13 +302,9 @@ updates = upds empty
       Since x y -> upds (upds s x) y
       Triggered x y -> upds (upds s x) y
 
------------------------------------------------------------------------------
-
 outputs ::
   (Ord a) => Formula a -> Set a
 outputs = S.map fst . updates
-
------------------------------------------------------------------------------
 
 inputs ::
   (Ord a) => Formula a -> Set a
@@ -363,8 +328,6 @@ inputs fml =
       FunctionTerm f -> fti a f
       Signal x -> insert x a
 
------------------------------------------------------------------------------
-
 functions ::
   (Ord a) => Formula a -> Set a
 functions fml =
@@ -385,8 +348,6 @@ functions fml =
       PredicateTerm p -> pti a p
       FunctionTerm f -> fti a f
       _ -> a
-
------------------------------------------------------------------------------
 
 predicates ::
   (Ord a) => Formula a -> Set a
@@ -409,20 +370,14 @@ predicates fml =
       FunctionTerm f -> fti a f
       _ -> a
 
------------------------------------------------------------------------------
-
 symbols ::
   (Ord a) => Formula a -> Set a
 symbols = unions . ((<*>) [inputs, outputs, functions, predicates]) . pure
-
------------------------------------------------------------------------------
 
 exactlyOne ::
   (Eq a) => [Formula a] -> Formula a
 exactlyOne xs =
   Or $ map (\x -> And ([x] ++ map Not (filter (/= x) xs))) xs
-
------------------------------------------------------------------------------
 
 -- | Converts a formula to TSL.
 tslFormula ::
@@ -480,8 +435,6 @@ tslFormula sig = prFml
       FunctionSymbol x -> sig x
       FApplied f s -> br $ prFT f ++ " " ++ prST s
 
------------------------------------------------------------------------------
-
 -- | Converts a formula to TLSF.
 tlsfFormula ::
   (a -> String) -> Formula a -> String
@@ -513,21 +466,15 @@ tlsfFormula f = pr
       Since x y -> "(" ++ pr x ++ ") S (" ++ pr y ++ ")"
       Triggered x y -> "(" ++ pr x ++ ") T (" ++ pr y ++ ")"
 
------------------------------------------------------------------------------
-
 encodeInputAP ::
   (a -> String) -> PredicateTerm a -> String
 encodeInputAP f =
   ("p0" ++) . encodePredicate f
 
------------------------------------------------------------------------------
-
 encodeOutputAP ::
   (a -> String) -> a -> SignalTerm a -> String
 encodeOutputAP f s t =
   "u0" ++ escape (f s) ++ "0" ++ encodeSignal f t
-
------------------------------------------------------------------------------
 
 -- | Converts a function term to a TLSF identifier.
 encodeFunction ::
@@ -535,8 +482,6 @@ encodeFunction ::
 encodeFunction f = \case
   FunctionSymbol s -> escape (f s)
   FApplied t t' -> encodeFunction f t ++ "0" ++ encodeSignal f t'
-
------------------------------------------------------------------------------
 
 -- | Converts a predicate term to a TLSF identifier.
 encodePredicate ::
@@ -548,8 +493,6 @@ encodePredicate f = \case
   PredicateSymbol s -> "p0" ++ escape (f s)
   PApplied t t' -> encodePredicate f t ++ "0" ++ encodeSignal f t'
 
------------------------------------------------------------------------------
-
 -- | Conversts a signal term to a TLSF identifier.
 encodeSignal ::
   (a -> String) -> SignalTerm a -> String
@@ -558,8 +501,6 @@ encodeSignal f = \case
   FunctionTerm t -> "f1d" ++ encodeFunction f t ++ "1b"
   PredicateTerm t -> "p1d" ++ encodePredicate f t ++ "1b"
 
------------------------------------------------------------------------------
-
 -- | Parses the term structure from a generated TSLF input.
 decodeInputAP ::
   String -> Either Error (PredicateTerm String)
@@ -567,8 +508,6 @@ decodeInputAP str =
   case parse (string "p0" >> predicateParser) "Format Error" str of
     Left err -> parseError err
     Right x -> return x
-
------------------------------------------------------------------------------
 
 -- | Parses the term structure from a generated TSLF output.
 decodeOutputAP ::
@@ -590,8 +529,6 @@ decodeOutputAP str =
         <|> (try (string "f1d") >> (FunctionTerm <$> functionParser))
         <|> (Signal <$> identParser)
 
------------------------------------------------------------------------------
-
 functionParser ::
   Parser (FunctionTerm String)
 functionParser = do
@@ -607,8 +544,6 @@ functionParser = do
       (try (string "p1d") >> (PredicateTerm <$> predicateParser))
         <|> (try (string "f1d") >> (FunctionTerm <$> functionParser))
         <|> (Signal <$> identParser)
-
------------------------------------------------------------------------------
 
 predicateParser ::
   Parser (PredicateTerm String)
@@ -633,8 +568,6 @@ predicateParser =
              )
       )
         <|> (string "p0" >> PredicateSymbol <$> identParser)
-
------------------------------------------------------------------------------
 
 -- | Identifier parser that reverses character escaping
 identParser ::
@@ -666,8 +599,6 @@ identParser = ident ""
             c -> ident (toUpper c : a)
         c -> alphaNum >> ident (c : a)
 
------------------------------------------------------------------------------
-
 -- | Escapes characters which potentially can cause problems.
 escape ::
   String -> String
@@ -686,5 +617,3 @@ escape = escape' []
         _
           | isUpper c -> escape' (toLower c : '2' : a) cr
           | otherwise -> escape' (c : a) cr
-
------------------------------------------------------------------------------

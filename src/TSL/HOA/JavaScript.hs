@@ -1,3 +1,4 @@
+-- | Implement HOA controller in Javascript
 module TSL.HOA.JavaScript
   ( implement,
   )

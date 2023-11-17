@@ -1,17 +1,9 @@
------------------------------------------------------------------------------
------------------------------------------------------------------------------
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
 
------------------------------------------------------------------------------
-
--- |
--- Module      :  Dependency
--- Maintainer  :  Marvin Stenger
---
--- This module provides a representation for the dependency relation between
+-- | This module provides a representation for the dependency relation between
 -- a set of guarantees and their assumptions as well as functions to extract
 -- this representation out of the given 'Formula's or a given set of
 -- 'Specification's.
@@ -22,8 +14,6 @@ module TSL.Core.Dependency
   )
 where
 
------------------------------------------------------------------------------
-
 import Data.List as List (elemIndex)
 import Data.Map.Strict as Map (fromListWith, keys, (!))
 import Data.Maybe (fromJust)
@@ -31,8 +21,6 @@ import Data.Set as Set (elems, fromList, union)
 import TSL.Core.Logic (Formula (..), tslFormula)
 import qualified TSL.Core.Specification as S
 import TSL.Core.SymbolTable (stName)
-
------------------------------------------------------------------------------
 
 -- | Representation of the dependency relation between
 -- a set of guarantees and their assumptions.
@@ -70,8 +58,6 @@ instance Show DependencyRepresentation where
 
       aIdx a = fromJust $ List.elemIndex a assumptions
 
------------------------------------------------------------------------------
-
 -- | Function to extract the dependency relation between
 -- a set of guarantees and their assumptions
 -- out of a list of 'Formula's (assumptions, guarantees)
@@ -98,8 +84,6 @@ formulas2dependencies formulas =
         { guarantees = keys gMap,
           ..
         }
-
------------------------------------------------------------------------------
 
 -- | Function to extract the dependency relation between
 -- a set of guarantees and their assumptions

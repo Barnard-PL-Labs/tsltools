@@ -1,9 +1,5 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TypeFamilies #-}
-
--------------------------------------------------------------------------------
 
 -- |
 -- Module      :  TSL.ModuloTheories.Theories
@@ -44,8 +40,6 @@ module TSL.ModuloTheories.Theories
   )
 where
 
--------------------------------------------------------------------------------
-
 import TSL.Core.Ast
   ( Ast,
     AstInfo,
@@ -59,8 +53,6 @@ import qualified TSL.ModuloTheories.Theories.Base as Base (TheorySymbol (..))
 import qualified TSL.ModuloTheories.Theories.EUf as EUf (EUfSymbol)
 import qualified TSL.ModuloTheories.Theories.Lia as Lia (LiaSymbol)
 import qualified TSL.ModuloTheories.Theories.Uf as Uf (UfSymbol)
-
--------------------------------------------------------------------------------
 
 data Theory
   = Uf

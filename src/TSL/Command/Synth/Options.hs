@@ -6,5 +6,5 @@ data Options = Options
   { inputPath :: Maybe FilePath,
     outputPath :: Maybe FilePath,
     target :: CodeTarget,
-    solverPath :: String
+    solverPath :: FilePath
   }

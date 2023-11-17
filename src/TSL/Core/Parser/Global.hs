@@ -1,12 +1,4 @@
------------------------------------------------------------------------------
-
------------------------------------------------------------------------------
-
--- |
--- Module      :  TSL.Core.Parser.Global
--- Maintainer  :  Felix Klein
---
--- Parsers for global definitions and formula sections.
+-- | Parsers for global definitions and formula sections.
 module TSL.Core.Parser.Global
   ( GlobalElement (..),
     assignmentParser,
@@ -14,8 +6,6 @@ module TSL.Core.Parser.Global
     elementsParser,
   )
 where
-
------------------------------------------------------------------------------
 
 import Control.Monad (void)
 import Data.Functor.Identity (Identity)
@@ -53,21 +43,15 @@ import Text.Parsec.Token
     whiteSpace,
   )
 
------------------------------------------------------------------------------
-
 data GlobalElement
   = Import (FilePath, String, ExprPos, ExprPos)
   | Assignment (Binding String)
   | Section (SectionType, [Expr String])
 
------------------------------------------------------------------------------
-
 elementsParser ::
   Parser GlobalElement
 elementsParser =
   (~~) >> (importParser <|> sectionParser <|> assignmentParser)
-
------------------------------------------------------------------------------
 
 importParser ::
   Parser GlobalElement
@@ -77,8 +61,6 @@ importParser = do
   keyword "as"
   (name, p2) <- modulename
   return $ Import (file, name, p1, p2)
-
------------------------------------------------------------------------------
 
 -- | Parses a list of formulas within a section labeled by 'name'.
 sectionParser ::
@@ -90,8 +72,6 @@ sectionParser = do
   where
     nonEmptyParser p =
       fmap return p <|> return Nothing
-
------------------------------------------------------------------------------
 
 sectionTypeParser ::
   Parser SectionType
@@ -112,8 +92,6 @@ sectionTypeParser =
     afterParser c =
       fmap (c . fromIntegral) (keyword "after" >> natural tokenparser)
         <|> return (c 0)
-
------------------------------------------------------------------------------
 
 -- | Parses an assignment representing a single binding or a function
 -- definition.
@@ -143,8 +121,6 @@ assignmentParser = do
               bVal = GuardedBinding es
             }
 
------------------------------------------------------------------------------
-
 tokenparser ::
   GenTokenParser String p Identity
 tokenparser =
@@ -164,38 +140,26 @@ tokenparser =
           ]
       }
 
------------------------------------------------------------------------------
-
 br ::
   Parser a -> Parser a
 br = braces tokenparser
-
------------------------------------------------------------------------------
 
 rOp ::
   String -> Parser ()
 rOp = reservedOp tokenparser
 
------------------------------------------------------------------------------
-
 (~~) ::
   Parser ()
 (~~) = whiteSpace tokenparser
-
------------------------------------------------------------------------------
 
 keyword ::
   String -> Parser ()
 keyword = void . reserved tokenparser
 
------------------------------------------------------------------------------
-
 filepath ::
   ParsecT String () Identity (String, ExprPos)
 filepath =
   positionParser (~~) $ stringLiteral tokenparser
-
------------------------------------------------------------------------------
 
 modulename ::
   ParsecT String () Identity (String, ExprPos)
@@ -205,5 +169,3 @@ modulename =
     xr <- many (alphaNum <|> char '_')
     void $ lookAhead space
     return $ f : xr
-
------------------------------------------------------------------------------

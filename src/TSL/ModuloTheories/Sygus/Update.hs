@@ -1,10 +1,6 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
-
--------------------------------------------------------------------------------
 
 -- |
 -- Module      :  TSL.ModuloTheories.Sygus.Update
@@ -17,8 +13,6 @@ module TSL.ModuloTheories.Sygus.Update
   )
 where
 
--------------------------------------------------------------------------------
-
 import Data.List (transpose)
 import Data.Maybe (catMaybes)
 import TSL.ModuloTheories.Sygus.Common
@@ -26,8 +20,6 @@ import TSL.ModuloTheories.Sygus.Common
     Term (..),
   )
 import Text.Regex.PCRE.Heavy (re, scan)
-
--------------------------------------------------------------------------------
 
 unquoteShow :: String -> String
 unquoteShow = filter (/= '\"')

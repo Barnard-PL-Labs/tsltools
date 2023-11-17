@@ -1,23 +1,11 @@
-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------
-
--- |
--- Module      :  JSWriterTests
--- Maintainer  :  Mark Santolucito
---
--- JS Code gen tests.
--- check that the generated js code is syntactically valid
--- note: this generates the js code from the .hoa files rather than the .tsl spec,
--- and as such does not check for any semantic correctness
+-- | JS Code gen tests.
+-- Check that the generated js code is syntactically valid.
+-- Note: this generates the js code from the .hoa files rather than the .tsl spec,
+-- and as such does not check for any semantic correctness.
 module JSWriterTests
   ( tests,
   )
 where
-
------------------------------------------------------------------------------
-
------------------------------------------------------------------------------
 
 import Data.Maybe
 import Distribution.TestSuite
@@ -33,14 +21,11 @@ import System.Directory
   )
 import System.Exit
 import System.FilePath (joinPath)
-import System.IO (readFile)
 import System.Process
 import TSL.HOA
   ( CodeTarget (..),
     implement,
   )
-
------------------------------------------------------------------------------
 
 tests :: IO [Test]
 tests =
@@ -71,5 +56,5 @@ tests =
         paths <- listDirectory dirPath
         jsHintPath <- findExecutable "jshint"
         if isJust jsHintPath
-          then return $ map Test $ map (jsTestTemplate dirPath) paths
+          then return $ map (Test . jsTestTemplate dirPath) paths
           else return []

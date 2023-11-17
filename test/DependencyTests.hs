@@ -1,20 +1,8 @@
-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------
-
--- |
--- Module      :  DependencyTests
--- Maintainer  :  Marvin Stenger
---
--- Dependency test cases.
+-- | Dependency test cases.
 module DependencyTests
   ( tests,
   )
 where
-
------------------------------------------------------------------------------
-
------------------------------------------------------------------------------
 
 import Control.Monad (forM)
 import Distribution.TestSuite
@@ -25,11 +13,8 @@ import Distribution.TestSuite
   )
 import System.Directory (listDirectory)
 import System.FilePath (joinPath)
-import System.IO (readFile)
-import TSL.Core (fromTSL, specifications2dependencies)
+import TSL.Core (readTSL, specifications2dependencies)
 import TSL.Error (unwrap)
-
------------------------------------------------------------------------------
 
 tests :: [Test]
 tests =
@@ -44,7 +29,7 @@ tests =
                   ( \path -> do
                       let inputPath = joinPath [dirPath, path]
                       specStr <- readFile inputPath
-                      res <- fromTSL (Just inputPath) specStr
+                      res <- readTSL specStr
                       unwrap res
                   )
               let out = show $ specifications2dependencies specs
@@ -65,4 +50,4 @@ tests =
             options = [],
             setOption = \_ _ -> Right test
           }
-   in map Test [test]
+   in [Test test]

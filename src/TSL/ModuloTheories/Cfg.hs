@@ -1,9 +1,5 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
-
--------------------------------------------------------------------------------
 
 -- |
 -- Module      :  TSL.ModuloTheories.Cfg
@@ -23,8 +19,6 @@ module TSL.ModuloTheories.Cfg
   )
 where
 
--------------------------------------------------------------------------------
-
 import Control.Applicative (liftA2)
 import Data.Map (Map)
 import qualified Data.Map as Map
@@ -43,8 +37,6 @@ import TSL.ModuloTheories.Theories
     applySemantics,
     read2Symbol,
   )
-
--------------------------------------------------------------------------------
 
 newtype Cfg = Cfg {grammar :: Map TheorySymbol [TAst]}
 

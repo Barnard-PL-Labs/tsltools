@@ -1,10 +1,6 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-
--------------------------------------------------------------------------------
 
 -- |
 -- Module      :  TSL.ModuloTheories.Solver
@@ -15,16 +11,12 @@
 -- Maintainer  :  Wonhyuk Choi
 module TSL.ModuloTheories.Solver (solveSat, runGetModel, runSygusQuery) where
 
--------------------------------------------------------------------------------
-
 import Control.Monad.Trans.Except
 import Data.List (isInfixOf)
 import qualified Data.Text as Text
 import System.Exit (ExitCode (..))
 import System.Process (readProcessWithExitCode)
 import TSL.Error (Error, errSolver, errSygus)
-
--------------------------------------------------------------------------------
 
 strip :: String -> String
 strip = Text.unpack . Text.strip . Text.pack
