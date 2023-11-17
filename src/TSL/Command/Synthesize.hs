@@ -1,7 +1,6 @@
-module TSL.Command.Synth where
+module TSL.Command.Synthesize (command) where
 
 import Options.Applicative (Parser, ParserInfo, action, flag', fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, strOption, value, (<|>))
-import TSL.Command.Synth.Options (Options (..))
 import qualified TSL.HOA as HOA
 import qualified TSL.LTL as LTL
 import qualified TSL.ModuloTheories as ModuloTheories
@@ -9,11 +8,19 @@ import qualified TSL.Preprocessor as Preprocessor
 import qualified TSL.TLSF as TLSF
 import TSL.Utils (readInput, writeOutput)
 
+data Options = Options
+  { inputPath :: Maybe FilePath,
+    outputPath :: Maybe FilePath,
+    target :: HOA.CodeTarget,
+    solverPath :: FilePath,
+    ltlsyntPath :: FilePath
+  }
+
 optionsParserInfo :: ParserInfo Options
 optionsParserInfo =
   info (helper <*> optionsParser) $
     fullDesc
-      <> progDesc "Synthesize a TSL specification"
+      <> progDesc "TSL -> synthesized program in target language"
       <> header "tsl synthesize"
 
 optionsParser :: Parser Options
@@ -54,8 +61,8 @@ optionsParser =
           <> help "Path to ltlsynt"
       )
 
-synth :: Options -> IO ()
-synth (Options {inputPath, outputPath, target, solverPath, ltlsyntPath}) = do
+synthesize :: Options -> IO ()
+synthesize (Options {inputPath, outputPath, target, solverPath, ltlsyntPath}) = do
   -- Read input
   input <- readInput inputPath
 
@@ -78,4 +85,4 @@ synth (Options {inputPath, outputPath, target, solverPath, ltlsyntPath}) = do
   writeOutput outputPath targetController
 
 command :: ParserInfo (IO ())
-command = synth <$> optionsParserInfo
+command = synthesize <$> optionsParserInfo

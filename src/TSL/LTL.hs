@@ -5,7 +5,7 @@ import Control.Monad (unless)
 import Data.Maybe (isJust)
 import qualified Syfco as S
 import System.Directory (findExecutable)
-import System.Exit (ExitCode (ExitSuccess), die)
+import System.Exit (ExitCode (ExitSuccess))
 import System.Process (readProcessWithExitCode)
 import TSL.Error (genericError, unwrap)
 
@@ -32,10 +32,11 @@ synthesize ltlsyntPath tlsfContents = do
           "--outs=" ++ ltlOuts,
           "--hoaf=i"
         ]
+
+  -- call ltlsynt
   (exitCode, stdout, stderr) <- readProcessWithExitCode ltlsyntPath ltlCommandArgs ""
   if exitCode /= ExitSuccess
-    then do
-      die $ "TSL spec UNREALIZABLE. ltlsynt output: \n" ++ stderr
+    then unwrap . genericError $ "TSL spec UNREALIZABLE. ltlsynt output: \n" ++ stderr
     else return . unlines . tail . lines $ stdout
   where
     prFormulae ::
