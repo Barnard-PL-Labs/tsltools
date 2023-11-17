@@ -18,7 +18,7 @@ optionsParserInfo :: ParserInfo Options
 optionsParserInfo =
   info (helper <*> optionsParser) $
     fullDesc
-      <> progDesc "TSL -> synthesized controller in HOA format"
+      <> progDesc "Spec (TSL) -> synthesized controller (HOA)"
       <> header "tsl hoa"
 
 optionsParser :: Parser Options

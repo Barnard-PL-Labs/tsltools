@@ -20,7 +20,7 @@ optionsParserInfo :: ParserInfo Options
 optionsParserInfo =
   info (helper <*> optionsParser) $
     fullDesc
-      <> progDesc "TSL -> synthesized program in target language"
+      <> progDesc "Spec (TSL) -> synthesized program (in target language)"
       <> header "tsl synthesize"
 
 optionsParser :: Parser Options

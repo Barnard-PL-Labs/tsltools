@@ -13,7 +13,7 @@ optionsParserInfo :: ParserInfo Options
 optionsParserInfo =
   info (helper <*> optionsParser) $
     fullDesc
-      <> progDesc "TSL -> Core TSL"
+      <> progDesc "Spec (TSL) -> Spec (Base TSL)"
       <> header "tsl preprocess"
 
 optionsParser :: Parser Options

@@ -1,7 +1,28 @@
-module TSL.Command.Coregen (command) where
+module TSL.Command.Minrealizable (command) where
 
 import Control.Monad (when)
-import Options.Applicative (Parser, ParserInfo, action, auto, footerDoc, fullDesc, header, help, helper, info, long, metavar, option, optional, progDesc, short, showDefault, strOption, value)
+import Options.Applicative
+  ( Parser,
+    ParserInfo,
+    action,
+    auto,
+    footerDoc,
+    fullDesc,
+    header,
+    help,
+    helper,
+    info,
+    long,
+    metavar,
+    option,
+    optional,
+    progDesc,
+    short,
+    showDefault,
+    strOption,
+    switch,
+    value,
+  )
 import Options.Applicative.Help.Pretty (text)
 import qualified TSL.Base as Base
 import TSL.Core as Core
@@ -11,6 +32,7 @@ import TSL.Utils (readInput, writeOutput)
 data Options = Options
   { inputPath :: Maybe FilePath,
     outputPath :: Maybe FilePath,
+    treeBased :: Bool,
     poolSize :: Int,
     verbosity :: Int,
     ltlsyntPath :: FilePath
@@ -20,8 +42,8 @@ optionsParserInfo :: ParserInfo Options
 optionsParserInfo =
   info (helper <*> optionsParser) $
     fullDesc
-      <> progDesc "Spec (Base TSL) -> unrealizability core (Base TSL)"
-      <> header "tsl coregen"
+      <> progDesc "Spec (Base TSL) -> Spec that is realizable with a minimal amount of assumptions (Base TSL)"
+      <> header "tsl minunrealizable"
       <> footerDoc (Just $ text verbosityMessage)
   where
     verbosityMessage :: String
@@ -53,6 +75,11 @@ optionsParser =
             <> help "Output file (STDOUT, if not set)"
             <> action "file"
       )
+    <*> switch
+      ( long "tree-based"
+          <> short 't'
+          <> help "tree based"
+      )
     <*> option
       auto
       ( long "poolsize"
@@ -78,8 +105,8 @@ optionsParser =
           <> help "Path to ltlsynt"
       )
 
-coregen :: Options -> IO ()
-coregen (Options {inputPath, outputPath, poolSize, verbosity, ltlsyntPath}) = do
+minrealizable :: Options -> IO ()
+minrealizable (Options {inputPath, outputPath, treeBased, poolSize, verbosity, ltlsyntPath}) = do
   -- Read input
   input <- readInput inputPath
 
@@ -87,11 +114,17 @@ coregen (Options {inputPath, outputPath, poolSize, verbosity, ltlsyntPath}) = do
   checkPoolSize poolSize
   verbosity' <- convertVerbosity verbosity
   spec <- Base.readTSL input >>= unwrap
-  result <- Core.generateCore (Core.createContext poolSize verbosity' ltlsyntPath) spec
+  potMinimalRealizableSpec <-
+    ( if treeBased
+        then treeBasedMinimalAssumptions
+        else generateMinimalAssumptions
+      )
+      (Core.createContext poolSize verbosity' ltlsyntPath)
+      spec
 
   -- Write to output
-  case result of
-    Nothing -> writeOutput outputPath "Specification is realizable"
+  case potMinimalRealizableSpec of
+    Nothing -> writeOutput outputPath "UNREALIZABLE"
     Just core -> do
       writeOutput outputPath (Base.toTSL core)
   where
@@ -115,4 +148,4 @@ coregen (Options {inputPath, outputPath, poolSize, verbosity, ltlsyntPath}) = do
           unwrap $ genericError "The verbosity has to be given by a number between zero and three"
 
 command :: ParserInfo (IO ())
-command = coregen <$> optionsParserInfo
+command = minrealizable <$> optionsParserInfo

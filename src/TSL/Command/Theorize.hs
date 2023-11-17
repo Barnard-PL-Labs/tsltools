@@ -15,7 +15,7 @@ optionsParserInfo :: ParserInfo Options
 optionsParserInfo =
   info (helper <*> optionsParser) $
     fullDesc
-      <> progDesc "TSL -> theory-encoded Core TSL"
+      <> progDesc "Spec (TSL) -> theory-encoded (Base TSL)"
       <> header "tsl theorize"
 
 optionsParser :: Parser Options

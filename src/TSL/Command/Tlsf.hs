@@ -16,7 +16,7 @@ optionsParserInfo :: ParserInfo Options
 optionsParserInfo =
   info (helper <*> optionsParser) $
     fullDesc
-      <> progDesc "TSL -> LTL under-approximation in TLSF format"
+      <> progDesc "Spec (TSL) -> LTL under-approximation spec (TLSF)"
       <> header "tsl tlsf"
 
 optionsParser :: Parser Options
