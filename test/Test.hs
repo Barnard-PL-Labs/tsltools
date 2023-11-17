@@ -73,13 +73,8 @@ propReadOutput (o, s) =
 tests ::
   IO [Test]
 tests = do
-  putStrLn "Setting up JS tests."
   jsTests <- JSWriterTests.tests
-
-  putStrLn "Setting up Preprocessor tests."
   preprocessorTests <- PreprocessorTests.tests
-
-  putStrLn "Setting up TSLMT tests."
   tslmtTests <- ModuloTheoriesTests.tests
 
   return $

@@ -1,11 +1,6 @@
-deps
-specs
-local-dev
-*.tsl
-*.sl
-foo*
-bar*
-TODO
+# ignoring top-level .tsl files, because they are usually local test files
+/*.tsl
+
 .DS_Store
 tags
 dist

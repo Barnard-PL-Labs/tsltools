@@ -1,0 +1,8 @@
+always assume {
+}
+
+always guarantee {
+    F ([noteToPlay <- E4]);
+    F ([noteToPlay <- G4]);
+}
+
