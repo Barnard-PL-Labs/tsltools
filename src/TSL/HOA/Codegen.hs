@@ -158,8 +158,8 @@ parseUpdate str = case parse outputParser "Format Error" str of
       s <- parseSignal
       return (u, s)
     parseSignal =
-      (try (string "p1d") >> predicateParser)
-        <|> (try (string "f1d") >> functionParser)
+      try (string "p1d" >> predicateParser)
+        <|> try (string "f1d" >> functionParser)
         <|> (Var <$> identParser)
 
 functionParser :: Parser Term
@@ -173,18 +173,14 @@ functionParser = do
         <|> (string "1b" >> return argsRev)
         <|> (eof >> return argsRev)
     parseArgs =
-      (try (string "p1d") >> predicateParser)
-        <|> (try (string "f1d") >> functionParser)
+      try (string "p1d" >> predicateParser)
+        <|> try (string "f1d" >> functionParser)
         <|> (Var <$> identParser)
 
 predicateParser :: Parser Term
 predicateParser = do
-  (try varParser >>= return . Var)
-    <|> ( do
-            p <- predicateParser'
-            argsRev <- next []
-            return $ App p (reverse argsRev)
-        )
+  try varParser
+    <|> appParser
   where
     next argsRev =
       (char '0' >> parseArgs >>= \arg -> next (arg : argsRev))
@@ -192,17 +188,23 @@ predicateParser = do
         <|> (eof >> return argsRev)
 
     parseArgs =
-      (try (string "p1d") >> predicateParser)
-        <|> (try (string "f1d") >> functionParser)
+      try (string "p1d" >> predicateParser)
+        <|> try (string "f1d" >> functionParser)
         <|> (Var <$> identParser)
 
-    varParser =
-      char 'b'
-        >> ( (char 't' >> error "\"True\" cannot be part of an AST.")
-               <|> (char 'f' >> error "\"False\" cannot be part of an AST.")
-               <|> (char '0' >> identParser)
-           )
-    predicateParser' = string "p0" >> identParser
+    varParser = do
+      ident <-
+        char 'b'
+          >> ( (char 't' >> error "\"True\" cannot be part of an AST.")
+                 <|> (char 'f' >> error "\"False\" cannot be part of an AST.")
+                 <|> (char '0' >> identParser)
+             )
+      return $ Var ident
+    appParser = do
+      _ <- string "p0"
+      p <- identParser
+      argsRev <- next []
+      return $ App p (reverse argsRev)
 
 -- | Identifier parser that reverses character escaping
 identParser :: Parser String
