@@ -179,9 +179,12 @@ functionParser = do
 
 predicateParser :: Parser Term
 predicateParser = do
-  p <- identParser'
-  argsRev <- next []
-  return $ App p (reverse argsRev)
+  (try varParser >>= return . Var)
+    <|> ( do
+            p <- predicateParser'
+            argsRev <- next []
+            return $ App p (reverse argsRev)
+        )
   where
     next argsRev =
       (char '0' >> parseArgs >>= \arg -> next (arg : argsRev))
@@ -193,14 +196,13 @@ predicateParser = do
         <|> (try (string "f1d") >> functionParser)
         <|> (Var <$> identParser)
 
-    identParser' =
-      ( char 'b'
-          >> ( (char 't' >> error "\"True\" cannot be part of an AST.")
-                 <|> (char 'f' >> error "\"False\" cannot be part of an AST.")
-                 <|> (char '0' >> identParser)
-             )
-      )
-        <|> (string "p0" >> identParser)
+    varParser =
+      char 'b'
+        >> ( (char 't' >> error "\"True\" cannot be part of an AST.")
+               <|> (char 'f' >> error "\"False\" cannot be part of an AST.")
+               <|> (char '0' >> identParser)
+           )
+    predicateParser' = string "p0" >> identParser
 
 -- | Identifier parser that reverses character escaping
 identParser :: Parser String
