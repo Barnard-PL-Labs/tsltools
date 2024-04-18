@@ -5,14 +5,51 @@ module TSL.HOA.JavaScript
 where
 
 import Data.List (intercalate)
+import qualified Data.Set as Set
 import qualified Hanoi as H
+import TSL.HOA.Codegen (codegen, splitInputsCellsOutputs)
 import TSL.HOA.Imp
   ( ImpConfig (..),
-    withConfig,
+    cellOutputNextPrefix,
+    withConfig',
   )
 
 implement :: Bool -> H.HOA -> String
-implement = withConfig config
+implement isCounterStrat hoa =
+  let prog = codegen hoa
+      controller = withConfig' config isCounterStrat prog
+      (is', cs', os') = splitInputsCellsOutputs prog
+      is = Set.toList is'
+      cs = Set.toList cs'
+      os = Set.toList os'
+   in "function controller({"
+        -- inputs and cells (using JS object destructuring)
+        ++ commas (is ++ cs)
+        ++ "}) {\n"
+        -- instantiate next cells (using let)
+        ++ ( if not (null cs)
+               then
+                 indent 1
+                   ++ "let "
+                   ++ commas (map (cellOutputNextPrefix ++) (cs ++ os))
+                   ++ "\n\n"
+               else ""
+           )
+        -- controller logic
+        ++ controller
+        ++ "\n\n"
+        -- return next cells and outputs (using JS object)
+        ++ indent 1
+        ++ "return {"
+        ++ commas (map cellToNext (cs ++ os))
+        ++ "}\n"
+        ++ "}"
+  where
+    commas = intercalate ", "
+    cellToNext c = c ++ ": " ++ cellOutputNextPrefix ++ c
+
+indent :: Int -> String
+indent n = replicate (2 * n) ' '
 
 config :: ImpConfig
 config =
@@ -40,7 +77,8 @@ config =
       impCondition = \c -> "(" ++ c ++ ")",
       impFuncApp = \f args -> f ++ "(" ++ intercalate ", " args ++ ")",
       impAssign = \x y -> x ++ " = " ++ y,
-      impIndent = \n -> replicate (2 * n) ' ',
+      impIndent = indent,
       impBlockStart = " {",
-      impBlockEnd = "}"
+      impBlockEnd = "}",
+      impInitialIndent = 1
     }

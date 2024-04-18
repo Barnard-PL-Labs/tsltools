@@ -2,6 +2,7 @@
 
 module TSL.HOA.Codegen
   ( codegen,
+    splitInputsCellsOutputs,
     Program (..),
     StateTrans (..),
     Trans (..),
@@ -66,6 +67,37 @@ data Term
   = Var String
   | App String [Term]
   deriving (Show)
+
+-- | SPLIT INPUTS, CELLS, OUTPUTS
+splitInputsCellsOutputs :: Program -> (Set.Set String, Set.Set String, Set.Set String)
+splitInputsCellsOutputs p =
+  let (is, os) = ioFromProgram p
+   in splitSets is os
+  where
+    splitSets :: Set.Set String -> Set.Set String -> (Set.Set String, Set.Set String, Set.Set String)
+    splitSets is os = (is', cs, os')
+      where
+        cs = Set.intersection is os -- Elements common to both is and os
+        is' = is `Set.difference` os -- Elements in is not in os
+        os' = os `Set.difference` is -- Elements in os not in is
+    ioFromProgram :: Program -> (Set.Set String, Set.Set String)
+    ioFromProgram (Program stateTransList) = foldr ((\(ps, us) (ps', us') -> (Set.union ps ps', Set.union us us')) . ioFromStateTrans) (Set.empty, Set.empty) stateTransList
+    ioFromStateTrans :: StateTrans -> (Set.Set String, Set.Set String)
+    ioFromStateTrans (StateTrans _ transList) = foldr ((\(ps, us) (ps', us') -> (Set.union ps ps', Set.union us us')) . ioFromTrans) (Set.empty, Set.empty) transList
+    ioFromTrans :: Trans -> (Set.Set String, Set.Set String)
+    ioFromTrans (Trans ps us _) = (Set.unions (map varsFromPredicate ps) `Set.union` Set.unions (map varsFromUpdateRHS us), Set.fromList (map varsFromUpdateLHS us))
+    varsFromPredicate :: Predicate -> Set.Set String
+    varsFromPredicate PTrue = Set.empty
+    varsFromPredicate PFalse = Set.empty
+    varsFromPredicate (PNot p) = varsFromPredicate p
+    varsFromPredicate (PTerm t) = varsFromTerm t
+    varsFromTerm :: Term -> Set.Set String
+    varsFromTerm (Var x) = Set.singleton x
+    varsFromTerm (App _ ts) = Set.unions (map varsFromTerm ts)
+    varsFromUpdateLHS :: Update -> String
+    varsFromUpdateLHS (Update x _) = x
+    varsFromUpdateRHS :: Update -> Set.Set String
+    varsFromUpdateRHS (Update _ t) = varsFromTerm t
 
 -- | CODEGEN MONAD
 type Gen a = Reader GenCtx a

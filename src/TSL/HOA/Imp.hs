@@ -15,6 +15,9 @@ import Data.List
 import qualified Hanoi as H
 import qualified TSL.HOA.Codegen as CG
 
+cellOutputNextPrefix :: String
+cellOutputNextPrefix = "_next_"
+
 data ImpConfig = ImpConfig
   { -- binary functions
     impAdd :: String,
@@ -41,21 +44,27 @@ data ImpConfig = ImpConfig
     impAssign :: String -> String -> String,
     impIndent :: Int -> String,
     impBlockStart :: String,
-    impBlockEnd :: String
+    impBlockEnd :: String,
+    impInitialIndent :: Int
   }
 
 withConfig :: ImpConfig -> Bool -> H.HOA -> String
 withConfig config isCounterStrat hoa =
   let prog = CG.codegen hoa in Reader.runReader (writeProgram isCounterStrat prog) config -- TODO: make the False a flag for indicating counterstrategy
 
+withConfig' :: ImpConfig -> Bool -> CG.Program -> String
+withConfig' config isCounterStrat prog =
+  Reader.runReader (writeProgram isCounterStrat prog) config -- TODO: make the False a flag for indicating counterstrategy
+
 -- | WRITE PROGRAM TO STRING
 type Imp a = Reader ImpConfig a
 
 writeProgram :: Bool -> CG.Program -> Imp String
 writeProgram isCounterStrat (CG.Program stateTransList) = do
+  ImpConfig {..} <- Reader.ask
   lines <-
     concat <$> zipWithM (writeStateTrans isCounterStrat) (False : repeat True) stateTransList
-  return $ intercalate "\n" $ discardEmptyLines lines
+  return $ impIndent impInitialIndent ++ intercalate ("\n" ++ impIndent impInitialIndent) (discardEmptyLines lines)
   where
     discardEmptyLines lines =
       filter (\l -> not (null l) && not (all isSpace l)) lines
@@ -114,7 +123,7 @@ writePredicate p = do
 writeUpdate :: CG.Update -> Imp String
 writeUpdate (CG.Update var term) = do
   ImpConfig {..} <- Reader.ask
-  impAssign var <$> writeTermNoParens term
+  impAssign (cellOutputNextPrefix ++ var) <$> writeTermNoParens term
 
 writeTerm :: CG.Term -> Imp String
 writeTerm term = do
