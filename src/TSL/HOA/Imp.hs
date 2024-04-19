@@ -15,6 +15,9 @@ import Data.List
 import qualified Hanoi as H
 import qualified TSL.HOA.Codegen as CG
 
+functionName :: String
+functionName = "updateState"
+
 cellOutputNextPrefix :: String
 cellOutputNextPrefix = "_next_"
 

@@ -11,6 +11,7 @@ import TSL.HOA.Codegen (codegen, splitInputsCellsOutputs)
 import TSL.HOA.Imp
   ( ImpConfig (..),
     cellOutputNextPrefix,
+    functionName,
     withConfig',
   )
 
@@ -22,7 +23,9 @@ implement isCounterStrat hoa =
       is = Set.toList is'
       cs = Set.toList cs'
       os = Set.toList os'
-   in "function controller({"
+   in "function"
+        ++ functionName
+        ++ "({"
         -- inputs and cells (using JS object destructuring)
         ++ commas (is ++ cs)
         ++ "}) {\n"

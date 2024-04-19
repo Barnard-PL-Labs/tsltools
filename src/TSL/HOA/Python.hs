@@ -11,6 +11,7 @@ import TSL.HOA.Codegen (codegen, splitInputsCellsOutputs)
 import TSL.HOA.Imp
   ( ImpConfig (..),
     cellOutputNextPrefix,
+    functionName,
     withConfig',
   )
 
@@ -22,7 +23,9 @@ implement isCounterStrat hoa =
       is = Set.toList is'
       cs = Set.toList cs'
       os = Set.toList os'
-   in "def controller(_inputs_and_cells):\n"
+   in "def "
+        ++ functionName
+        ++ "(_inputs_and_cells):\n"
         -- inputs and cells
         ++ ( if not (null (is ++ cs))
                then
