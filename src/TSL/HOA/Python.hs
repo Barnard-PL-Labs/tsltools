@@ -30,9 +30,9 @@ implement isCounterStrat hoa =
         ++ ( if not (null (is ++ cs))
                then
                  indent 1
-                   ++ commas (is ++ cs)
+                   ++ commas ("currentState" : is ++ cs)
                    ++ " = itemgetter("
-                   ++ commas (map wrapQuotes (is ++ cs))
+                   ++ commas ("currentState" : map wrapQuotes (is ++ cs))
                    ++ ")(_inputs_and_cells)"
                    ++ "\n\n"
                else ""
@@ -43,7 +43,7 @@ implement isCounterStrat hoa =
         -- return next cells and outputs (using JS object)
         ++ indent 1
         ++ "return {"
-        ++ commas (map cellToNext (cs ++ os))
+        ++ commas ("\"currentState\": currentState" : map cellToNext (cs ++ os))
         ++ "}\n"
         ++ "}"
   where

@@ -23,11 +23,11 @@ implement isCounterStrat hoa =
       is = Set.toList is'
       cs = Set.toList cs'
       os = Set.toList os'
-   in "function"
+   in "function "
         ++ functionName
         ++ "({"
         -- inputs and cells (using JS object destructuring)
-        ++ commas (is ++ cs)
+        ++ commas ("currentState" : is ++ cs)
         ++ "}) {\n"
         -- instantiate next cells (using let)
         ++ ( if not (null cs)
@@ -44,7 +44,7 @@ implement isCounterStrat hoa =
         -- return next cells and outputs (using JS object)
         ++ indent 1
         ++ "return {"
-        ++ commas (map cellToNext (cs ++ os))
+        ++ commas ("currentState" : map cellToNext (cs ++ os))
         ++ "}\n"
         ++ "}"
   where
