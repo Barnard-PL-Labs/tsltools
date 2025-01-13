@@ -4,7 +4,7 @@
 
 -- |
 -- Module      :  TSL.ModuloTheories.ConsistencyChecking
--- Description :
+-- Description :  Adds partial semantics back to uninterpreted functions by checking which combinations of uninterpreted predicates are satisfiable. For each unsatisfiable combination, the negation of that combination is added as an assumption.
 -- Maintainer  :  Wonhyuk Choi
 module TSL.ModuloTheories.ConsistencyChecking
   ( generateConsistencyAssumptions,
@@ -43,7 +43,17 @@ pred2Assumption :: TheoryPredicate -> String
 pred2Assumption p = "G " ++ pred2Tsl (NotPLit p) ++ ";"
 
 data ConsistencyDebugInfo = ConsistencyDebugInfo IntermediateResults String
-  deriving (Show)
+
+instance Show ConsistencyDebugInfo where
+  show (ConsistencyDebugInfo results assumption) =
+    "ConsistencyDebugInfo {\n"
+      ++ "  results: "
+      ++ show results
+      ++ ",\n"
+      ++ "  assumption: "
+      ++ assumption
+      ++ "\n"
+      ++ "}"
 
 generateConsistencyAssumptions ::
   FilePath ->
@@ -66,7 +76,7 @@ consistencyChecking ::
 consistencyChecking solverPath pred = do
   isSat <- solveSat solverPath query
   if isSat
-    then except $ errConsistency $ "Predicate " ++ show pred ++ " is satisfiable."
+    then except $ errConsistency $ "Predicate " ++ show pred ++ " is satisfiable. No new assumption added."
     else
       let assumption = pred2Assumption pred
           intermediateResults =

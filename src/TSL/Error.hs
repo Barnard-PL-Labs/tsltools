@@ -144,22 +144,22 @@ instance Show Error where
     ErrDep DependencyError {..} -> pr "Dependency Error" errDPos errDMsgs
     ErrSyntax SyntaxError {..} -> pr "Syntax Error" errSPos errSMsgs
     ErrRunT RunTimeError {..} -> pr "Evaluation Error" errRPos errRMsgs
-    ErrCfg ConfigError {..} -> "\"Error\":\n" ++ fmsg
+    ErrCfg ConfigError {..} -> "Error (line unknown):\n" ++ fmsg
     ErrConv ConvError {..} ->
-      "\"Conversion Error\": " ++ title ++ "\n" ++ cmsg
+      "Conversion Error (line unknown): " ++ title ++ "\n" ++ cmsg
     ErrFormat FormatError {..} ->
-      "\"Format Error\": Unexpected format" ++ "\n" ++ errFmt
-    ErrGeneric GenericError {..} -> "Error: " ++ errGen
-    ErrMtParse TheoryParseError {..} -> "Modulo Theories Parse Error: " ++ mtRaw
-    ErrSolver SolverError {..} -> "Solver Error: " ++ solverErr
+      "Format Error (line unknown): Unexpected format" ++ "\n" ++ errFmt
+    ErrGeneric GenericError {..} -> "Error (line unknown): " ++ errGen
+    ErrMtParse TheoryParseError {..} -> "Modulo Theories Parse Error (line unknown): " ++ mtRaw
+    ErrSolver SolverError {..} -> "Solver Error (line unknown): " ++ solverErr
     ErrConsistency ConsistencyError {..} ->
-      "SMT Consistency Error: " ++ consistencyErr
+      "SMT Consistency Flag: " ++ consistencyErr
     ErrModel ModelError {..} ->
-      "Model Error: " ++ modelErr
-    ErrSygus SygusError {..} -> "Sygus Error: " ++ sygusErr
+      "Model Error (line unknown): " ++ modelErr
+    ErrSygus SygusError {..} -> "Sygus Error (line unknown): " ++ sygusErr
     where
       pr errname pos msgs =
-        "\"" ++ errname ++ "\" (" ++ prErrPos pos ++ "):\n" ++ concat msgs
+        "\"" ++ errname ++ "\" at " ++ prErrPos pos ++ ":\n" ++ concat msgs
 
 unwrap :: Either Error a -> IO a
 unwrap = \case
@@ -434,6 +434,7 @@ errSolver =
   Left . ErrSolver . SolverError
 
 -- | Consistency Error.
+-- This error should get thrown under normal circumstances - it just means that the SMT solver returned sat and no new assumptions were added.
 errConsistency ::
   String -> Either Error a
 errConsistency =

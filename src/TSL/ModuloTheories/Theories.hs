@@ -72,6 +72,7 @@ instance Show Theory where
 readTheory :: String -> Either Error Theory
 readTheory "#UF" = Right Uf
 readTheory "#EUF" = Right EUf
+readTheory "#QF_UF" = Right EUf
 readTheory "#LIA" = Right Lia
 readTheory other = errMtParse other
 

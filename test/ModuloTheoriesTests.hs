@@ -70,21 +70,39 @@ makeTestName = ("Modulo Theories >> " ++)
 cvc5Path :: FilePath
 cvc5Path = "deps/bin/cvc5"
 
-predicatesTests :: [Test]
-predicatesTests = [convert2Cabal (makeTestName "Predicates") hUnitTest]
+commandTests :: [Test]
+commandTests = [convert2Cabal (makeTestName "Command") hUnitTest]
   where
-    path = "test/regression/ModuloTheories/functions_and_preds.tslmt"
-    expectedNumPreds = 2
+    testcases =
+      [ ("test/regression/ModuloTheories/euf.tslmt", "test/regression/ModuloTheories/euf_expected.tsl")
+      ]
 
     hUnitTest = do
+      let runTest (path, expectedPath) = do
+            output <- readFile path >>= MT.theorize "cvc5"
+            expected <- readFile expectedPath
+            return $ H.TestCase $ output @=? expected
+
+      tests <- mapM runTest testcases
+      return $ H.TestList tests
+
+predicatesTests :: [Test]
+predicatesTests = map (convert2Cabal (makeTestName "Predicates") . hUnitTest) testcases
+  where
+    testcases =
+      [ ("test/regression/ModuloTheories/functions_and_preds.tslmt", "[(p z),(q (f a b))]"),
+        ("test/regression/ModuloTheories/euf.tslmt", "[(= x a),(= a x)]")
+      ]
+
+    hUnitTest (path, expectedNumPreds) = do
       (mTheory, spec, _) <- readFile path >>= MT.parse
       case mTheory of
         Nothing -> return $ H.TestCase $ H.assertFailure "Does not invoke ModuloTheory (no theory tag)."
-        Just theory ->
-          return $
-            H.TestCase $ case predsFromSpec theory spec of
-              Right preds -> expectedNumPreds @=? length preds
-              Left errMsg -> H.assertFailure $ show errMsg
+        Just theory -> do
+          let preds = predsFromSpec theory spec
+          return $ H.TestCase $ case preds of
+            Right preds -> expectedNumPreds @=? show preds
+            Left errMsg -> H.assertFailure $ show errMsg
 
 cfgTests :: [Test]
 cfgTests = [convert2Cabal (makeTestName "CFG") hUnitTest]
@@ -114,6 +132,12 @@ isSuccess = fmap isRight . runExceptT
 countSuccess :: (Monad m) => [ExceptT e m a] -> m Int
 countSuccess = fmap (length . filter id) . mapM isSuccess
 
+successes :: (Monad m) => [ExceptT e m a] -> m [Either e a]
+successes = mapM unwrapSuccess
+
+unwrapSuccess :: (Monad m) => ExceptT e m a -> m (Either e a)
+unwrapSuccess o = runExceptT o >>= return
+
 consistencyTests :: [Test]
 consistencyTests = [convert2Cabal (makeTestName "Consistency") hUnitTest]
   where
@@ -130,8 +154,12 @@ consistencyTests = [convert2Cabal (makeTestName "Consistency") hUnitTest]
                 Left err -> error $ show err
                 Right ps -> ps
               results = consistencyDebug cvc5Path preds
-
           actualNumAssumptions <- countSuccess results
+
+          -- putStrLn $ "Preds: " ++ show preds
+          -- actualAssumptions <- successes results
+          -- putStrLn $ "Results: "
+          -- mapM_ print actualAssumptions
 
           return $
             H.TestList $
@@ -185,7 +213,7 @@ sygusTests =
           return $ H.TestCase $ numExpected @=? numActual
 
 allTests :: [Test]
-allTests = concat [predicatesTests, cfgTests, consistencyTests, sygusTests]
+allTests = concat [predicatesTests, commandTests, cfgTests, consistencyTests, sygusTests]
 
 tests :: IO [Test]
 tests = do

@@ -9,4 +9,16 @@ data IntermediateResults = IntermediateResults
     query :: String,
     result :: String
   }
-  deriving (Show)
+
+instance Show IntermediateResults where
+  show (IntermediateResults problem query result) =
+    "IntermediateResults {\n"
+      ++ "  problem: "
+      ++ problem
+      ++ ",\n"
+      ++ "  query: "
+      ++ query
+      ++ ",\n"
+      ++ "  result: "
+      ++ result
+      ++ "\n}"

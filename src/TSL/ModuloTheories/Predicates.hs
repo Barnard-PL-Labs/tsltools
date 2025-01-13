@@ -113,11 +113,11 @@ enumeratePreds preds = map andPreds $ filter (not . null) $ powerset preds'
     preds' = preds ++ map NotPLit preds
 
 predsFromSpec :: Theory -> Specification -> Either Error [TheoryPredicate]
-predsFromSpec theory (Specification a g s) = mapM toTheoryPred asts
+predsFromSpec theory (Specification assumptions guarantees symtable) = mapM toTheoryPred asts
   where
-    pTerms = concatMap fromFormula (a ++ g)
-    unhash = stName s
-    toAst = fromPredicateTerm (arity . stType s)
+    pTerms = concatMap fromFormula (assumptions ++ guarantees)
+    unhash = stName symtable
+    toAst = fromPredicateTerm (arity . stType symtable)
     asts = map (fmap unhash . toAst) pTerms
     toTheoryPred = fmap PLiteral . applySemantics theory
 
