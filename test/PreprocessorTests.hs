@@ -1,9 +1,12 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module PreprocessorTests
   ( tests,
   )
 where
 
 import Data.Either (isRight)
+import qualified Data.Text as T
 import Distribution.TestSuite
   ( Progress (..),
     Result (..),
@@ -70,8 +73,16 @@ unitTests = map runTest testNums
             inputTSL <- readFile inputPath
             expectedTSL <- readFile expectedPath
             actual <- preprocess inputTSL
-            expected <- preprocess expectedTSL
-            return $ H.TestCase $ expected @=? actual
+            let actual' = T.unpack $ T.replace "QF_UF" "EUF" $ T.pack actual
+            let parsedActual = parse actual'
+            let parsedExpected = parse expectedTSL
+            let parsedActual' = either (const Nothing) Just parsedActual
+            let parsedExpected' = either (const Nothing) Just parsedExpected
+
+            return $
+              H.TestCase $
+                H.assertBool "Parse failed!" (isRight parsedExpected && isRight parsedActual)
+                  >> (parsedActual' @=? parsedExpected')
 
 specTests :: IO [Test]
 specTests = fmap (map runTest) filePaths

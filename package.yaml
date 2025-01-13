@@ -90,6 +90,7 @@ tests:
       - filepath
       - directory
       - Cabal
+      - text
       - transformers
       - process
       - hanoi

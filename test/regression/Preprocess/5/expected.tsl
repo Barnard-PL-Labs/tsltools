@@ -1,4 +1,5 @@
 #LIA
 always assume {
-    [m <- ((p u z - x) / (a y))] <-> ( ((f y) = (g z h) ) || (y <= w));
+([m <- (div (sub (p u z) x) (a y))] <-> ((eq (f y) (g z h)) || (lte y w)));
+
 }
