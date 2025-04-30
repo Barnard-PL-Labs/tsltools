@@ -12,3 +12,5 @@ extra-deps:
 - github: Barnard-PL-Labs/syfco
   commit: 9b248b47b6310752ec1cad26d537e147c6a195e7 
 allow-newer: true
+extra-include-dirs:
+- /opt/homebrew/include
