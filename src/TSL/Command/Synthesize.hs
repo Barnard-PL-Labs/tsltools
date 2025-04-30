@@ -1,22 +1,30 @@
 module TSL.Command.Synthesize (command) where
 
 import Data.Maybe (fromJust)
-import Options.Applicative (Parser, ParserInfo, action, flag', fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, showDefault, strOption, value, (<|>))
+import Options.Applicative (Parser, ParserInfo, action, flag, flag', fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, showDefault, strOption, value, (<|>))
 import System.Exit (ExitCode (ExitFailure), exitSuccess, exitWith)
-import TSL.Error (warn)
+import TSL.Error (warn, unwrap)
 import qualified TSL.HOA as HOA
 import qualified TSL.LTL as LTL
 import qualified TSL.ModuloTheories as ModuloTheories
 import qualified TSL.Preprocessor as Preprocessor
 import qualified TSL.TLSF as TLSF
 import TSL.Utils (readInput, writeOutput)
+import qualified Control.Monad as ControlM
+import qualified TSL.Base.Reader as Base (readTSL)
+import TSL.Base.Logic (inputs, outputs, functions, predicates, updates)
+import TSL.Base.Specification (toFormula, Specification(..))
+import TSL.Base.SymbolTable (stName)
+import Data.Set (toList)
+import qualified Data.Set as Set
 
 data Options = Options
   { inputPath :: Maybe FilePath,
     outputPath :: Maybe FilePath,
     target :: HOA.CodeTarget,
     solverPath :: FilePath,
-    ltlsyntPath :: FilePath
+    ltlsyntPath :: FilePath,
+    analyzeSpec :: Bool
   }
 
 optionsParserInfo :: ParserInfo Options
@@ -66,9 +74,13 @@ optionsParser =
           <> metavar "LTLSYNT"
           <> help "Path to ltlsynt"
       )
+    <*> flag False True
+      ( long "analyze"
+          <> help "Analyze the specification before synthesis"
+      )
 
 synthesize :: Options -> IO ()
-synthesize (Options {inputPath, outputPath, target, solverPath, ltlsyntPath}) = do
+synthesize (Options {inputPath, outputPath, target, solverPath, ltlsyntPath, analyzeSpec}) = do
   -- Read input
   input <- readInput inputPath
 
@@ -77,6 +89,15 @@ synthesize (Options {inputPath, outputPath, target, solverPath, ltlsyntPath}) = 
 
   -- desugared TSLMT spec (String) -> theory-encoded TSL spec (String)
   theorizedSpec <- ModuloTheories.theorize solverPath preprocessedSpec
+
+  ControlM.when analyzeSpec $ do
+    spec <- Base.readTSL theorizedSpec >>= unwrap
+    let formula = toFormula (assumptions spec) (guarantees spec)
+    putStrLn "=== Specification Metadata ==="
+    putStrLn $ "Inputs:     " ++ show (map (stName (symboltable spec)) $ toList $ inputs formula)
+    putStrLn $ "Outputs:    " ++ show (map (stName (symboltable spec)) $ toList $ outputs formula)
+    putStrLn $ "Functions:  " ++ show (map (stName (symboltable spec)) $ toList $ functions formula)
+    putStrLn $ "Predicates: " ++ show (map (stName (symboltable spec)) $ toList $ predicates formula)
 
   -- theory-encoded TSL spec (String) -> TLSF (String)
   tlsfSpec <- TLSF.lower' theorizedSpec
