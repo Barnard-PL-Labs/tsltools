@@ -8,15 +8,16 @@
 --                calls, we now cap the number of combinations examined.
 -- Maintainer  :  Wonhyuk Choi
 module TSL.ModuloTheories.ConsistencyChecking
-  ( generateConsistencyAssumptions
-  , consistencyDebug
-  , ConsistencyDebugInfo (..)
-  , config_MAX_CONSISTENCY_CHECKS   
-  ) where
+  ( generateConsistencyAssumptions,
+    consistencyDebug,
+    ConsistencyDebugInfo (..),
+  )
+  where
 
 import           Control.Monad.Trans.Except
 import qualified Data.List                      as L
 import           Debug.Trace                    (trace)
+import Data.Maybe (fromMaybe)
 
 import           TSL.Base.Ast                   (AstInfo (..), SymbolInfo (..), deduplicate)
 import           TSL.Error                      (Error, errConsistency)
@@ -32,19 +33,21 @@ import           TSL.ModuloTheories.Theories    (Theory, TheorySymbol, isUninter
 --   predicates appear in the spec.  Adjust as needed or expose it as a CLI flag.
 -- this number can be changed based on the problem, but even for simple synthesis problems the 
 -- number of predicates being checked was always become 2^n. This simplifies while getting the correct answer
-config_MAX_CONSISTENCY_CHECKS :: Int
-config_MAX_CONSISTENCY_CHECKS = 100
+config_MAX_CONSISTENCY_CHECKS :: Maybe Int
+config_MAX_CONSISTENCY_CHECKS = Just 100
 
 
 generateConsistencyAssumptions
-  :: FilePath                  
-  -> [TheoryPredicate]        
+  :: FilePath
+  -> [TheoryPredicate]
   -> [ExceptT Error IO String]
 generateConsistencyAssumptions path preds =
   map (fmap fst . consistencyChecking path) limitedCombos
   where
-    -- enumerate all combinations, then keep only the first N
-    limitedCombos = take config_MAX_CONSISTENCY_CHECKS $ enumeratePreds preds
+    allCombos    = enumeratePreds preds
+    limitedCombos = case config_MAX_CONSISTENCY_CHECKS of
+      Just n  -> take n allCombos
+      Nothing -> allCombos
 
 consistencyDebug
   :: FilePath
@@ -53,7 +56,11 @@ consistencyDebug
 consistencyDebug path preds =
   map (fmap snd . consistencyChecking path) limitedCombos
   where
-    limitedCombos = take config_MAX_CONSISTENCY_CHECKS $ enumeratePreds preds
+    allCombos    = enumeratePreds preds
+    limitedCombos = case config_MAX_CONSISTENCY_CHECKS of
+      Just n  -> take n allCombos
+      Nothing -> allCombos
+
 
 pred2Assumption :: TheoryPredicate -> String
 pred2Assumption p = "G " ++ pred2Tsl (NotPLit p) ++ ";"
