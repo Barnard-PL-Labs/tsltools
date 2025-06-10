@@ -1,0 +1,48 @@
+#LIA  
+initially assume { 
+
+
+}
+
+
+always assume {
+
+    Cop.x < MaxX() && [Cop.x <- Cop.x + 1] -> X(Cop.x = MaxX());
+    Cop.x > MinX() && [Cop.x <- Cop.x - 1] -> X(Cop.x = MinX());
+
+    Cop.y < MaxY() && [Cop.y <- Cop.y + 1] -> X(Cop.y = MaxY());
+    Cop.y > MinY() && [Cop.y <- Cop.y - 1] -> X(Cop.y = MinY());
+
+    F(Cop.x = MinX());
+    F(Cop.x = MaxX());
+
+    F(Cop.y = MinY());
+    F(Cop.y = MaxY());
+
+
+}
+
+always guarantee {
+
+  //Cop.x maxX eventually cop.x minX and inverse
+  Cop.x = MaxX() -> F(Cop.x = MinX());
+  Cop.x = MinX() -> F(Cop.x = MaxX());
+
+  Cop.y = MaxY() -> F(Cop.y = MinY());
+  Cop.y = MinY() -> F(Cop.y = MaxY());
+  
+  [Cop.x <- Cop.x + 1] || [Cop.x <- Cop.x - 1];
+
+  [Cop.y <- Cop.y + 1] || [Cop.y <- Cop.y - 1];
+
+
+ // X Coordinate Ping Pong Effects
+  (Cop.x = MinX() &&  (!(X (Cop.x) = MinX()))) -> (!( [Cop.x <- Cop.x - 1]) U (Cop.x = MaxX()));
+  (Cop.x = MaxX() &&  (!(X (Cop.x) = MaxX()))) -> (!( [Cop.x <- Cop.x + 1]) U (Cop.x = MinX()));
+
+  (Cop.y = MinY() &&  (!(X (Cop.y) = MinY()))) -> (!( [Cop.y <- Cop.y - 1]) U (Cop.y = MaxY()));
+  (Cop.y = MaxY() &&  (!(X (Cop.y) = MaxY()))) -> (!( [Cop.y <- Cop.y + 1]) U (Cop.y = MinY()));
+  
+
+  
+}
