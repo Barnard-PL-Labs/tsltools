@@ -42,7 +42,6 @@ always guarantee {
 
   (Cop.y = MinY() &&  (!(X (Cop.y) = MinY()))) -> (!( [Cop.y <- Cop.y - 1]) U (Cop.y = MaxY()));
   (Cop.y = MaxY() &&  (!(X (Cop.y) = MaxY()))) -> (!( [Cop.y <- Cop.y + 1]) U (Cop.y = MinY()));
-  
-
+    //empty comment
   
 }
