@@ -10,10 +10,12 @@ module TSL.ModuloTheories
   )
 where
 
-import Control.Monad (unless)
+import Control.Monad (unless,forM_)
+import qualified Control.Monad as ControlM
 import Control.Monad.Trans.Except
 import Data.Maybe (catMaybes, isJust)
-import System.Directory (findExecutable)
+import System.Directory (findExecutable, createDirectoryIfMissing, getDirectoryContents)
+import Control.Monad.IO.Class (liftIO)
 import TSL.Base.Reader (readTSL)
 import TSL.Base.Specification (Specification)
 import TSL.Error (genericError, unwrap)
@@ -23,8 +25,8 @@ import TSL.ModuloTheories.Predicates
 import TSL.ModuloTheories.Sygus
 import TSL.ModuloTheories.Theories
 
-theorize :: FilePath -> String -> IO String
-theorize solverPath spec = do
+theorize :: Bool -> FilePath -> String -> IO String
+theorize debugSpec solverPath spec = do
   -- check if ltlsynt is available on path
   ltlsyntAvailable <- checkSolverPath solverPath
   unless ltlsyntAvailable $
@@ -53,17 +55,20 @@ theorize solverPath spec = do
             return $ case either of
               Left _ -> Nothing
               Right assumption -> Just assumption
+              
 
           extractAssumptions :: (Monad m) => [ExceptT e m String] -> m String
           extractAssumptions =
             fmap (unlines . catMaybes) . mapM extractAssumption
 
           consistencyAssumptions :: IO String
+
           consistencyAssumptions =
             extractAssumptions $
               generateConsistencyAssumptions
                 solverPath
                 preds
+
 
           sygusAssumptions :: IO String
           sygusAssumptions =
@@ -80,7 +85,18 @@ theorize solverPath spec = do
                       <$> consistencyAssumptions
                       <*> sygusAssumptions
                   )
-      (++ specStr) <$> assumptionsBlock
+      ass <- assumptionsBlock
+
+      ControlM.when debugSpec $ do
+        liftIO $ createDirectoryIfMissing True "Assumption_Block"
+        let outPath = "Assumption_Block/assumptions.txt"
+        liftIO $ writeFile outPath ass
+        putStrLn $ ">> [theorize] wrote assumptions to " ++ outPath
+
+      -- **finally**, assemble and return your full spec:
+      let fullSpec = ass ++ specStr
+      return fullSpec
+
   where
     unError :: (Show a) => Either a b -> b
     unError = \case

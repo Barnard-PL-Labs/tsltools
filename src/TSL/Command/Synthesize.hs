@@ -24,7 +24,8 @@ data Options = Options
     target :: HOA.CodeTarget,
     solverPath :: FilePath,
     ltlsyntPath :: FilePath,
-    analyzeSpec :: Bool
+    analyzeSpec :: Bool,
+    debugSpec :: Bool
   }
 
 optionsParserInfo :: ParserInfo Options
@@ -79,16 +80,27 @@ optionsParser =
           <> help "Analyze the specification before synthesis"
       )
 
+    <*> flag False True
+      ( long "debug"
+        <> help "Assist in Debug Process"
+      )
+
 synthesize :: Options -> IO ()
-synthesize (Options {inputPath, outputPath, target, solverPath, ltlsyntPath, analyzeSpec}) = do
+synthesize (Options {inputPath, outputPath, target, solverPath, ltlsyntPath, analyzeSpec, debugSpec}) = do
   -- Read input
+  ControlM.when debugSpec $ do
+    putStrLn "Reading Input"
   input <- readInput inputPath
 
   -- user-provided TSLMT spec (String) -> desugared TSLMT spec (String)
+  ControlM.when debugSpec $ do
+    putStrLn "Preprocessing Input"
   preprocessedSpec <- Preprocessor.preprocess input
 
   -- desugared TSLMT spec (String) -> theory-encoded TSL spec (String)
-  theorizedSpec <- ModuloTheories.theorize solverPath preprocessedSpec
+  ControlM.when debugSpec $ do
+    putStrLn "Grabbing assumptions "
+  theorizedSpec <- ModuloTheories.theorize debugSpec solverPath preprocessedSpec
 
   ControlM.when analyzeSpec $ do
     spec <- Base.readTSL theorizedSpec >>= unwrap
@@ -98,11 +110,18 @@ synthesize (Options {inputPath, outputPath, target, solverPath, ltlsyntPath, ana
     putStrLn $ "Outputs:    " ++ show (map (stName (symboltable spec)) $ toList $ outputs formula)
     putStrLn $ "Functions:  " ++ show (map (stName (symboltable spec)) $ toList $ functions formula)
     putStrLn $ "Predicates: " ++ show (map (stName (symboltable spec)) $ toList $ predicates formula)
-
+  
+  ControlM.when debugSpec $ do
+    putStrLn "Entering TLSF Spec Translation: theory-encoded TSL spec (String) -> TLSF (String)"
   -- theory-encoded TSL spec (String) -> TLSF (String)
   tlsfSpec <- TLSF.lower' theorizedSpec
-
+  ControlM.when analyzeSpec $ do
+    putStrLn "               "
+    putStrLn "===TLSF Spec==="
+    --putStrLn (tlsfSpec) 
   -- TLSF (String) -> HOA controller (String)
+  ControlM.when debugSpec $ do
+    putStrLn "Entering HOA Controller Spec Translation: TLSF (String) -> HOA controller (String)"
   hoaController <- LTL.synthesize ltlsyntPath tlsfSpec
 
   hoaController <-
@@ -111,6 +130,8 @@ synthesize (Options {inputPath, outputPath, target, solverPath, ltlsyntPath, ana
       Just c -> return $ Right c
 
   -- HOA controller (String) -> controller in target language (String)
+  ControlM.when debugSpec $ do
+    putStrLn "HOA controller (String) -> controller in target language (String)"
   targetController <-
     either
       (\h -> warn "Warning: Unrealizable Spec, generating counterstrategy" >> HOA.implement' True target h)

@@ -1,7 +1,7 @@
 module TSL.Command.Hoa (command) where
 
 import Data.Maybe (fromJust)
-import Options.Applicative (Parser, ParserInfo, action, fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, showDefault, strOption, value)
+import Options.Applicative (Parser, ParserInfo, action, flag, fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, showDefault, strOption, value)
 import System.Exit (ExitCode (ExitFailure), exitSuccess, exitWith)
 import TSL.Error (warn)
 import qualified TSL.LTL as LTL
@@ -14,7 +14,8 @@ data Options = Options
   { inputPath :: Maybe FilePath,
     outputPath :: Maybe FilePath,
     solverPath :: FilePath,
-    ltlsyntPath :: FilePath
+    ltlsyntPath :: FilePath,
+    debugSpec :: Bool
   }
 
 optionsParserInfo :: ParserInfo Options
@@ -58,9 +59,13 @@ optionsParser =
           <> metavar "LTLSYNT"
           <> help "Path to ltlsynt"
       )
+    <*> flag False True
+      ( long "debug"
+         <> help "Print debug info during theorization"
+      )
 
 hoa :: Options -> IO ()
-hoa (Options {inputPath, outputPath, solverPath, ltlsyntPath}) = do
+hoa (Options {inputPath, outputPath, solverPath, ltlsyntPath, debugSpec}) = do
   -- Read input
   input <- readInput inputPath
 
@@ -68,7 +73,7 @@ hoa (Options {inputPath, outputPath, solverPath, ltlsyntPath}) = do
   preprocessedSpec <- Preprocessor.preprocess input
 
   -- desugared TSLMT spec (String) -> theory-encoded TSL spec (String)
-  theorizedSpec <- ModuloTheories.theorize solverPath preprocessedSpec
+  theorizedSpec <- ModuloTheories.theorize debugSpec solverPath preprocessedSpec
 
   -- theory-encoded TSL spec (String) -> TLSF (String)
   tlsfSpec <- TLSF.lower' theorizedSpec

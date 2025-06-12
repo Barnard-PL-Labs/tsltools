@@ -28,51 +28,63 @@ realizable ltlsyntPath tlsfContents = do
 
 synthesize' :: FilePath -> String -> IO (ExitCode, String, String)
 synthesize' ltlsyntPath tlsfContents = do
-  -- check if ltlsynt is available on path
+  putStrLn $ "[LTL] -> checking ltlsynt at: " ++ ltlsyntPath
   ltlsyntAvailable <- checkLtlsynt ltlsyntPath
   unless ltlsyntAvailable $
     unwrap . genericError $
       "Invalid path to ltlsynt: " ++ ltlsyntPath
 
-  -- prepare arguments for ltlsynt
+  putStrLn "[LTL] -> parsing TLSF via Syfco.fromTLSF"
   let tlsfSpec =
         case S.fromTLSF tlsfContents of
-          Left err -> error $ show err
+          Left err   -> error $ show err
           Right spec -> spec
+
+  putStrLn "[LTL] -> extracting inputs"
   let ltlIns = prInputs S.defaultCfg tlsfSpec
       ltlOuts = prOutputs S.defaultCfg tlsfSpec
-      ltlFormulae = prFormulae S.defaultCfg {S.outputMode = S.Fully, S.outputFormat = S.LTLXBA} tlsfSpec
-      ltlCommandArgs =
-        [ "--formula=" ++ ltlFormulae,
-          "--ins=" ++ ltlIns,
-          "--outs=" ++ ltlOuts,
-          "--hoaf=i"
+
+  putStrLn $ "[LTL]    inputs = " ++ show ltlIns
+  putStrLn $ "[LTL]    outputs = " ++ show ltlOuts
+
+  putStrLn "[LTL] -> building formulae"
+  let ltlFormulae = prFormulae
+        S.defaultCfg {S.outputMode = S.Fully, S.outputFormat = S.LTLXBA}
+        tlsfSpec
+  putStrLn $ "[LTL]    formula = " ++ take 80 ltlFormulae ++ "…"
+
+  let ltlCommandArgs =
+        [ "--formula=" ++ ltlFormulae
+        , "--ins="     ++ ltlIns
+        , "--outs="    ++ ltlOuts
+        , "--hoaf=i"
         ]
+  putStrLn $ "[LTL] -> invoking ltlsynt with args: " ++ show ltlCommandArgs
 
-  -- call ltlsynt
-  readProcessWithExitCode ltlsyntPath ltlCommandArgs ""
+  result <- readProcessWithExitCode ltlsyntPath ltlCommandArgs ""
+  putStrLn $ "[LTL] <- ltlsynt exited with: " ++ show (fst3 result)
+  return result
   where
-    prFormulae ::
-      S.Configuration -> S.Specification -> String
+    fst3 (x,_,_) = x
+
+    prFormulae :: S.Configuration -> S.Specification -> String
     prFormulae c s = case S.apply c s of
-      Left err -> show err
-      Right formulae -> formulae
+      Left err      -> show err
+      Right formula -> formula
 
-    -- \| Prints the input signals of the given specification.
-    prInputs ::
-      S.Configuration -> S.Specification -> String
+    -- | Prints the input signals of the given specification.
+    prInputs :: S.Configuration -> S.Specification -> String
     prInputs c s = case S.inputs c s of
-      Left err -> show err
-      Right [] -> ""
-      Right (x : xr) -> x ++ concatMap ((:) ',' . (:) ' ') xr
+      Left err    -> show err
+      Right []    -> ""
+      Right (x:xr) -> x ++ concatMap ((:) ',' . (:) ' ') xr
 
-    -- \| Prints the output signals of the given specification.
-    prOutputs ::
-      S.Configuration -> S.Specification -> String
+    -- | Prints the output signals of the given specification.
+    prOutputs :: S.Configuration -> S.Specification -> String
     prOutputs c s = case S.outputs c s of
-      Left err -> show err
-      Right [] -> ""
-      Right (x : xr) -> x ++ concatMap ((:) ',' . (:) ' ') xr
+      Left err    -> show err
+      Right []    -> ""
+      Right (x:xr) -> x ++ concatMap ((:) ',' . (:) ' ') xr
 
 -- | Check if 'ltlsynt' is available on path
 checkLtlsynt :: FilePath -> IO Bool

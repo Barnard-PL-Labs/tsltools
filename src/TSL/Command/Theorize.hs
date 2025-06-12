@@ -1,6 +1,6 @@
 module TSL.Command.Theorize (command) where
 
-import Options.Applicative (Parser, ParserInfo, action, fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, showDefault, strOption, value)
+import Options.Applicative (Parser, ParserInfo, action, flag,fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, showDefault, strOption, value)
 import qualified TSL.ModuloTheories as ModuloTheories
 import qualified TSL.Preprocessor as Preprocessor
 import TSL.Utils (readInput, writeOutput)
@@ -8,7 +8,8 @@ import TSL.Utils (readInput, writeOutput)
 data Options = Options
   { inputPath :: Maybe FilePath,
     outputPath :: Maybe FilePath,
-    solverPath :: FilePath
+    solverPath :: FilePath,
+    debugSpec :: Bool
   }
 
 optionsParserInfo :: ParserInfo Options
@@ -45,9 +46,13 @@ optionsParser =
           <> help "Path to SMT and SyGus solver"
           <> action "file"
       )
+    <*> flag False True
+      ( long "debug"
+         <> help "Print debug info during theorization"
+      )
 
 theorize :: Options -> IO ()
-theorize (Options {inputPath, outputPath, solverPath}) = do
+theorize (Options {inputPath, outputPath, solverPath, debugSpec}) = do
   -- Read input
   input <- readInput inputPath
 
@@ -55,7 +60,7 @@ theorize (Options {inputPath, outputPath, solverPath}) = do
   preprocessedSpec <- Preprocessor.preprocess input
 
   -- desugared TSLMT spec (String) -> theory-encoded TSL spec (String)
-  theorizedSpec <- ModuloTheories.theorize solverPath preprocessedSpec
+  theorizedSpec <- ModuloTheories.theorize debugSpec solverPath preprocessedSpec
 
   -- Write to output
   writeOutput outputPath theorizedSpec
