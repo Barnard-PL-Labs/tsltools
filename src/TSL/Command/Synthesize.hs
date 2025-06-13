@@ -122,11 +122,14 @@ synthesize (Options {inputPath, outputPath, target, solverPath, ltlsyntPath, ana
   -- TLSF (String) -> HOA controller (String)
   ControlM.when debugSpec $ do
     putStrLn "Entering HOA Controller Spec Translation: TLSF (String) -> HOA controller (String)"
-  hoaController <- LTL.synthesize ltlsyntPath tlsfSpec
+  hoaController <- LTL.synthesize ltlsyntPath tlsfSpec debugSpec
 
   hoaController <-
     case hoaController of
-      Nothing -> TLSF.counter' theorizedSpec >>= LTL.synthesize ltlsyntPath >>= return . Left . fromJust
+      Nothing -> do
+        newTlsf     <- TLSF.counter' theorizedSpec
+        mController <- LTL.synthesize ltlsyntPath newTlsf debugSpec
+        return . Left . fromJust $ mController
       Just c -> return $ Right c
 
   -- HOA controller (String) -> controller in target language (String)

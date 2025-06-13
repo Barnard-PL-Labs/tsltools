@@ -2,56 +2,86 @@
 module TSL.LTL (synthesize, synthesize', realizable) where
 
 import Control.Exception (handle)
-import Control.Monad (unless)
-import Data.Maybe (isJust)
+import Control.Monad (unless, when)
+import qualified Control.Monad as ControlM
+import Data.Maybe (fromMaybe, isJust)
 import qualified Syfco as S
-import System.Directory (findExecutable)
+import System.Directory (createDirectoryIfMissing, getCurrentDirectory, findExecutable)
+import System.FilePath      ((</>))
 import System.Exit (ExitCode (ExitSuccess))
 import System.Process (readProcessWithExitCode)
 import TSL.Error (genericError, unwrap)
 
 -- | Given LTL spec in TLSF format, synthesize a Right HOA controller
 --   If unrealizable, generate a Left counterstrategy
-synthesize :: FilePath -> String -> IO (Maybe String)
-synthesize ltlsyntPath tlsfContents = do
-  (exitCode, stdout, stderr) <- synthesize' ltlsyntPath tlsfContents
+synthesize :: FilePath -> String -> Bool -> IO (Maybe String)
+synthesize ltlsyntPath tlsfContents debugSpec = do
+  ControlM.when debugSpec $ do
+    cwd <- getCurrentDirectory
+    putStrLn $ "[LTL][DEBUG] cwd is: " ++ cwd
+
+    let debugDir  = "debug" </> "tlsf"
+        debugFile = debugDir </> "spec.tlsf"
+
+    putStrLn "[LTL][DEBUG] writing raw TLSF spec to disk"
+    createDirectoryIfMissing True debugDir
+    writeFile debugFile tlsfContents
+    putStrLn $ "[LTL][DEBUG] wrote TLSF to " ++ debugFile
+
+  (exitCode, out, err) <- synthesize' ltlsyntPath tlsfContents debugSpec
   if exitCode /= ExitSuccess
     then return Nothing
-    else return . Just . unlines . tail . lines $ stdout
+    else return . Just . unlines . tail . lines $ out
 
 realizable :: FilePath -> String -> IO Bool
 realizable ltlsyntPath tlsfContents = do
-  (exitCode, _, _) <- synthesize' ltlsyntPath tlsfContents
-  if exitCode /= ExitSuccess
-    then return True
-    else return False
+  (exitCode, _, _) <- synthesize' ltlsyntPath tlsfContents False
+  return (exitCode == ExitSuccess)
 
-synthesize' :: FilePath -> String -> IO (ExitCode, String, String)
-synthesize' ltlsyntPath tlsfContents = do
-  putStrLn $ "[LTL] -> checking ltlsynt at: " ++ ltlsyntPath
+synthesize' :: FilePath -> String -> Bool -> IO (ExitCode, String, String)
+synthesize' ltlsyntPath tlsfContents debugSpec = do
   ltlsyntAvailable <- checkLtlsynt ltlsyntPath
   unless ltlsyntAvailable $
     unwrap . genericError $
       "Invalid path to ltlsynt: " ++ ltlsyntPath
-
-  putStrLn "[LTL] -> parsing TLSF via Syfco.fromTLSF"
+  ControlM.when debugSpec $ do
+    putStrLn "[LTL] -> parsing TLSF via Syfco.fromTLSF"
+  
   let tlsfSpec =
         case S.fromTLSF tlsfContents of
           Left err   -> error $ show err
           Right spec -> spec
 
-  putStrLn "[LTL] -> extracting inputs"
+  ControlM.when debugSpec $ do
+    putStrLn "[LTL] -> extracting inputs"
   let ltlIns = prInputs S.defaultCfg tlsfSpec
       ltlOuts = prOutputs S.defaultCfg tlsfSpec
-
-  putStrLn $ "[LTL]    inputs = " ++ show ltlIns
-  putStrLn $ "[LTL]    outputs = " ++ show ltlOuts
+  ControlM.when debugSpec $ do
+    let debugDir = "debug" </> "LTL_Inputs"
+        debugFile = debugDir </> "LTL.tlsf"
+    createDirectoryIfMissing True debugDir
+    writeFile debugFile ltlIns
+    putStrLn $ "[LTL][DEBUG] wrote inputs to " ++ debugFile
+  ControlM.when debugSpec $ do
+    putStrLn $ "[LTL]    outputs = " ++ show ltlOuts
+    let debugDir = "debug" </> "LTL_Outputs"
+        debugFile = debugDir </> "LTL.tlsf"
+    createDirectoryIfMissing True debugDir
+    writeFile debugFile ltlOuts
+    putStrLn $ "[LTL][DEBUG] wrote inputs to " ++ debugFile
 
   putStrLn "[LTL] -> building formulae"
   let ltlFormulae = prFormulae
         S.defaultCfg {S.outputMode = S.Fully, S.outputFormat = S.LTLXBA}
         tlsfSpec
-  putStrLn $ "[LTL]    formula = " ++ take 80 ltlFormulae ++ "…"
+  ControlM.when debugSpec $ do
+    let debugDir  = "debug" </> "LTL_Formula"
+        debugFile = debugDir </> "formula.tlsf"
+    createDirectoryIfMissing True debugDir
+    writeFile debugFile ltlFormulae
+    putStrLn $ "[LTL][DEBUG] wrote full formula to " ++ debugFile
+
+  
 
   let ltlCommandArgs =
         [ "--formula=" ++ ltlFormulae
@@ -59,10 +89,19 @@ synthesize' ltlsyntPath tlsfContents = do
         , "--outs="    ++ ltlOuts
         , "--hoaf=i"
         ]
-  putStrLn $ "[LTL] -> invoking ltlsynt with args: " ++ show ltlCommandArgs
+  ControlM.when debugSpec $ do
+    let debugDir  = "debug" </> "LTL_Args"
+        debugFile = debugDir </> "args.txt"
+        -- turn the [String] into one big Text
+        argsText  = unlines ltlCommandArgs
+
+    createDirectoryIfMissing True debugDir
+    writeFile debugFile argsText
+    putStrLn $ "[LTL][DEBUG] wrote ltlsynt args to " ++ debugFile
 
   result <- readProcessWithExitCode ltlsyntPath ltlCommandArgs ""
-  putStrLn $ "[LTL] <- ltlsynt exited with: " ++ show (fst3 result)
+  ControlM.when debugSpec $ do
+    putStrLn $ "[LTL] <- ltlsynt exited with: " ++ show (fst3 result)
   return result
   where
     fst3 (x,_,_) = x

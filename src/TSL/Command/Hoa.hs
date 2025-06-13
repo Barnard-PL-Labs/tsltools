@@ -79,11 +79,15 @@ hoa (Options {inputPath, outputPath, solverPath, ltlsyntPath, debugSpec}) = do
   tlsfSpec <- TLSF.lower' theorizedSpec
 
   -- TLSF (String) -> HOA controller (String)
-  hoaController <- LTL.synthesize ltlsyntPath tlsfSpec
+  hoaController <- LTL.synthesize ltlsyntPath tlsfSpec debugSpec
 
   hoaController <-
     case hoaController of
-      Nothing -> TLSF.counter' theorizedSpec >>= LTL.synthesize ltlsyntPath >>= return . Left . fromJust
+      Nothing -> do
+        newTlsf <- TLSF.counter' theorizedSpec
+        mController <- LTL.synthesize ltlsyntPath newTlsf debugSpec
+        return . Left . fromJust $ mController
+        
       Just c -> return $ Right c
 
   case hoaController of

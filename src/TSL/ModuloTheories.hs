@@ -89,7 +89,7 @@ theorize debugSpec solverPath spec = do
 
       ControlM.when debugSpec $ do
         liftIO $ createDirectoryIfMissing True "Assumption_Block"
-        let outPath = "Assumption_Block/assumptions.txt"
+        let outPath = "debug/assumptions.txt"
         liftIO $ writeFile outPath ass
         putStrLn $ ">> [theorize] wrote assumptions to " ++ outPath
 
