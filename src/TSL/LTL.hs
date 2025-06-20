@@ -70,39 +70,40 @@ synthesize' ltlsyntPath tlsfContents debugSpec = do
     writeFile debugFile ltlOuts
     putStrLn $ "[LTL][DEBUG] wrote inputs to " ++ debugFile
 
-  putStrLn "[LTL] -> building formulae"
-  let ltlFormulae = prFormulae
-        S.defaultCfg {S.outputMode = S.Fully, S.outputFormat = S.LTLXBA}
-        tlsfSpec
-  ControlM.when debugSpec $ do
-    let debugDir  = "debug" </> "LTL_Formula"
-        debugFile = debugDir </> "formula.tlsf"
-    createDirectoryIfMissing True debugDir
-    writeFile debugFile ltlFormulae
-    putStrLn $ "[LTL][DEBUG] wrote full formula to " ++ debugFile
+    putStrLn "[LTL] -> building formulae"
+  let cfg = S.defaultCfg
+          { S.outputFormat = S.LTLXBA   -- LTL2BA / LTL3BA input format
+          , S.outputMode   = S.Pretty   -- or `Fully` if you need every paren
+          }
+      ltlFormulae = prFormulae cfg tlsfSpec
 
-  
+  putStrLn "[LTL] -> Writing Formula"
+  -- write out the formula file no matter what
+  let formulaDir  = "debug" </> "LTL_Formula"
+      formulaFile = formulaDir </> "formula.tlsf"
+  createDirectoryIfMissing True formulaDir
+  writeFile formulaFile ltlFormulae
 
   let ltlCommandArgs =
-        [ "--formula=" ++ ltlFormulae
-        , "--ins="     ++ ltlIns
-        , "--outs="    ++ ltlOuts
+        [ "-F", formulaFile
+        , "--ins="  ++ ltlIns
+        , "--outs=" ++ ltlOuts
         , "--hoaf=i"
         ]
+  putStrLn "[LTL] -> Results being written to readProcess"
+  result <- readProcessWithExitCode ltlsyntPath ltlCommandArgs ""
+
   ControlM.when debugSpec $ do
     let debugDir  = "debug" </> "LTL_Args"
         debugFile = debugDir </> "args.txt"
-        -- turn the [String] into one big Text
         argsText  = unlines ltlCommandArgs
-
     createDirectoryIfMissing True debugDir
     writeFile debugFile argsText
     putStrLn $ "[LTL][DEBUG] wrote ltlsynt args to " ++ debugFile
-
-  result <- readProcessWithExitCode ltlsyntPath ltlCommandArgs ""
-  ControlM.when debugSpec $ do
     putStrLn $ "[LTL] <- ltlsynt exited with: " ++ show (fst3 result)
+
   return result
+
   where
     fst3 (x,_,_) = x
 
