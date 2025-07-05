@@ -1,18 +1,15 @@
 #LIA  
+initially assume { 
+
+}
+
 
 always assume {
-
     MinX() <= Cop.x;
     Cop.x <= MaxX();
     
     MinY() <= Cop.y;
-    Cop.y <= MaxY();
-
-    MinX() <= ArbX();
-    ArbX() <= MaxX();
-
-    MinY() <= ArbY();
-    ArbY() <= MaxY();
+    Cop.y <= MaxY();  
 
     !(Cop.x = MinX() && Cop.x = MaxX());
 
@@ -24,9 +21,6 @@ always assume {
     Cop.y = MinY()  && !([Cop.y <- Cop.y + 1] || [Cop.y <- Cop.y - 1]) ->  X (Cop.y = MinY());
     Cop.y = MaxY()  && !([Cop.y <- Cop.y + 1] || [Cop.y <- Cop.y - 1]) ->  X (Cop.y = MaxY());
 
-    Cop.x = ArbX()  && !([Cop.x <- Cop.y + 1] || [Cop.y <- Cop.y - 1]) ->  X (Cop.x = ArbX());
-    Cop.y = ArbY()  && !([Cop.y <- Cop.y + 1] || [Cop.y <- Cop.y - 1]) ->  X (Cop.y = ArbY());
-
 
     !(Cop.x = MaxX()) && ([Cop.x <- Cop.x + 1]  W (Cop.x = MaxX())) -> F(Cop.x = MaxX());
     !(Cop.x = MinX())  && ([Cop.x <- Cop.x - 1]  W (Cop.x = MinX()))  -> F(Cop.x = MinX());
@@ -34,14 +28,7 @@ always assume {
     !(Cop.y = MaxY()) && ([Cop.y <- Cop.y + 1]  W (Cop.y = MaxY())) -> F(Cop.y = MaxY());
     !(Cop.y = MinY())  && ([Cop.y <- Cop.y - 1] W (Cop.y = MinY()))  -> F(Cop.y = MinY());
 
-    !(Cop.x = MaxX()) && ([Cop.x <- Cop.x + 1]  W (Cop.x = MaxX())) -> F(Cop.x = MaxX());
-    !(Cop.x = MinX())  && ([Cop.x <- Cop.x - 1]  W (Cop.x = MinX()))  -> F(Cop.x = MinX());
 
-    (Cop.x < ArbX()) && ([Cop.x <- Cop.x + 1]  W (Cop.x = ArbX())) -> F(Cop.x = ArbX());
-    (Cop.x > ArbX()) && ([Cop.x <- Cop.x - 1]  W (Cop.x = ArbX())) -> F(Cop.x = ArbX());
-
-    (Cop.y < ArbY())  && ([Cop.y <- Cop.y + 1] W (Cop.y = ArbY()))  -> F(Cop.y = ArbY());
-    (Cop.y > ArbY())  && ([Cop.y <- Cop.y - 1] W (Cop.y = ArbY()))  -> F(Cop.y = ArbY());
 
 
 }
@@ -63,11 +50,10 @@ always guarantee {
 
   (Cop.y = MaxY()) -> !([Cop.y <- Cop.y + 1]) W !(Cop.y = MaxY());
 
-  //F(Cop.x = ArbX() && Cop.y = ArbY());
-  //F(Cop.x = MinX() && Cop.y = MaxY());
-  F(Cop.x = ArbX());
-  //F(Cop.y = ArbY());
-
+  F (Cop.x = MaxX() && Cop.y = MinY());
+  F (Cop.x = MinX() && Cop.y = MinY());
+  F (Cop.x = MaxX() && Cop.y = MaxY());
+  F (Cop.x = MinX() && Cop.y = MaxY());
 
 
 }

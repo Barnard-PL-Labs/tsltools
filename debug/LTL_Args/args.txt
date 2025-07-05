@@ -1,0 +1,5 @@
+-F
+debug/LTL_Formula/formula.tlsf
+--ins=p0p0eq02cop29y0f1dint91b, p0p0eq02cop29y0f1dint231b, p0p0eq02cop29x0f1dint91b, p0p0eq02cop29x0f1dint231b, p0p0lte0f1dint231b02cop29y, p0p0lte0f1dint231b02cop29x, p0p0lte02cop29y0f1dint91b, p0p0lte02cop29x0f1dint91b
+--outs=u02cop29y0f1dsub02cop29y0f1dint241b1b, u02cop29y0f1dadd02cop29y0f1dint241b1b, u02cop29y02cop29y, u02cop29x0f1dsub02cop29x0f1dint241b1b, u02cop29x0f1dadd02cop29x0f1dint241b1b, u02cop29x02cop29x
+--hoaf=i

@@ -1,0 +1,31 @@
+#LIA
+initially assume{
+
+
+}
+
+always assume {
+    !(MinX() = MaxX());
+    !(MinY() = MaxY());
+
+
+    ( [Cop.x <- Cop.x + 1]) -> F (Cop.x = MaxX());
+    ( [Cop.y <- Cop.y - 1]) -> F (Cop.y = MinY());
+    ( [Cop.x <- Cop.x - 1]) -> F (Cop.x = MinX());
+    ( [Cop.y <- Cop.y + 1]) -> F (Cop.y = MaxY());
+    F (Cop.x = MaxX() && Cop.y = MaxY());
+
+}
+always guarantee {
+    !(Cop.x = MaxX()) && !(Cop.x = MinX()) -> ( F ([Cop.x <- Cop.x - 1]) ||  F ([Cop.x <- Cop.x + 1]));
+    !(Cop.y = MaxY()) && !(Cop.y = MinY()) -> ( F ([Cop.y <- Cop.y - 1]) ||  F ([Cop.y <- Cop.y + 1]));
+
+
+    Cop.x = MaxX() ->  !  ( [Cop.x <- Cop.x + 1]);
+    Cop.x = MinX() ->  !  ( [Cop.x <- Cop.x - 1]);  
+
+    Cop.y = MaxY() ->  !  ( [Cop.y <- Cop.y + 1]);
+    Cop.y = MinY() ->  !  ( [Cop.y <- Cop.y - 1]); 
+
+
+}

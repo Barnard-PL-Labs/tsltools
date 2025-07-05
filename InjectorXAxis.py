@@ -3,7 +3,7 @@ import re
 if __name__ == '__main__':
     # 1. Run the TSL synth command and capture its output
     proc = subprocess.run(
-        ["tsl", "synthesize", "-i", "/Users/will/github/tsl_local/tsltools/SingleCopRetrieval.tslmt", "--python"],
+        ["tsl", "synthesize", "-i", "/Users/will/github/tsl_local/tsltools/SingleCopTest.tslmt", "--python"],
         check=True,
         stdout=subprocess.PIPE
     )
@@ -14,7 +14,7 @@ if __name__ == '__main__':
     generated_code = re.sub(r"\n*\}\s*$", "", generated_code)
 
     # 2. Read the target file
-    target_path = "./GridGame.py"
+    target_path = "./GridGameXAxis.py"
     with open(target_path, "r") as f:
         text = f.read()
 

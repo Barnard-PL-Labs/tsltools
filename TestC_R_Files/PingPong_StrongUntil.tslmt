@@ -7,11 +7,6 @@ initially assume {
 
 always assume {
 
-    Cop.x < MaxX() && [Cop.x <- Cop.x + 1] -> X(Cop.x = MaxX());
-    Cop.x > MinX() && [Cop.x <- Cop.x - 1] -> X(Cop.x = MinX());
-
-    Cop.y < MaxY() && [Cop.y <- Cop.y + 1] -> X(Cop.y = MaxY());
-    Cop.y > MinY() && [Cop.y <- Cop.y - 1] -> X(Cop.y = MinY());
 
     F(Cop.x = MinX());
     F(Cop.x = MaxX());

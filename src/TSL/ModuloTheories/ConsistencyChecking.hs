@@ -34,7 +34,7 @@ import           TSL.ModuloTheories.Theories    (Theory, TheorySymbol, isUninter
 -- this number can be changed based on the problem, but even for simple synthesis problems the 
 -- number of predicates being checked was always become 2^n. This simplifies while getting the correct answer
 config_MAX_CONSISTENCY_CHECKS :: Maybe Int
-config_MAX_CONSISTENCY_CHECKS = Just 100
+config_MAX_CONSISTENCY_CHECKS = Just 150
 
 
 generateConsistencyAssumptions

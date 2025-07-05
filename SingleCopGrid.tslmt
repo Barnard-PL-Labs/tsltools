@@ -1,0 +1,66 @@
+#LIA  
+initially assume { 
+
+}
+
+
+always assume {
+    0 <= Cop.x;
+    Cop.x <= 9;
+    
+    0 <= Cop.y;
+    Cop.y <= 9;  
+
+    !(Cop.x = 0 && Cop.x = 9);
+
+    !(Cop.y = 0 && Cop.y = 9);
+
+
+    //Cop.x = 0  && !([Cop.x <- Cop.x + 1] || [Cop.x <- Cop.x - 1]) ->  X (Cop.x = 0);
+    //Cop.x = 9  && !([Cop.x <- Cop.x + 1] || [Cop.x <- Cop.x - 1]) ->  X (Cop.x = 9);
+    //Cop.y = 0  && !([Cop.y <- Cop.y + 1] || [Cop.y <- Cop.y - 1]) ->  X (Cop.y = 0);
+    //Cop.y = 9  && !([Cop.y <- Cop.y + 1] || [Cop.y <- Cop.y - 1]) ->  X (Cop.y = 9);
+
+    (Cop.x = 0  && [Cop.x <- Cop.x]) ->  X (Cop.x = 0);
+    (Cop.x = 9  && [Cop.x <- Cop.x]) ->  X (Cop.x = 9);
+    (Cop.y = 0  && [Cop.y <- Cop.y]) ->  X (Cop.y = 0);
+    (Cop.y = 9  && [Cop.y <- Cop.y]) ->  X (Cop.y = 9);
+
+
+
+    !(Cop.x = 9) && ([Cop.x <- Cop.x + 1]  W (Cop.x = 9)) -> F(Cop.x = 9);
+    !(Cop.x = 0)  && ([Cop.x <- Cop.x - 1]  W (Cop.x = 0))  -> F(Cop.x = 0);
+
+    !(Cop.y = 9) && ([Cop.y <- Cop.y + 1]  W (Cop.y = 9)) -> F(Cop.y = 9);
+    !(Cop.y = 0)  && ([Cop.y <- Cop.y - 1] W (Cop.y = 0))  -> F(Cop.y = 0);
+
+
+
+}
+
+always guarantee {
+
+
+  ([Cop.x <- Cop.x + 1] || [Cop.x <- Cop.x - 1] || [Cop.x <- Cop.x]);
+  ([Cop.y <- Cop.y + 1] || [Cop.y <- Cop.y - 1] || [Cop.y <- Cop.y]);
+ 
+ 
+
+  
+
+  !([Cop.x <- Cop.x] && [Cop.y <- Cop.y]);
+
+  (Cop.x = 0) -> !([Cop.x <- Cop.x - 1]) W !(Cop.x = 0);
+
+  (Cop.x = 9) -> !([Cop.x <- Cop.x + 1]) W !(Cop.x = 9);
+
+  (Cop.y = 0) -> !([Cop.y <- Cop.y - 1]) W !(Cop.y = 0);
+
+  (Cop.y = 9) -> !([Cop.y <- Cop.y + 1]) W !(Cop.y = 9);
+
+  F (Cop.x = 9 && Cop.y = 0);
+  F (Cop.x =0 && Cop.y = 0);
+  F (Cop.x = 9 && Cop.y = 9);
+
+
+}
