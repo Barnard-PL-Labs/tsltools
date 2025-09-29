@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Pre-commit hook to run ormolu formatter on Haskell files
+
+# Get list of staged Haskell files
+STAGED_HS_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.hs$')
+
+if [ -z "$STAGED_HS_FILES" ]; then
+    # No Haskell files staged, nothing to format
+    exit 0
+fi
+
+echo "Running ormolu on staged Haskell files..."
+
+# Run ormolu on staged files
+for FILE in $STAGED_HS_FILES; do
+    # Check if file exists (might be deleted)
+    if [ -f "$FILE" ]; then
+        ormolu --mode inplace "$FILE"
+        if [ $? -ne 0 ]; then
+            echo "Error: ormolu failed on $FILE"
+            exit 1
+        fi
+        # Re-add the file if it was modified
+        git add "$FILE"
+    fi
+done
+
+echo "Ormolu formatting complete."
+exit 0
