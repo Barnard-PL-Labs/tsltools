@@ -16,10 +16,26 @@ jobs:
         with:
           enable-stack: true
           stack-version: 'latest'
+
+      # Cache Stack dependencies
+      - uses: actions/cache@v3
+        name: Cache ~/.stack
+        with:
+          path: ~/.stack
+          key: ${{ runner.os }}-stack-${{ hashFiles('stack.yaml.lock', 'package.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-stack-
+
+      # Update Stack index to avoid hash verification errors
+      - run: stack update
+
+      # Setup CVC5
       - run: mkdir deps deps-src
       - run: mkdir deps/bin
       - run: wget -P deps-src https://github.com/cvc5/cvc5/releases/download/cvc5-1.1.1/cvc5-Linux-static.zip
       - run: unzip deps-src/cvc5-Linux-static.zip -d deps-src
       - run: mv deps-src/cvc5-Linux-static/bin/cvc5 deps/bin
       - run: chmod u+x deps/bin/cvc5
+
+      # Run tests
       - run: PATH="deps/bin:$PATH" stack test
