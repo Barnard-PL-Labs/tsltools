@@ -1,22 +1,22 @@
 module TSL.Command.Synthesize (command) where
 
+import qualified Control.Monad as ControlM
 import Data.Maybe (fromJust)
+import Data.Set (toList)
+import qualified Data.Set as Set
 import Options.Applicative (Parser, ParserInfo, action, flag, flag', fullDesc, header, help, helper, info, long, metavar, optional, progDesc, short, showDefault, strOption, value, (<|>))
 import System.Exit (ExitCode (ExitFailure), exitSuccess, exitWith)
-import TSL.Error (warn, unwrap)
+import TSL.Base.Logic (functions, inputs, outputs, predicates, updates)
+import qualified TSL.Base.Reader as Base (readTSL)
+import TSL.Base.Specification (Specification (..), toFormula)
+import TSL.Base.SymbolTable (stName)
+import TSL.Error (unwrap, warn)
 import qualified TSL.HOA as HOA
 import qualified TSL.LTL as LTL
 import qualified TSL.ModuloTheories as ModuloTheories
 import qualified TSL.Preprocessor as Preprocessor
 import qualified TSL.TLSF as TLSF
 import TSL.Utils (readInput, writeOutput)
-import qualified Control.Monad as ControlM
-import qualified TSL.Base.Reader as Base (readTSL)
-import TSL.Base.Logic (inputs, outputs, functions, predicates, updates)
-import TSL.Base.Specification (toFormula, Specification(..))
-import TSL.Base.SymbolTable (stName)
-import Data.Set (toList)
-import qualified Data.Set as Set
 
 data Options = Options
   { inputPath :: Maybe FilePath,
@@ -74,7 +74,9 @@ optionsParser =
           <> metavar "LTLSYNT"
           <> help "Path to ltlsynt"
       )
-    <*> flag False True
+    <*> flag
+      False
+      True
       ( long "analyze"
           <> help "Analyze the specification before synthesis"
       )

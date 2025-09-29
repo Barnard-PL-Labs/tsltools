@@ -66,7 +66,10 @@ theorize solverPath spec = do
                 preds
 
           sygusAssumptions :: IO String
-          sygusAssumptions =
+          sygusAssumptions = do
+            putStrLn "Generating sygus assumptions"
+            putStrLn $ "preds: " ++ show (buildDtoList preds)
+            putStrLn $ "cfg: " ++ show cfg
             extractAssumptions $
               generateSygusAssumptions
                 solverPath
