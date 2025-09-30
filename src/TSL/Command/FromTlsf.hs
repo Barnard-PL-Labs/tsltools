@@ -28,8 +28,8 @@ optionsParserInfo :: ParserInfo Options
 optionsParserInfo =
   info (helper <*> optionsParser) $
     fullDesc
-      <> progDesc "Convert TLSF format back to TSL format"
-      <> header "tsl fromtlsf - Convert TLSF to TSL"
+      <> progDesc "LTL spec (TLSF) -> Spec (TSL)"
+      <> header "tsl fromtlsf"
 
 optionsParser :: Parser Options
 optionsParser =
