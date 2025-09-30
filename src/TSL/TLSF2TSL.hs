@@ -50,7 +50,7 @@ processFormula line =
   let trimmed = trim line
    in if null trimmed || trimmed == "}" || trimmed == "{"
         then Nothing
-        else Just $ decodeTlsfFormula $ removeSemicolon trimmed
+        else Just $ decodeTlsfFormula trimmed
 
 -- | Remove trailing semicolon
 removeSemicolon :: String -> String
@@ -68,7 +68,8 @@ decodeTlsfFormula formula =
   let -- First decode all atomic propositions
       decoded = decodeAllPropositions formula
       -- Then remove the G operator (always is handled at section level)
-      result = replaceAll "G " "" decoded
+      -- Also be sure to replace & with && and | with ||
+      result = replaceAll "G " "" $ replaceAll "&" "&&" $ replaceAll "|" "||" decoded
    in result
 
 -- | Decode all propositions in a formula
