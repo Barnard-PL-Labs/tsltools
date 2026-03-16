@@ -43,14 +43,14 @@ synthesize' ltlsyntPath tlsfContents = do
       ltlOuts = prOutputs S.defaultCfg tlsfSpec
       ltlFormulae = prFormulae S.defaultCfg {S.outputMode = S.Fully, S.outputFormat = S.LTLXBA} tlsfSpec
       ltlCommandArgs =
-        [ "--formula=" ++ ltlFormulae,
+        [ "--file=-",
           "--ins=" ++ ltlIns,
           "--outs=" ++ ltlOuts,
           "--hoaf=i"
         ]
 
   -- call ltlsynt
-  readProcessWithExitCode ltlsyntPath ltlCommandArgs ""
+  readProcessWithExitCode ltlsyntPath ltlCommandArgs ltlFormulae
   where
     prFormulae ::
       S.Configuration -> S.Specification -> String
